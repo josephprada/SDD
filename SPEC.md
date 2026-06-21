@@ -1,141 +1,145 @@
-# JP-WALLET — Project Specification
+# JP-WALLET — Especificación del Proyecto
 
-**Version**: 0.3.0 (In Review — Updated)
-**Status**: In Review
-**Last Updated**: 2026-05-29
-
----
-
-## 1. Overview
-
-**Project Name**: JP-WALLET
-**Type**: Mobile Financial Management Application
-
-**Core Vision**: A personal finance app that combines expense tracking, budget management, and group expense splitting with an AI-first interface. Users interact primarily through natural language (text or voice) — telling the app what they spent, asking about their finances, and managing categories through conversation.
-
-**Target Users**: Individual users managing personal finances, with future potential for shared household or group expense scenarios.
+**Versión**: 0.6.0 (Adjuntos + Configuración + Panel de Resultados + reorganización de changes)
+**Estado**: En Revisión
+**Última actualización**: 2026-06-21
 
 ---
 
-## 2. Tech Stack
+## 1. Visión General
 
-| Layer | Technology | Rationale |
-|-------|-------------|------------|
-| **Mobile Framework** | React Native (Expo) | Sideloading for personal APK install |
-| **Package Manager** | Bun | Faster installs, modern runtime |
-| **Linter/Formatter** | Biome | Unified DX tooling |
-| **Navigation** | React Navigation v6 | Bottom tabs + stack nested navigation |
-| **State Management** | Zustand | Lightweight, minimal boilerplate |
-| **Backend** | Convex (convex.dev) | Real-time TypeScript backend, scheduled functions |
-| **Auth** | Device Biometric + PIN fallback | FaceID/TouchID primary, PIN secondary, email recovery |
-| **LLM Integration** | MiniMax M2.7 API | Configurable, swappable provider |
-| **Speech-to-Text** | @react-native-community/speech | Native speech recognition |
-| **Notifications** | Expo Notifications | Budget alerts and reminders |
-| **Storage** | Convex (cloud) + Secure Device Storage | Token vault + data persistence |
+**Nombre del Proyecto**: JP-WALLET
+**Tipo**: Aplicación Web de Finanzas Personales
+
+**Visión Central**: Una aplicación de finanzas personales que combina registro de gastos, gestión de presupuestos y control de cuentas. Los usuarios registran sus transacciones de forma manual y visualizan reportes para entender sus hábitos financieros.
+
+**Usuarios Objetivo**: Usuario individual que gestiona sus finanzas personales. A futuro, soporte para grupos compartidos (gastos divididos).
 
 ---
 
-## 3. UI/UX Design Principles
+## 2. Stack Tecnológico
 
-### 3.1 Natural Feel
-- **Organic Interactions**: Gestures feel tactile, transitions are smooth and purposeful
-- **Breathing Space**: Generous whitespace, no cluttered screens
-- **Progressive Disclosure**: Simple by default, deep on demand
+| Capa | Tecnología | Razón |
+|------|-----------|-------|
+| **Framework** | Vite + React 19 + TypeScript 6 | Rendimiento, ecosistema, tipado fuerte |
+| **Package Manager** | Bun | Velocidad, runtime moderno |
+| **Linter/Formatter** | Biome | Herramienta unificada DX |
+| **Backend** | Convex (cloud) | Tiempo real, TypeScript end-to-end, serverless |
+| **Auth** | Google OAuth 2.0 | Single sign-on, simple, requiere conexión en primer login |
+| **Estado UI** | Zustand | Liviano, mínimo boilerplate |
+| **Estado Servidor** | TanStack Query | Caching automático, revalidación, optimistas |
+| **Ruteo** | React Router v6/v7 | Simple, suficiente para ~10 pantallas |
+| **Notificaciones** | Diferido a v2 | Web Push cuando se necesite |
+| **Offline** | Diferido a v2 | No crítico en VPS con conexión permanente |
+| **Despliegue** | Docker Compose + Caddy (VPS) | Reproducible, auto-HTTPS con Let's Encrypt |
 
-### 3.2 Supremacy of Utility
-- Every element serves a functional purpose — no decorative UI
-- Quick actions accessible in ≤2 taps
-- Information hierarchy: what matters most is most visible
+---
 
-### 3.3 Core Screens
+## 3. Principios de Diseño UX/UI
+
+### 3.1 Enfoque Mobile-First Web
+- Diseñado pensando en mobile pero adaptable a desktop
+- Navegación tipo bottom navigation en mobile, sidebar en desktop
+- Formularios grandes optimizados para teclado táctil
+
+### 3.2 Utilidad Ante Todo
+- Cada elemento sirve un propósito funcional
+- Acciones rápidas en ≤2 clics
+- Jerarquía de información: lo importante es lo más visible
+
+### 3.3 JP-DS (Sistema de Diseño)
+- Design tokens en CSS custom properties (colores, tipografía, espaciado)
+- Modo oscuro/claro desde el inicio
+- Componentes base en `packages/jp-ds`
+- Portátil a futuros proyectos
+
+### 3.4 Pantallas Core
 
 ```
-├── Login Screen
-│   └── Biometric authentication
-├── Home Dashboard
-│   ├── Balance overview (total, by account)
-│   ├── Recent transactions
-│   ├── Quick action buttons (+ expense, + income)
-│   └── AI Chat toggle
-├── Transactions List
-│   ├── Filterable by date, category, account
-│   ├── Search
-│   └── Swipe actions (edit, delete)
-├── AI Chat Interface
-│   ├── Message history
-│   ├── Voice input button
-│   ├── Text input
-│   └── Transaction preview confirmation
-├── Categories Management
-│   ├── List view with icons/colors
-│   ├── Create/Edit via AI Chat
-│   └── Category stats
-├── Budgets
-│   ├── Active budgets with progress bars
-│   ├── Alerts configuration
-│   └── Budget creation
-├── Reports & Charts
-│   ├── Monthly overview charts
-│   ├── Category breakdowns
-│   ├── Trend analysis
-│   └── Export options
-├── Split Groups
-│   ├── Group list
-│   ├── Group detail (members, expenses, balances)
-│   └── Create/join group
-└── Settings
-    ├── Account management
-    ├── LLM configuration
-    ├── Sync status
-    └── Theme preferences
+├── Login / Registro
+│   └── Email + password
+├── Dashboard (Home)
+│   ├── Resumen de balance total
+│   ├── Transacciones recientes
+│   └── Acciones rápidas (+ gasto, + ingreso)
+├── Transacciones
+│   ├── Lista filtrable por fecha, categoría, cuenta
+│   ├── Búsqueda
+│   └── CRUD completo
+├── Cuentas
+│   ├── Lista de cuentas (efectivo, banco, crédito)
+│   ├── Balance por cuenta
+│   └── Transferencias entre cuentas
+├── Categorías
+│   ├── Lista con iconos y colores
+│   ├── Crear/Editar categorías
+│   └── Estadísticas por categoría
+├── Presupuestos
+│   ├── Presupuestos activos con barras de progreso
+│   ├── Configuración de alertas
+│   └── Crear presupuesto mensual
+├── Reportes
+│   ├── Resumen mensual (ingresos vs gastos)
+│   ├── Desglose por categoría (gráficos)
+│   └── Exportar (PDF/CSV)
+├── Grupos (Futuro)
+│   ├── Lista de grupos
+│   └── Gastos compartidos
+└── Configuración
+    ├── Perfil de usuario
+    ├── Preferencias (tema, moneda)
+    └── Estado de sincronización
 ```
 
 ---
 
-## 4. Core Features
+## 4. Funcionalidades Core
 
-### 4.1 Authentication & Vault
+### 4.1 Autenticación con Google
 
-| Capability | Description |
-|------------|-------------|
-| Biometric Login | FaceID/TouchID authentication on app launch |
-| Secure Token Storage | Encrypted storage for API tokens and sensitive data |
-| Session Management | Auto-logout after inactivity, secure token refresh |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Inicio de sesión | Botón "Continuar con Google" → flujo OAuth 2.0 |
+| Cuenta nueva | Primer login crea `user` automáticamente con categorías por defecto |
+| Cierre de sesión | Limpia sesión local, redirect a landing |
+| Re-autenticación | Si expira la sesión, vuelve a pedir Google OAuth |
 
-### 4.2 Account Management
+**Nota**: requiere conexión a internet para autenticar. Sin conexión no se puede iniciar sesión por primera vez.
 
-| Capability | Description |
-|------------|-------------|
-| Multi-Account Support | Cash, Bank, Credit Card accounts |
-| Balance Tracking | Real-time balance per account |
-| Transfers | Move funds between accounts |
+### 4.2 Gestión de Cuentas
 
-### 4.3 Transaction Engine
+| Capacidad | Descripción |
+|-----------|-------------|
+| Múltiples cuentas | Efectivo, Banco, Tarjeta de Crédito |
+| Balance en tiempo real | Saldo actual por cuenta |
+| Transferencias | Movimiento de fondos entre cuentas |
 
-| Capability | Description |
-|------------|-------------|
-| Record Income | Add income with amount, date, category, notes |
-| Record Expense | Add expense with same metadata |
-| Transfer Funds | Internal transfers between accounts |
-| Edit/Delete | Full CRUD on transactions |
-| Search & Filter | By date range, category, account, amount range |
-| Recurring Transactions | Convex scheduled functions evaluate and auto-create pending transactions |
-| Receipt Photos | **Deferred** — not in initial scope, but AI chat CAN read images via vision when attached |
+### 4.3 Motor de Transacciones
 
-### 4.4 Category System
+| Capacidad | Descripción |
+|-----------|-------------|
+| Registrar ingreso | Monto, fecha, categoría, notas |
+| Registrar gasto | Misma metadata |
+| Transferencias | Internas entre cuentas |
+| Editar/Eliminar | CRUD completo |
+| Buscar y filtrar | Por fecha, categoría, cuenta, rango de monto |
+| Transacciones recurrentes | Automatizadas via Convex scheduled functions |
+| **Adjuntos** | **Imágenes y PDFs por transacción (recibos, facturas, extractos)** |
+| **Agrupación temporal** | **Vista por semana, mes, trimestre o semestre (configurable)** |
 
-| Capability | Description |
-|------------|-------------|
-| Custom Categories | User-created categories with name, icon, color |
-| Category Types | Income, Expense, Transfer |
-| Predefined Seed | App starts with common categories (see 4.4.1) |
-| AI Category Creation | Create categories via natural language chat |
+### 4.4 Sistema de Categorías
 
-#### 4.4.1 Default Categories (Seed)
+| Capacidad | Descripción |
+|-----------|-------------|
+| Categorías personalizadas | Nombre, icono, color |
+| Tipos | Ingreso, Gasto, Transferencia |
+| Categorías por defecto | Semilla inicial (ver 4.4.1) |
 
-**Expense Categories:**
-| Name | Icon | Color |
-|------|------|-------|
+#### 4.4.1 Categorías por Defecto
+
+**Gastos:**
+| Nombre | Icono | Color |
+|--------|-------|-------|
 | Comida | 🍔 | #FF6B6B |
 | Transporte | 🚗 | #4ECDC4 |
 | Entretenimiento | 🎬 | #9B59B6 |
@@ -145,299 +149,332 @@
 | Servicios | 📄 | #95A5A6 |
 | Otros Gastos | 📦 | #7F8C8D |
 
-**Income Categories:**
-| Name | Icon | Color |
-|------|------|-------|
+**Ingresos:**
+| Nombre | Icono | Color |
+|--------|-------|-------|
 | Salario | 💰 | #27AE60 |
 | Freelance | 💻 | #2ECC71 |
 | Inversiones | 📈 | #16A085 |
-| Regalos | 🎁 | #E91E63 |
 | Otros Ingresos | 💵 | #1ABC9C |
 
-**Transfer Categories:**
-| Name | Icon | Color |
-|------|------|-------|
+**Transferencias:**
+| Nombre | Icono | Color |
+|--------|-------|-------|
 | Transferencia | 🔄 | #34495E |
 
-### 4.5 AI Chat Interface
+### 4.5 Presupuestos y Alertas
 
-| Capability | Description |
-|------------|-------------|
-| Conversational Finance | Ask questions: "How much did I spend on food this month?" |
-| Voice Input | Transcribe voice to text for transaction entry |
-| Natural Transaction Entry | "Spent 50 dollars on pizza yesterday" → parsed and created |
-| Recommendations | AI suggests budgets, categorizations, savings tips |
-| Category Management | "Create a category called Travel with blue color" |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Crear presupuesto | Límite mensual por categoría |
+| Progreso visual | Barras de progreso |
+| Umbrales de alerta | Notificar al 50%, 80%, 100% |
+| Exceso de gasto | Alerta en tiempo real |
 
-### 4.6 AI Auto-Categorization
+### 4.6 Panel de Resultados y Gráficos
 
-| Capability | Description |
-|------------|-------------|
-| Text Analysis | LLM extracts amount, date, category, notes from natural text |
-| Voice Parsing | Audio → text → structured transaction |
-| Confidence Flow | High confidence → auto-create; Low confidence → user confirm |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Resumen mensual | Comparativa ingresos vs gastos |
+| Desglose por categoría | Gráficos de torta/barras |
+| Tendencia | Comparación mes a mes, trimestre a trimestre |
+| Gráficos visuales | Barras, líneas, tortas, áreas, combinados |
+| Filtros | Por rango de fechas, categoría, cuenta, período |
+| Exportar | PDF y CSV |
 
-### 4.7 Budgets & Alerts
+### 4.7 Gastos Compartidos (Futuro)
 
-| Capability | Description |
-|------------|-------------|
-| Budget Creation | Set monthly limits per category |
-| Progress Tracking | Visual progress bars |
-| Alert Thresholds | Notify at 50%, 80%, 100% of budget |
-| Overspend Alerts | Real-time notifications via Expo Notifications |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Crear grupos | Invitar miembros |
+| Gastos grupales | Registrar quién pagó y quién debe |
+| Cálculo de balances | Saldo pendiente por miembro |
+| Liquidación | Marcar deudas como saldadas |
 
-### 4.8 Reports & Charts
+### 4.8 Sincronización Cloud
 
-| Capability | Description |
-|------------|-------------|
-| Monthly Overview | Income vs Expense summary |
-| Category Breakdown | Pie/bar charts by category |
-| Trend Analysis | Month-over-month comparison |
-| Export | PDF/CSV export of reports |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Tiempo real | Convex reactive database |
+| Multi-dispositivo | Acceso desde varios dispositivos |
+| Backup | Backup automático de datos |
 
-### 4.9 Split Expenses (Future)
+### 4.9 Declaración de Renta (DIAN Colombia)
 
-| Capability | Description |
-|------------|-------------|
-| Create Groups | Invite members to shared group |
-| Add Group Expenses | Track who paid and who owes |
-| Balance Calculation | Per-member outstanding balance |
-| Settlement | Mark debts as settled |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Perfiles anuales | Una declaración por año gravable |
+| Secciones DIAN | Patrimonio, Deudas, Ingresos, Deducciones, Rentas exentas |
+| Ingresos | Salarios, cesantías, intereses, dividendos, honorarios, otros |
+| Deducciones | Salud, educación, vivienda, dependientes, intereses de vivienda |
+| Patrimonio | Bienes inmuebles, vehículos, inversiones, cuentas bancarias |
+| **Adjuntos** | **Imágenes y PDFs por rubro (certificaciones, facturas, extractos)** |
+| Auto-poblar | Trae datos desde `transactions` y `accounts` cuando aplica |
+| Exportar | PDF / CSV / JSON listo para revisión o presentación |
 
-### 4.10 Cloud Sync
+### 4.10 Créditos y Préstamos
 
-| Capability | Description |
-|------------|-------------|
-| Real-time Sync | Convex real-time database |
-| Multi-Device | Access from multiple devices |
-| Backup | Automatic data backup |
+| Capacidad | Descripción |
+|-----------|-------------|
+| Registrar crédito | Nombre, entidad, monto original, tasa de interés, plazo, fecha inicio |
+| Calendario de pagos | Genera tabla de amortización (cuotas mensuales) |
+| Historial de pagos | Registra cada pago, linkea a `transactions` cuando se paga |
+| Saldo pendiente | Balance en tiempo real por crédito |
+| Alertas de vencimiento | Notificación X días antes del pago |
+| Múltiples créditos | Varios créditos simultáneos (hipotecario, vehículo, personal) |
+
+### 4.11 Configuración y Personalización
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| Tema | Claro / Oscuro / Sistema |
+| Período de agrupación | Vista por defecto: semana, mes, trimestre o semestre |
+| Gestión de categorías | Crear, editar, archivar categorías (interfaz dedicada) |
+| Idioma | Español (default) |
+| Notificaciones | Activar/desactivar alertas y recordatorios |
+| Exportar datos | Descarga completa (PDF, CSV, JSON) |
+| Eliminar cuenta | Borrar cuenta y todos los datos asociados |
 
 ---
 
-## 5. Data Model
+## 5. Modelo de Datos
 
-### 5.1 Core Entities
+### 5.1 Formato de Moneda
+**COP (Peso Colombiano):** `$ 1.234.567` (puntos como separador de miles)
 
-```
-User
-├── id: string
-├── email: string (optional, for account recovery)
-├── pinHash: string (bcrypt hash of fallback PIN)
-├── createdAt: timestamp
-└── settings: JSON
-```
+### 5.2 Schema Convex
 
-**Currency Format (COP):** `1.234.567` (peso colombiano con puntos como separador de miles)
+Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `attachments`, `userPreferences`
 
-### 5.2 Convex Schema
-
-Tables: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `chatMessages`
-
-### 5.3 Recurring Transactions
+### 5.3 Transacciones Recurrentes
 
 ```typescript
 interface RecurringConfig {
   frequency: "daily" | "weekly" | "biweekly" | "monthly" | "yearly";
   startDate: timestamp;
-  endDate?: timestamp; // optional, infinite if omitted
+  endDate?: timestamp;
   nextTriggerDate: timestamp;
   lastTriggerDate?: timestamp;
-  autoCreate: boolean; // true = auto-create; false = prompt user
+  autoCreate: boolean;
 }
 ```
 
-### 5.4 Sync Queue (Offline)
+### 5.4 Declaración de Renta
 
 ```typescript
-interface SyncQueueItem {
+interface TaxDocument {
   id: string;
-  entityType: "transaction" | "account" | "category" | "budget";
-  entityId: string;
-  operation: "create" | "update" | "delete";
-  payload: JSON;
+  userId: string;
+  taxYear: number; // año gravable (ej: 2025)
+  status: "draft" | "review" | "filed";
+  totalIncome: number;
+  totalDeductions: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  taxableIncome: number;
+  taxDue: number;
   createdAt: timestamp;
-  retryCount: number;
+  filedAt?: timestamp;
+}
+
+interface TaxItem {
+  id: string;
+  documentId: string; // → TaxDocument
+  section: "income" | "deductions" | "assets" | "liabilities" | "exempt";
+  category: string; // ej: "salarios", "salud_prepagada", "vivienda"
+  description: string;
+  amount: number;
+  imageIds: string[]; // → TaxImage
+  notes?: string;
+  createdAt: timestamp;
+}
+
+interface TaxImage {
+  id: string;
+  itemId: string; // → TaxItem
+  storageId: string; // Convex file storage
+  filename: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: timestamp;
 }
 ```
 
----
-
-## 6. AI Integration
-
-### 6.1 LLM Provider (Configurable)
+### 5.5 Créditos y Préstamos
 
 ```typescript
-interface LLMConfig {
-  provider: "minimax" | "openai" | "anthropic" | "ollama";
-  apiKey: string;
-  model: string;
-  baseUrl?: string;
+interface Credit {
+  id: string;
+  userId: string;
+  name: string; // ej: "Crédito Hipotecario Bancolombia"
+  lender: string;
+  principal: number;
+  interestRate: number; // anual, ej: 12.5
+  termMonths: number;
+  startDate: timestamp;
+  paymentDay: number; // día del mes (1-31)
+  outstandingBalance: number;
+  status: "active" | "paid_off" | "defaulted";
+  notes?: string;
+  createdAt: timestamp;
+}
+
+interface CreditPayment {
+  id: string;
+  creditId: string; // → Credit
+  installmentNumber: number;
+  dueDate: timestamp;
+  paidDate?: timestamp;
+  amount: number;
+  principal: number;
+  interest: number;
+  status: "pending" | "paid" | "overdue";
+  transactionId?: string; // → Transaction
 }
 ```
 
-**Initial**: MiniMax M2.7 with MiniMax API token
+### 5.6 Adjuntos
 
-### 6.2 Prompt Engineering
-
-| Intent | System Prompt Guidance |
-|--------|----------------------|
-| Transaction Creation | Extract: amount, type (income/expense), category, date, notes |
-| Category Creation | Extract: name, type, icon preference, color preference |
-| Finance Query | Answer based on user's transaction history |
-| Recommendations | Personalized based on spending patterns |
-
-### 6.3 Voice Pipeline
-
-```
-User speaks → Speech-to-Text (@react-native-community/speech) → LLM Parsing → Transaction Confirmation → Convex Write
-```
-
-### 6.4 Image Handling in AI Chat
-
-The AI Chat interface CAN receive and process images:
-- User attaches image from gallery or camera
-- Image is sent to LLM with vision capability (if supported by provider)
-- LLM extracts transaction data from image (receipt parsing in future)
-- For now: images are described/analyzed, no automatic transaction creation
-
-**Note**: Receipt photo attachment to transactions is deferred to future scope.
-
----
-
-## 7. Security
-
-| Concern | Approach |
-|---------|----------|
-| API Tokens | Encrypted in device keychain, never in plaintext |
-| Biometric Auth | Native device APIs (LocalAuthentication) — primary method |
-| PIN Fallback | Mandatory PIN setup after biometric enrollment |
-| Account Recovery | Email-based recovery link (optional email field) |
-| Data at Rest | Convex handles encryption in transit; device keychain for local secrets |
-| Session | Auto-timeout after 5 min inactivity |
-
-### 7.1 Auth Flow
-
-```
-App Launch
-├── Biometric available?
-│   ├── YES → Prompt biometric → Success → Home
-│   └── NO → Prompt PIN → Success → Home
-└── First launch / No PIN → PIN setup wizard
+```typescript
+interface Attachment {
+  id: string;
+  userId: string;
+  entityType: "transaction" | "taxItem" | "creditPayment";
+  entityId: string;
+  storageId: string; // Convex file storage
+  filename: string;
+  mimeType: string; // image/jpeg, image/png, application/pdf
+  size: number; // bytes
+  uploadedAt: timestamp;
+}
 ```
 
-### 7.2 Account Recovery Flow
+### 5.7 Preferencias de Usuario
 
-```
-Login → Forgot PIN?
-├── Enter registered email
-├── Receive recovery link
-├── Reset PIN
-└── Login with new PIN
+```typescript
+interface UserPreferences {
+  id: string;
+  userId: string;
+  theme: "light" | "dark" | "system";
+  defaultGrouping: "week" | "month" | "quarter" | "semester";
+  language: "es" | "en";
+  notificationsEnabled: boolean;
+  updatedAt: timestamp;
+}
 ```
 
 ---
 
-## 8. Open Questions
+## 6. Arquitectura de Despliegue
 
-- [x] Currency support → **COP (Colombian Pesos)** — single currency
-- [x] Recurring transactions support → **Yes**
-- [x] Receipt photo attachment → **Yes** — gallery or camera, auto-processed by AI
-- [x] Offline mode → **Priority** — local SQLite for viewing and creating records, sync on reconnect, AI chat unavailable offline
-- [x] Export formats → **PDF, CSV, JSON** — full export support
-- [x] AI/MCP Integration → **Yes** — external API for AI environments to connect
+```
+VPS (Hostinger)
+├── Caddy (reverse proxy, auto-HTTPS)
+│   ├── wallet.tudominio.com → frontend (Nginx)
+│   └── api.tudominio.com → backend (Convex cloud)
+├── Docker Compose
+│   ├── frontend (Nginx sirviendo build estático de Vite)
+│   └── caddy (TLS automático)
+└── Convex cloud (backend serverless, no en VPS)
+```
 
 ---
 
-## 9. Design System (JP-DS)
+## 7. Seguridad
 
-JP-WALLET will establish a **reusable design system (JP-DS)** that can be ported to future projects.
-
-### Principles
-- **Zero dependency on business logic** — pure UI components
-- **Self-contained tokens** — colors, typography, spacing in a single source
-- **Themeable** — dark/light modes, future custom themes
-- **Accessible** — WCAG 2.1 AA minimum
-
-### Token Categories
-```
-jp-ds/
-├── tokens/
-│   ├── color/
-│   ├── typography/
-│   ├── spacing/
-│   ├── motion/
-│   └── elevation/
-├── components/       # Base UI components
-├── patterns/         # Composed patterns (card, list-item, etc.)
-└── templates/       # Screen templates
-```
-
-### Portability
-The design system will be published as a separate package (`jp-ds-react-native`) for reuse in:
-- JP-WALLET (primary consumer)
-- Future React Native projects
-- Web variants (future)
-
----
-
-## 10. Offline Architecture
-
-### Local Storage Strategy
-- **SQLite (expo-sqlite)** for local transaction cache
-- **Sync Queue**: offline-created records queued for sync
-- **Conflict Resolution**: last-write-wins with timestamp comparison
-
-### Offline Capabilities
-| Feature | Offline |
+| Aspecto | Enfoque |
 |---------|---------|
-| View transactions | ✅ Full read access |
-| Create transactions | ✅ Queued for sync |
-| Edit/Delete transactions | ✅ Queued for sync |
-| View accounts/balance | ✅ Cached |
-| AI Chat | ❌ Requires connection |
-| Voice input | ✅ Text captured, processed when online |
+| Identidad | Google OAuth (ID token validado server-side en Convex) |
+| Sesión | JWT firmado tras validar token de Google |
+| API Tokens | No aplica (no hay API externa por ahora) |
+| Datos en tránsito | HTTPS vía Caddy |
+| Datos en reposo | Convex maneja encriptación |
 
-### Sync Flow
+### 7.1 Flujo de Auth (Google OAuth)
+
 ```
-Online: Convex ←→ React Native (real-time)
-Offline: SQLite ←→ Sync Queue → Convex (on reconnect)
+App → Inicio
+├── ¿Sesión activa?
+│   ├── SÍ → Dashboard
+│   └── NO → Pantalla con botón "Continuar con Google"
+├── Click Google → popup OAuth de Google
+├── Usuario autoriza → Google devuelve ID token
+├── Convex action valida token contra Google
+├── ¿Usuario nuevo?
+│   ├── SÍ → crea `user` + categorías por defecto
+│   └── NO → carga perfil existente
+└── Sesión persistida → Dashboard
 ```
 
 ---
 
-## 11. External API / MCP
+## 8. Sistema de Diseño (JP-DS)
 
-To support AI environment integration:
+JP-WALLET incluirá un **sistema de diseño reutilizable (JP-DS)** como paquete separado.
 
-### Exposed Endpoints
+### Principios
+- **Zero dependencia de lógica de negocio** — componentes UI puros
+- **Tokens auto-contenidos** — colores, tipografía, espaciado en una sola fuente
+- **Themeable** — modo oscuro/claro desde el inicio
+- **Accesible** — WCAG 2.1 AA mínimo
+
+### Estructura
 ```
-POST /api/transactions    — Create transaction
-GET  /api/transactions    — List transactions
-GET  /api/balance         — Current balance
-GET  /api/categories      — List categories
-POST /api/categories      — Create category
-GET  /api/chat            — Send chat message
-GET  /api/reports         — Generate report
+packages/jp-ds/
+├── tokens/
+│   ├── color.css
+│   ├── typography.css
+│   ├── spacing.css
+│   └── dark.css (overrides modo oscuro)
+├── components/    # Componentes base UI
+└── patterns/      # Patrones compuestos (card, list-item, etc.)
 ```
-
-### Authentication
-- API key-based auth for external clients
-- Scoped permissions (read-only, read-write, admin)
 
 ---
 
-## 12. Next Steps
+## 9. Pendientes y Decisiones
 
-1. ✅ Review and refine this SPEC.md (IN PROGRESS)
-2. Start **Change 1: Auth + Vault Core**
-   - Biometric login flow
-   - Secure token storage (Keychain)
-   - Convex user schema
-   - Local SQLite setup for offline
-3. Proceed to **Change 2: Account Management**
-4. Continue with remaining changes
-5. Extract JP-DS (design system) into separate package after Change 3
+- [x] Moneda → **COP (Peso Colombiano)**
+- [x] Transacciones recurrentes → **Sí**
+- [x] Modo offline → **Diferido a v2**
+- [x] Formatos de exportación → **PDF, CSV**
+- [x] Integración con IA → **No por ahora**
+- [x] Autenticación biométrica → **No, ahora Google OAuth**
+- [x] Despliegue → **VPS Hostinger con Docker Compose + Caddy**
+- [x] Voz/STT → **No por ahora**
+- [x] Login → **Google OAuth (requiere conexión)**
+- [x] Declaración de Renta → **Sí, organizada por secciones DIAN con imágenes y PDFs**
+- [x] Créditos y préstamos → **Sí, sección personalizada**
+- [x] Adjuntos en transacciones → **Sí, imágenes y PDFs**
+- [x] Agrupación temporal configurable → **Sí, semana / mes / trimestre / semestre**
+- [x] Panel de configuración → **Sí, centralizado (tema, agrupación, categorías, idioma, notificaciones)**
+- [x] Panel de Resultados con gráficas → **Sí, gráficos visuales de ingresos/gastos/categorías**
 
 ---
 
-*This spec will be refined as we progress through SDD cycles.*
+## 10. Próximos Pasos
+
+1. ✅ SPEC v0.6.0 con Google Auth + Declaración de Renta + Créditos + Adjuntos + Configuración + Panel de Resultados
+2. **Change 1: web-foundation**
+   - Google OAuth flow end-to-end
+   - App shell, ruteo, JP-DS, tema (toggle básico)
+3. **Change 2: Core (Cuentas + Categorías + Transacciones) + Dashboard + Adjuntos**
+   - CRUD de los 3
+   - Adjuntos (imágenes y PDFs) por transacción
+   - Dashboard real con balance y resumen mensual
+4. **Change 3: Configuración completa**
+   - Panel: tema, agrupación temporal (semana/mes/trimestre/semestre), gestión de categorías, idioma, notificaciones
+5. **Change 4: Presupuestos + Reportes + Panel de Resultados**
+   - Límites por categoría con alertas
+   - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros
+6. **Change 5: Declaración de Renta (DIAN)**
+   - Items por sección DIAN
+   - Adjuntos (imágenes y PDFs) por rubro
+   - Exportación para presentación
+7. **Change 6: Créditos y Préstamos**
+   - Calendario de amortización
+   - Tracking de pagos y saldo
+
+---
+
+*Este spec se refinará a medida que avancemos con los ciclos SDD.*
