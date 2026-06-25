@@ -1,0 +1,325 @@
+{
+  "version": "2.14",
+  "children": [
+    {
+      "type": "frame",
+      "id": "nxTPw",
+      "x": 0,
+      "y": 920,
+      "name": "Button / Google OAuth",
+      "reusable": true,
+      "width": 320,
+      "height": 48,
+      "fill": "$color-surface-2",
+      "cornerRadius": "$radius-pill",
+      "stroke": "$color-border",
+      "strokeWidth": 1,
+      "gap": 12,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "icon",
+          "id": "Ck08M",
+          "width": 20,
+          "height": 20,
+          "icon": "globe",
+          "library": "lucide",
+          "fill": "$color-text-primary"
+        },
+        {
+          "type": "text",
+          "id": "gxzYy",
+          "name": "Label",
+          "fill": "$color-text-primary",
+          "content": "Continuar con Google",
+          "fontFamily": "$font-body",
+          "fontSize": 16,
+          "fontWeight": "600"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "FwId3",
+      "x": 0,
+      "y": 0,
+      "name": "Login / Mobile 375",
+      "clip": true,
+      "width": 375,
+      "height": 812,
+      "fill": "$color-bg",
+      "layout": "vertical",
+      "padding": 16,
+      "children": [
+        {
+          "type": "frame",
+          "id": "FnjkQ",
+          "width": "fill_container",
+          "height": 56,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "i3UYy",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 6,
+                  "id": "x2vLn",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../../../public/icon.svg",
+                    "mode": "fit"
+                  },
+                  "width": 32,
+                  "height": 32
+                },
+                {
+                  "type": "text",
+                  "id": "d4w1o",
+                  "fill": "$color-text-primary",
+                  "content": "JP",
+                  "fontFamily": "$font-body",
+                  "fontSize": 18,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "iGaLi",
+              "width": 44,
+              "height": 44,
+              "fill": "$color-surface-2",
+              "cornerRadius": "$radius-md",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "vP1dJ",
+                  "width": 20,
+                  "height": 20,
+                  "icon": "moon",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "jOetQ",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            0,
+            8
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "vtkjQ",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 12,
+                  "id": "ecN1b",
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "../../../public/icon.svg",
+                    "mode": "fit"
+                  },
+                  "width": 72,
+                  "height": 72
+                },
+                {
+                  "type": "text",
+                  "id": "J66wE",
+                  "fill": "$color-text-primary",
+                  "content": "JP-WALLET",
+                  "fontFamily": "$font-body",
+                  "fontSize": 28,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "JOwNg",
+                  "fill": "$color-text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": 280,
+                  "content": "Tus finanzas, bajo control",
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "QpydR",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "id": "fEEtB",
+                  "type": "ref",
+                  "ref": "nxTPw",
+                  "width": "fill_container"
+                },
+                {
+                  "type": "text",
+                  "id": "y9ryA5",
+                  "fill": "$color-text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Al continuar aceptas nuestros términos de servicio",
+                  "textAlign": "center",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "s2JTFK",
+      "x": 420,
+      "y": 0,
+      "name": "Login / Desktop 1280",
+      "width": 1280,
+      "height": 900,
+      "fill": "$color-bg",
+      "justifyContent": "center",
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "frame",
+          "id": "LpOAg",
+          "name": "Login Card",
+          "width": 440,
+          "fill": "#1A1F2699",
+          "cornerRadius": 16,
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "effect": {
+            "type": "background_blur",
+            "radius": 32
+          },
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 40,
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 10,
+              "id": "Y1ekj",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "../../../public/icon.svg",
+                "mode": "fit"
+              },
+              "width": 56,
+              "height": 56
+            },
+            {
+              "type": "text",
+              "id": "iqvm4",
+              "fill": "$color-text-primary",
+              "content": "Bienvenido a JP-WALLET",
+              "fontFamily": "$font-body",
+              "fontSize": 24,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "FG0kG",
+              "fill": "$color-text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Inicia sesión para gestionar tus finanzas personales",
+              "fontFamily": "$font-body",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "uTYLa",
+              "type": "ref",
+              "ref": "nxTPw",
+              "width": "fill_container"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "color-accent": {
+      "type": "color",
+      "value": "#07FBA2"
+    },
+    "color-accent-deep": {
+      "type": "color",
+      "value": "#159563"
+    },
+    "color-bg": {
+      "type": "color",
+      "value": "#0F1419"
+    },
+    "color-border": {
+      "type": "color",
+      "value": "#2F3742"
+    },
+    "color-surface-1": {
+      "type": "color",
+      "value": "#1A1F26"
+    },
+    "color-surface-2": {
+      "type": "color",
+      "value": "#232A33"
+    },
+    "color-text-primary": {
+      "type": "color",
+      "value": "#FAFAFA"
+    },
+    "color-text-secondary": {
+      "type": "color",
+      "value": "#A1A8B3"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "radius-md": {
+      "type": "number",
+      "value": 8
+    },
+    "radius-pill": {
+      "type": "number",
+      "value": 9999
+    }
+  },
+  "fileToken": "4527bf24-0077-45fa-b6a3-69e66d381be2"
+}
