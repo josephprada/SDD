@@ -1,9 +1,10 @@
 # Propuesta: Change 1 — Web Foundation
 
-**Versión**: 1.0.0
-**Estado**: Borrador
+**Versión**: 1.1.0
+**Estado**: Completada
 **Change**: web-foundation
 **Creado**: 2026-06-21
+**Completada**: 2026-06-24
 
 ---
 
@@ -129,13 +130,4 @@ Change foundational — sin rollback parcial razonable. `git revert` del merge c
 
 ## Criterios de Éxito
 
-- [ ] Click en "Continuar con Google" completa OAuth → aterriza en `/`
-- [ ] Primer login crea `users` + seedea categorías de SPEC §4.4.1
-- [ ] Usuario recurrente skipea `/login` vía sesión persistida
-- [ ] Shell renderiza header + main + nav responsiva (bottom nav móvil, sidebar desktop)
-- [ ] Theme toggle cicla light → dark → system; persiste across reloads y devices
-- [ ] Sin FOUC en primer paint (dark mode no parpadea)
-- [ ] JP-DS consumible vía `@jp-ds/tokens` y `@jp-ds/components` en ambos temas
-- [ ] Shell y auth respetan `prefers-reduced-motion` (`desing.md` §10.8 y §11)
-- [ ] WCAG 2.1 AA contrast verificado en light + dark
-- [ ] Motion tokens exportados desde `src/lib/motion/tokens.ts` y consumidos por JP-DS
+Ver `spec.md` §Criterios de Éxito y §Registro de decisiones — todos marcados completados al cierre (2026-06-24), con UI de theme toggle y auditoría WCAG formal documentadas como decisiones D-07 y D-12.

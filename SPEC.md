@@ -458,9 +458,9 @@ packages/jp-ds/
 ## 10. Próximos Pasos
 
 1. ✅ SPEC v0.6.0 con Google Auth + Declaración de Renta + Créditos + Adjuntos + Configuración + Panel de Resultados
-2. **Change 1: web-foundation**
-   - Google OAuth flow end-to-end
-   - App shell, ruteo, JP-DS, tema (toggle básico)
+2. ✅ **Change 1: web-foundation** (completado 2026-06-24, en `testing`)
+   - Google OAuth popup end-to-end (`@convex-dev/auth`)
+   - App shell, ruteo, JP-DS, tema (lógica completa; UI toggle diferida)
 3. **Change 2: Core (Cuentas + Categorías + Transacciones) + Dashboard + Adjuntos**
    - CRUD de los 3
    - Adjuntos (imágenes y PDFs) por transacción

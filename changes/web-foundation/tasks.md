@@ -14,6 +14,8 @@
 
 **Tests**: No solicitados explícitamente en spec — omitidos. Validación manual + Lighthouse contrast en fase Polish.
 
+**Cierre**: 2026-06-24 — Change completado. Decisiones de implementación documentadas en `spec.md` §Registro de decisiones. Rama `feat/web-foundation` → merge a `testing`.
+
 ---
 
 ## Phase 1: Setup (Monorepo + Workspaces)

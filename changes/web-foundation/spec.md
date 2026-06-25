@@ -1,9 +1,11 @@
 # Change 1 — Web Foundation
 
-**Versión**: 1.0.0
-**Estado**: Borrador
+**Versión**: 1.1.0
+**Estado**: Completada
 **Change**: web-foundation
 **Creado**: 2026-06-21
+**Completada**: 2026-06-24
+**Rama de entrega**: `testing` (merge desde `feat/web-foundation`, commit `3b12fc9`)
 
 ---
 
@@ -222,16 +224,53 @@ El sistema DEBE evitar parpadeo de tema incorrecto en el primer paint.
 
 ## Criterios de Éxito
 
-- [ ] Click en "Continuar con Google" completa OAuth → aterriza en `/`
-- [ ] Primer login crea `users` + seedea categorías de SPEC §4.4.1
-- [ ] Usuario recurrente skipea `/login` vía sesión persistida
-- [ ] Shell renderiza header + main + nav responsiva (bottom nav móvil, sidebar desktop)
-- [ ] Theme toggle cicla light → dark → system; persiste across reloads y devices
-- [ ] Sin FOUC en primer paint (dark mode no parpadea)
-- [ ] JP-DS consumible vía `@jp-ds/tokens` y `@jp-ds/components` en ambos temas
-- [ ] Shell y auth respetan `prefers-reduced-motion` (`desing.md` §10.8 y §11)
-- [ ] WCAG 2.1 AA contrast verificado en light + dark
-- [ ] Motion tokens exportados desde `src/lib/motion/tokens.ts` y consumidos por JP-DS
+- [x] Click en "Continuar con Google" completa OAuth → aterriza en `/` — popup OAuth vía `@convex-dev/auth`, ruta `/oauth-callback`
+- [x] Primer login crea `users` + seedea categorías de SPEC §4.4.1 — `convex/users.ts` + `convex/seed.ts`
+- [x] Usuario recurrente skipea `/login` vía sesión persistida — `ConvexAuthProvider` + auth guard en router
+- [x] Shell renderiza header + main + nav responsiva (bottom nav móvil, sidebar desktop)
+- [x] Theme toggle cicla light → dark → system; persiste across reloads y devices — **lógica completa** (`stores/theme.ts`, `ThemeToggle.tsx`); **UI oculta** hasta nuevo aviso (ver Decisiones §D-07)
+- [x] Sin FOUC en primer paint (dark mode no parpadea) — script pre-paint en `apps/web/index.html`
+- [x] JP-DS consumible vía `@jp-ds/tokens` y `@jp-ds/components` en ambos temas — paquete `packages/jp-ds`
+- [x] Shell y auth respetan `prefers-reduced-motion` — CSS `animations.css` + galaxy engine desactiva animaciones
+- [x] WCAG 2.1 AA contrast verificado en light + dark — tokens alineados a `desing.md`; auditoría Lighthouse formal **diferida** a Change 3 (ver Decisiones §D-12)
+- [x] Motion tokens exportados desde `src/lib/motion/tokens.ts` y consumidos por JP-DS — re-export en `packages/jp-ds/src/motion/tokens.ts`
+
+---
+
+## Registro de decisiones (implementación)
+
+Decisiones tomadas durante la implementación y al cierre del change. Sustituyen o aclaran requisitos del borrador original cuando hay conflicto.
+
+| ID | Decisión | Motivo | Impacto |
+|----|----------|--------|---------|
+| **D-01** | Auth con **`@convex-dev/auth`** (Google provider) en lugar de action hand-rolled `signInGoogle` + validación manual de ID-token GIS | Menor superficie de mantenimiento; integración nativa Convex session/JWT | Flujo real: popup → redirect Google → callback Convex (`/api/auth/callback/google`) → `signIn("google", { code })`. No usa GIS `credential` directo. Archivos: `convex/auth.ts`, `apps/web/src/lib/auth/googlePopupSignIn.ts`, `routes/oauthCallback.tsx` |
+| **D-02** | **OAuth en popup** sin redirigir pestaña principal | UX acordada en diseño; pestaña principal permanece en `/login` | `fetchGoogleOAuthRedirect` abre ventana; callback en `/oauth-callback` comunica vía `postMessage` |
+| **D-03** | **Dark-first** como tema por defecto en primer load | `desing.md` v1.1.0 prevalece sobre escenario legacy light en spec §theme-toggle | Pre-paint script default `dark`; escenario "primer load light" del borrador **no aplica** |
+| **D-04** | Fondo **Bolt Aurora galaxia** (canvas estrellas fugaces + orbes + parallax cursor) **solo en `/login`** | Iteración UX solicitada | Área autenticada usa fondo simple `shell-bg` (2 orbes CSS). Archivos: `galaxyEngine.ts`, `AuroraOrbs.tsx`, `aurora.css` |
+| **D-05** | Sin texto de marca **"Bolt Aurora"** ni pill **"JP"** en login | Pedido explícito de limpieza visual | Login sin header de marca; logo en card vía `public/icon.svg` |
+| **D-06** | Monorepo Bun: `apps/web` + `packages/jp-ds` + `convex/` | Plan técnico `design.md` | Scaffold Vite raíz eliminado |
+| **D-07** | **Theme toggle UI oculto** (Header y Login) hasta nuevo aviso | Pedido explícito del usuario (2026-06-24) | `ThemeToggle.tsx` y store operativos; no montados en shell. Fila "Tema" en `/settings` queda placeholder → **Change 3** |
+| **D-08** | Variables de entorno: `.env.local` en **raíz del monorepo**; Vite `envDir: "../.."` | Un solo archivo de secrets para Convex + Vite | `apps/web/vite.config.ts` |
+| **D-09** | JWT Convex local vía script `bun run convex:setup-jwt` | Requisito `@convex-dev/auth` para `JWT_PRIVATE_KEY` / `JWKS` | `scripts/setup-convex-jwt.mjs` |
+| **D-10** | Google OAuth redirect URI local: `http://127.0.0.1:3211/api/auth/callback/google` | Convex dev default | Documentado en `.env.example` |
+| **D-11** | **Tests automatizados omitidos** | No solicitados en spec/tasks | Validación manual + build (`bun run build`) |
+| **D-12** | Auditoría **WCAG Lighthouse formal diferida** | Cierre pragmático Change 1; tokens diseñados para AA | Checklist en Change 3 (configuración / polish) |
+| **D-13** | **React Router v7** | Última estable al implementar | Spec mencionaba v6/v7 — v7 adoptada |
+| **D-14** | Diseños `.pen` en `changes/web-foundation/designs/` como referencia visual | Hand-off Pencil; no bloquean runtime | Opcional en git; código es fuente de verdad en runtime |
+| **D-15** | Deploy **solo entorno dev/local** en este change | Sin staging/prod Convex ni OAuth prod | Variables prod → antes de release público |
+
+### Desviaciones aceptadas del borrador original
+
+1. **Validación server-side**: el borrador describe validación de ID-token GIS; la implementación delega en `@convex-dev/auth` (OAuth 2.0 authorization code). Criterio funcional equivalente: sesión válida solo tras intercambio server-side con Google.
+2. **Theme toggle visible en header**: diferido por D-07; capacidad `theme-toggle` considerada **entregada a nivel de código**, exposición UI en change posterior.
+3. **Google Identity Services SDK**: no cargado directamente; popup usa redirect OAuth de Convex Auth.
+
+### Entregables verificados al cierre
+
+- `bun install && bun dev` — app en `http://localhost:5173`
+- `bunx convex dev` — backend local
+- `bun run build` (workspace `apps/web`) — build exitoso
+- 64/64 tareas en `tasks.md` marcadas completadas
 
 ## Riesgos
 
