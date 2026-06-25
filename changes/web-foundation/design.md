@@ -62,7 +62,7 @@ Theme toggle: `cycle()` → `localStorage.theme = X` → si autenticado, `userPr
 | `packages/jp-ds/tokens/{color,typography,spacing,motion}.css` | Crear: CSS custom properties |
 | `packages/jp-ds/tokens/dark.css` | Crear: overrides `[data-theme="dark"]` |
 | `packages/jp-ds/components/{Button,Input,IconButton,Avatar,Spinner}.tsx` | Crear: consumen `var(--*)` |
-| `packages/jp-ds/src/motion/tokens.ts` | Crear: `duration,ease,spring,distance,stagger,shake` (design §3) |
+| `packages/jp-ds/src/motion/tokens.ts` | Crear: `duration,ease,spring,distance,stagger,shake` (`desing.md` §10) |
 | `packages/jp-ds/src/index.ts` | Crear: barrel exports |
 | `convex/schema.ts` | Modificar: `users` + `userPreferences` |
 | `convex/auth.config.ts` + `auth.ts` | Crear: provider Google + `signInGoogle` |

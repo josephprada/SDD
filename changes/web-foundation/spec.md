@@ -21,7 +21,7 @@ Establecer la capa foundational visible de JP-WALLET en su versión web: autenti
 - Ruteo React Router v6/v7: `/login` público, `/` y `/settings` protegidos, 404, auth guard loader
 - Google OAuth end-to-end: validación server-side de ID-token, primer login crea usuario + seed de categorías (SPEC §4.4.1)
 - Theme toggle light/dark/system persistido en `localStorage` pre-auth y `userPreferences` post-auth, FOUC-safe
-- Motion tokens module según design.md v1.1.0
+- Motion tokens module según `desing.md` v1.0.0
 
 **Fuera del Scope:**
 - Pantallas de dominio (Dashboard, Transacciones, Cuentas — Change 2+)
@@ -229,7 +229,7 @@ El sistema DEBE evitar parpadeo de tema incorrecto en el primer paint.
 - [ ] Theme toggle cicla light → dark → system; persiste across reloads y devices
 - [ ] Sin FOUC en primer paint (dark mode no parpadea)
 - [ ] JP-DS consumible vía `@jp-ds/tokens` y `@jp-ds/components` en ambos temas
-- [ ] Shell y auth respetan `prefers-reduced-motion` (design.md §9)
+- [ ] Shell y auth respetan `prefers-reduced-motion` (`desing.md` §10.8 y §11)
 - [ ] WCAG 2.1 AA contrast verificado en light + dark
 - [ ] Motion tokens exportados desde `src/lib/motion/tokens.ts` y consumidos por JP-DS
 
@@ -241,7 +241,7 @@ El sistema DEBE evitar parpadeo de tema incorrecto en el primer paint.
 | Convex Auth choice locks-in | Media | Wrapper `useAuth()` thin; swap posible después |
 | FOUC en dark mode en primer paint | Media | Inline `<script>` pre-paint `data-theme`; test Playwright |
 | WCAG AA contrast falla en dark mode | Baja | Review de tokens + auditoría Lighthouse |
-| Interop Bun + Vite + Convex | Media | Pinear versiones; documentar en design.md |
+| Interop Bun + Vite + Convex | Media | Pinear versiones; documentar en `changes/web-foundation/design.md` |
 | Race condition con `prefers-color-scheme` | Baja | `matchMedia` listener con debounce en writes |
 
 ## Dependencias
@@ -250,7 +250,7 @@ El sistema DEBE evitar parpadeo de tema incorrecto en el primer paint.
 - Convex cloud project (scaffolded)
 - Decisión de sdd-design: `@convex-dev/auth` vs implementación hand-rolled
 - `react-router` v6/v7, `zustand`, Google Identity Services SDK
-- design.md v1.1.0 (motion tokens contract)
+- `desing.md` v1.0.0 (contrato visual JP-DS y motion tokens)
 
 ## Estructura de Archivos
 

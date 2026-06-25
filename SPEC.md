@@ -52,6 +52,7 @@
 - Modo oscuro/claro desde el inicio
 - Componentes base en `packages/jp-ds`
 - Portátil a futuros proyectos
+- **Fuente de verdad visual:** [`desing.md`](/desing.md) (raíz del repo)
 
 ### 3.4 Pantallas Core
 
@@ -411,6 +412,8 @@ App → Inicio
 ## 8. Sistema de Diseño (JP-DS)
 
 JP-WALLET incluirá un **sistema de diseño reutilizable (JP-DS)** como paquete separado.
+
+**Documento maestro (visual e interacción):** [`desing.md`](/desing.md) — tokens, temas, componentes, motion, accesibilidad e identidad *Green Bolt*. Consultar siempre antes de implementar o diseñar UI.
 
 ### Principios
 - **Zero dependencia de lógica de negocio** — componentes UI puros

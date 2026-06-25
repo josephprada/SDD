@@ -1,0 +1,41 @@
+{
+  "guides": [
+    {
+      "id": "style_d80614a1c56f",
+      "name": "JP-WALLET - Green Bolt Identity (Dark)",
+      "tokens": {
+        "colors": {
+          "secondary": "#159563",
+          "text": "#FAFAFA",
+          "surface": "#1A1F26",
+          "accent": "#07FBA2",
+          "background": "#0F1419",
+          "primary": "#07FBA2"
+        },
+        "typography": {
+          "body": {
+            "family": "Inter Variable",
+            "size": "16px",
+            "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap"
+          },
+          "display": {
+            "family": "Cal Sans",
+            "size": "48px",
+            "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+          }
+        },
+        "spacing": {
+          "md": "24px",
+          "lg": "48px"
+        },
+        "radius": {
+          "md": "8px",
+          "lg": "16px"
+        }
+      },
+      "designInstructions": "# Visual Language: Green Bolt Foundation (Dark)\n\n## Brand Identity & Logo Integration\nThe design is strictly driven by the green bolt logo (`public/icon.svg`). The primary accent color is the vibrant green (#07FBA2). Layouts must use sharp, aggressive diagonal splits and polygon masks that echo the bolt's internal structure.\n\n## Dark Mode Foundation\nThe primary environment is Dark. Use `#0F1419` for the main background and `#1A1F26` for surface layers. Shadows should be subtle but deep, using the accent green as a very faint glow for \"active\" or \"premium\" surfaces.\n\n## Gelatinous Depth\nSurfaces use high-transparency glassmorphism. Use `backdrop-filter: blur(32px)` on containers with a subtle `#1A1F26` fill at 60% opacity. This creates a \"gelatinous\" feel where the background geometric motifs are visible but blurred.\n\n## Component Style\n- **Buttons**: Pill-shaped with a heavy #07FBA2 fill. Hover state must include a significant glow and a `scale(0.97)` press effect.\n- **Inputs**: Use the \"Label Float\" pattern. Borders should be sharp, using `#2F3742` for default and `#07FBA2` for focus.\n- **Avatars**: Masked into sharp polygons (hexagons or clipped squares) rather than circles.\n\n## Motion & Stagger\nFollowing `desing.md` §10.7:\n- **Mount**: `duration-base` + `ease-out` with `stagger-item` (60ms).\n- **Interactions**: Use `spring-gentle` for a reactive, physical feel.",
+      "created": "2026-06-25T00:30:45.999295+00:00",
+      "modified": "2026-06-25T00:39:16.267484+00:00"
+    }
+  ]
+}
