@@ -1,0 +1,191 @@
+.jp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--touch-min);
+  padding: 0 var(--space-5);
+  border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out),
+    opacity var(--duration-fast);
+}
+
+.jp-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.jp-btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.jp-btn--primary {
+  color: #0a0e12;
+  background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
+  box-shadow: var(--shadow-glow-strong);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .jp-btn--primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 56px var(--color-accent-glow);
+  }
+}
+
+.jp-btn--secondary {
+  color: var(--color-text-primary);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+}
+
+.jp-btn--danger {
+  color: #fff;
+  background: var(--color-danger);
+}
+
+.jp-btn--google {
+  width: 100%;
+  color: var(--color-text-primary);
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--color-glass-border);
+  box-shadow: var(--shadow-glass);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .jp-btn--google:hover:not(:disabled) {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+.jp-btn--full {
+  width: 100%;
+}
+
+.jp-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.jp-input-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.jp-input {
+  width: 100%;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.jp-input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px var(--color-accent-muted);
+}
+
+.jp-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.jp-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition:
+    box-shadow var(--duration-fast),
+    transform var(--duration-fast) var(--ease-spring);
+}
+
+.jp-icon-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .jp-icon-btn:hover:not(:disabled) {
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+.jp-icon-btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.jp-avatar {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  border-radius: var(--radius-md);
+  background: var(--color-accent-deep);
+  border: 2px solid var(--color-accent);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.jp-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.jp-spinner {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jp-spinner__ring {
+  width: 28px;
+  height: 28px;
+  border: 3px solid transparent;
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: jp-spin 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jp-spinner__ring {
+    animation: none;
+    border-top-color: var(--color-accent);
+    border-right-color: var(--color-accent);
+  }
+
+  .jp-btn:active:not(:disabled),
+  .jp-icon-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+@keyframes jp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

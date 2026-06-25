@@ -20,14 +20,14 @@
 
 **Purpose**: Migrar scaffold Vite raíz → monorepo Bun (`apps/web` + `packages/jp-ds` + `convex/`)
 
-- [ ] T001 Configurar workspaces Bun en `package.json` raíz (`apps/web`, `packages/jp-ds`)
-- [ ] T002 Crear `bunfig.toml` con `workspaces = true`
-- [ ] T003 Crear `tsconfig.json` raíz con project references y paths `@jp-ds/*`, `@app/*`
-- [ ] T004 [P] Mover app Vite a `apps/web/` (`index.html`, `vite.config.ts`, `src/`, `public/` symlink o copy)
-- [ ] T005 [P] Crear `packages/jp-ds/package.json` y `packages/jp-ds/tsconfig.json`
-- [ ] T006 [P] Crear `.env.example` con `VITE_CONVEX_URL`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
-- [ ] T007 Actualizar scripts raíz en `package.json` (`dev`, `build`, `lint` por workspace)
-- [ ] T008 Eliminar scaffold obsoleto en raíz (`src/`, `index.html`, `vite.config.ts` tras migración)
+- [x] T001 Configurar workspaces Bun en `package.json` raíz (`apps/web`, `packages/jp-ds`)
+- [x] T002 Crear `bunfig.toml` con `workspaces = true`
+- [x] T003 Crear `tsconfig.json` raíz con project references y paths `@jp-ds/*`, `@app/*`
+- [x] T004 [P] Mover app Vite a `apps/web/` (`index.html`, `vite.config.ts`, `src/`, `public/` symlink o copy)
+- [x] T005 [P] Crear `packages/jp-ds/package.json` y `packages/jp-ds/tsconfig.json`
+- [x] T006 [P] Crear `.env.example` con `VITE_CONVEX_URL`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- [x] T007 Actualizar scripts raíz en `package.json` (`dev`, `build`, `lint` por workspace)
+- [x] T008 Eliminar scaffold obsoleto en raíz (`src/`, `index.html`, `vite.config.ts` tras migración)
 
 **Checkpoint**: `bun install && bun dev` arranca `apps/web` sin errores de paths
 
@@ -39,16 +39,16 @@
 
 ⚠️ Ninguna US puede empezar hasta completar esta fase.
 
-- [ ] T009 Definir `convex/schema.ts` tablas `users` + `userPreferences` según `design.md`
-- [ ] T010 [P] Crear `convex/auth.config.ts` provider Google (`@convex-dev/auth`)
-- [ ] T011 [P] Crear `convex/auth.ts` con action `signInGoogle` (validación ID-token)
-- [ ] T012 Implementar `convex/users.ts` — `getOrCreate` por `googleSub`
-- [ ] T013 Implementar `convex/seed.ts` — 13 categorías default SPEC §4.4.1 en primer login
-- [ ] T014 Añadir script pre-paint FOUC-safe en `apps/web/index.html` (lee `localStorage.theme`, default `dark`)
-- [ ] T015 Configurar `apps/web/main.tsx` — `ConvexAuthProvider` + `ConvexReactClient`
-- [ ] T016 [P] Configurar alias `@jp-ds/*` en `apps/web/vite.config.ts`
-- [ ] T017 [P] Instalar deps: `react-router`, `zustand`, `@convex-dev/auth`, `@auth/core`
-- [ ] T018 Crear `apps/web/src/routes/router.tsx` — esqueleto rutas `/login`, `/`, `/settings`, `*`
+- [x] T009 Definir `convex/schema.ts` tablas `users` + `userPreferences` según `design.md`
+- [x] T010 [P] Crear `convex/auth.config.ts` provider Google (`@convex-dev/auth`)
+- [x] T011 [P] Crear `convex/auth.ts` con action `signInGoogle` (validación ID-token)
+- [x] T012 Implementar `convex/users.ts` — `getOrCreate` por `googleSub`
+- [x] T013 Implementar `convex/seed.ts` — 13 categorías default SPEC §4.4.1 en primer login
+- [x] T014 Añadir script pre-paint FOUC-safe en `apps/web/index.html` (lee `localStorage.theme`, default `dark`)
+- [x] T015 Configurar `apps/web/main.tsx` — `ConvexAuthProvider` + `ConvexReactClient`
+- [x] T016 [P] Configurar alias `@jp-ds/*` en `apps/web/vite.config.ts`
+- [x] T017 [P] Instalar deps: `react-router`, `zustand`, `@convex-dev/auth`, `@auth/core`
+- [x] T018 Crear `apps/web/src/routes/router.tsx` — esqueleto rutas `/login`, `/`, `/settings`, `*`
 
 **Checkpoint**: Convex dev levanta schema; router renderiza rutas vacías; `data-theme` presente pre-paint
 
@@ -62,18 +62,18 @@
 
 ### Implementation
 
-- [ ] T019 [US1] Crear `packages/jp-ds/tokens/color.css` — tokens light según `desing.md` §4.3
-- [ ] T020 [P] [US1] Crear `packages/jp-ds/tokens/dark.css` — overrides `[data-theme="dark"]` (default)
-- [ ] T021 [P] [US1] Crear `packages/jp-ds/tokens/typography.css` — Inter, escala mobile-first
-- [ ] T022 [P] [US1] Crear `packages/jp-ds/tokens/spacing.css` — escala 4/8/12/16/24/32
-- [ ] T023 [P] [US1] Crear `packages/jp-ds/tokens/motion.css` + tokens glass (`--color-surface-glass`, `--color-accent-glow`)
-- [ ] T024 [US1] Crear `packages/jp-ds/src/motion/tokens.ts` — `duration`, `ease`, `spring`, `distance`, `stagger`, `shake`
-- [ ] T025 [P] [US1] Crear `packages/jp-ds/components/Button.tsx` — primary/secondary/danger + gradient+glow Bolt Aurora
-- [ ] T026 [P] [US1] Crear `packages/jp-ds/components/Input.tsx` — glass variant, focus ring accent
-- [ ] T027 [P] [US1] Crear `packages/jp-ds/components/IconButton.tsx` — ghost + glow hover
-- [ ] T028 [P] [US1] Crear `packages/jp-ds/components/Avatar.tsx` — anillo accent
-- [ ] T029 [P] [US1] Crear `packages/jp-ds/components/Spinner.tsx` — stroke accent animado
-- [ ] T030 [US1] Crear `packages/jp-ds/src/index.ts` — barrel `components` + `motion` + import CSS tokens
+- [x] T019 [US1] Crear `packages/jp-ds/tokens/color.css` — tokens light según `desing.md` §4.3
+- [x] T020 [P] [US1] Crear `packages/jp-ds/tokens/dark.css` — overrides `[data-theme="dark"]` (default)
+- [x] T021 [P] [US1] Crear `packages/jp-ds/tokens/typography.css` — Inter, escala mobile-first
+- [x] T022 [P] [US1] Crear `packages/jp-ds/tokens/spacing.css` — escala 4/8/12/16/24/32
+- [x] T023 [P] [US1] Crear `packages/jp-ds/tokens/motion.css` + tokens glass (`--color-surface-glass`, `--color-accent-glow`)
+- [x] T024 [US1] Crear `packages/jp-ds/src/motion/tokens.ts` — `duration`, `ease`, `spring`, `distance`, `stagger`, `shake`
+- [x] T025 [P] [US1] Crear `packages/jp-ds/components/Button.tsx` — primary/secondary/danger + gradient+glow Bolt Aurora
+- [x] T026 [P] [US1] Crear `packages/jp-ds/components/Input.tsx` — glass variant, focus ring accent
+- [x] T027 [P] [US1] Crear `packages/jp-ds/components/IconButton.tsx` — ghost + glow hover
+- [x] T028 [P] [US1] Crear `packages/jp-ds/components/Avatar.tsx` — anillo accent
+- [x] T029 [P] [US1] Crear `packages/jp-ds/components/Spinner.tsx` — stroke accent animado
+- [x] T030 [US1] Crear `packages/jp-ds/src/index.ts` — barrel `components` + `motion` + import CSS tokens
 
 **Checkpoint**: Storybook manual o página dev importa todos los componentes; contraste texto/fondo ≥ 4.5:1 en dark
 
@@ -87,13 +87,13 @@
 
 ### Implementation
 
-- [ ] T031 [US2] Crear `apps/web/src/stores/theme.ts` — Zustand `ThemeState` (`mode`, `resolved`, `cycle`, `set`)
-- [ ] T032 [US2] Crear `apps/web/src/lib/theme/applyTheme.ts` — aplica `data-theme` al `<html>`
-- [ ] T033 [US2] Crear `apps/web/src/lib/theme/systemListener.ts` — `matchMedia('prefers-color-scheme')` con debounce
-- [ ] T034 [US2] Crear `apps/web/src/components/theme/ThemeToggle.tsx` según `designs/theme-toggle.pen` (anillo glow en focus)
-- [ ] T035 [US2] Sincronizar pre-paint `apps/web/index.html` con default `dark` y claves `localStorage.theme`
-- [ ] T036 [US2] Crear `convex/userPreferences.ts` mutation `updateTheme` (fire-and-forget post-auth)
-- [ ] T037 [US2] Reconciliar tema en root loader — `userPreferences.theme` override `localStorage` si autenticado
+- [x] T031 [US2] Crear `apps/web/src/stores/theme.ts` — Zustand `ThemeState` (`mode`, `resolved`, `cycle`, `set`)
+- [x] T032 [US2] Crear `apps/web/src/lib/theme/applyTheme.ts` — aplica `data-theme` al `<html>`
+- [x] T033 [US2] Crear `apps/web/src/lib/theme/systemListener.ts` — `matchMedia('prefers-color-scheme')` con debounce
+- [x] T034 [US2] Crear `apps/web/src/components/theme/ThemeToggle.tsx` según `designs/theme-toggle.pen` (anillo glow en focus)
+- [x] T035 [US2] Sincronizar pre-paint `apps/web/index.html` con default `dark` y claves `localStorage.theme`
+- [x] T036 [US2] Crear `convex/userPreferences.ts` mutation `updateTheme` (fire-and-forget post-auth)
+- [x] T037 [US2] Reconciliar tema en root loader — `userPreferences.theme` override `localStorage` si autenticado
 
 **Checkpoint**: Toggle en login (sin sesión) persiste; tras login sync a Convex; sin flash en reload dark
 
@@ -107,15 +107,15 @@
 
 ### Implementation
 
-- [ ] T038 [US3] Crear `apps/web/src/lib/auth/useAuth.ts` — wrapper thin sobre `@convex-dev/auth`
-- [ ] T039 [US3] Crear `apps/web/src/components/auth/LoginScreen.tsx` — Bolt Aurora según `designs/auth-google-oauth.pen`
-- [ ] T040 [US3] Integrar Google Identity Services popup en `LoginScreen.tsx` (no redirect pestaña principal)
-- [ ] T041 [US3] Completar `convex/auth.ts` — validar ID-token contra Google, emitir sesión JWT
-- [ ] T042 [US3] Conectar primer login en `convex/users.ts` — crear user + invocar `seed.defaultCategories`
-- [ ] T043 [US3] Crear `apps/web/src/routes/login.tsx` — ruta pública `/login`
-- [ ] T044 [US3] Implementar redirect `?next=` post-login en root loader
-- [ ] T045 [US3] Crear `apps/web/src/components/auth/UserMenu.tsx` — avatar, nombre, cerrar sesión
-- [ ] T046 [US3] Implementar `signOut` — limpiar sesión + redirect `/login`
+- [x] T038 [US3] Crear `apps/web/src/lib/auth/useAuth.ts` — wrapper thin sobre `@convex-dev/auth`
+- [x] T039 [US3] Crear `apps/web/src/components/auth/LoginScreen.tsx` — Bolt Aurora según `designs/auth-google-oauth.pen`
+- [x] T040 [US3] Integrar Google Identity Services popup en `LoginScreen.tsx` (no redirect pestaña principal)
+- [x] T041 [US3] Completar `convex/auth.ts` — validar ID-token contra Google, emitir sesión JWT
+- [x] T042 [US3] Conectar primer login en `convex/users.ts` — crear user + invocar `seed.defaultCategories`
+- [x] T043 [US3] Crear `apps/web/src/routes/login.tsx` — ruta pública `/login`
+- [x] T044 [US3] Implementar redirect `?next=` post-login en root loader
+- [x] T045 [US3] Crear `apps/web/src/components/auth/UserMenu.tsx` — avatar, nombre, cerrar sesión
+- [x] T046 [US3] Implementar `signOut` — limpiar sesión + redirect `/login`
 
 **Checkpoint**: Criterios de éxito spec §OAuth cumplidos; popup cancelado no muestra error bloqueante
 
@@ -129,17 +129,17 @@
 
 ### Implementation
 
-- [ ] T047 [US4] Crear `apps/web/src/routes/root.tsx` — loader auth guard + layout `<Shell><Outlet/></Shell>`
-- [ ] T048 [P] [US4] Crear `apps/web/src/components/shell/SkipToContent.tsx` — primer foco Tab
-- [ ] T049 [P] [US4] Crear `apps/web/src/components/shell/Header.tsx` — brand pill glass + ThemeToggle + UserMenu
-- [ ] T050 [P] [US4] Crear `apps/web/src/components/shell/NavMobile.tsx` — bottom nav <768px según `designs/app-shell.pen`
-- [ ] T051 [P] [US4] Crear `apps/web/src/components/shell/NavDesktop.tsx` — sidebar glass ≥1024px
-- [ ] T052 [US4] Crear `apps/web/src/components/shell/Shell.tsx` — compone header + main + nav responsiva
-- [ ] T053 [US4] Crear `apps/web/src/routes/home.tsx` — placeholder dashboard con stat cards Aurora
-- [ ] T054 [US4] Crear `apps/web/src/routes/settings.tsx` — filas glass (tema, agrupación, idioma, notificaciones)
-- [ ] T055 [US4] Crear `apps/web/src/routes/notFound.tsx` — 404 glow según `designs/app-shell.pen`
-- [ ] T056 [US4] Crear `apps/web/src/styles/aurora.css` — utilidades fondo gradiente, orbes, glass (`backdrop-filter`)
-- [ ] T057 [US4] Wire rutas en `apps/web/src/routes/router.tsx` — guards, 404 catch-all
+- [x] T047 [US4] Crear `apps/web/src/routes/root.tsx` — loader auth guard + layout `<Shell><Outlet/></Shell>`
+- [x] T048 [P] [US4] Crear `apps/web/src/components/shell/SkipToContent.tsx` — primer foco Tab
+- [x] T049 [P] [US4] Crear `apps/web/src/components/shell/Header.tsx` — brand pill glass + ThemeToggle + UserMenu
+- [x] T050 [P] [US4] Crear `apps/web/src/components/shell/NavMobile.tsx` — bottom nav <768px según `designs/app-shell.pen`
+- [x] T051 [P] [US4] Crear `apps/web/src/components/shell/NavDesktop.tsx` — sidebar glass ≥1024px
+- [x] T052 [US4] Crear `apps/web/src/components/shell/Shell.tsx` — compone header + main + nav responsiva
+- [x] T053 [US4] Crear `apps/web/src/routes/home.tsx` — placeholder dashboard con stat cards Aurora
+- [x] T054 [US4] Crear `apps/web/src/routes/settings.tsx` — filas glass (tema, agrupación, idioma, notificaciones)
+- [x] T055 [US4] Crear `apps/web/src/routes/notFound.tsx` — 404 glow según `designs/app-shell.pen`
+- [x] T056 [US4] Crear `apps/web/src/styles/aurora.css` — utilidades fondo gradiente, orbes, glass (`backdrop-filter`)
+- [x] T057 [US4] Wire rutas en `apps/web/src/routes/router.tsx` — guards, 404 catch-all
 
 **Checkpoint**: Shell mobile-first 375px; desktop 1280px con sidebar; skip-link funcional
 
@@ -149,13 +149,13 @@
 
 **Purpose**: A11y, motion, docs, limpieza
 
-- [ ] T058 [P] Actualizar `changes/web-foundation/designs/design-brief.md` — Bolt Aurora como diseño canónico en `designs/`
-- [ ] T059 [P] Auditoría contraste WCAG AA tokens light+dark (`desing.md` §4, §11)
-- [ ] T060 Respetar `prefers-reduced-motion` en shell, login y theme toggle (`desing.md` §10.8)
-- [ ] T061 Validar artboards 375/1280 contra `.pen` guardados (mobile-first checklist §7.9)
-- [ ] T062 Verificar seed 13 categorías SPEC §4.4.1 en `convex/seed.ts` — test manual Convex dashboard
-- [ ] T063 Limpiar `changes/web-foundation/designs/propose-0/` referencia en docs si aplica (archivado)
-- [ ] T064 Actualizar `AGENTS.md` si cambian paths de monorepo post-migración
+- [x] T058 [P] Actualizar `changes/web-foundation/designs/design-brief.md` — Bolt Aurora como diseño canónico en `designs/`
+- [x] T059 [P] Auditoría contraste WCAG AA tokens light+dark (`desing.md` §4, §11)
+- [x] T060 Respetar `prefers-reduced-motion` en shell, login y theme toggle (`desing.md` §10.8)
+- [x] T061 Validar artboards 375/1280 contra `.pen` guardados (mobile-first checklist §7.9)
+- [x] T062 Verificar seed 13 categorías SPEC §4.4.1 en `convex/seed.ts` — test manual Convex dashboard
+- [x] T063 Limpiar `changes/web-foundation/designs/propose-0/` referencia en docs si aplica (archivado)
+- [x] T064 Actualizar `AGENTS.md` si cambian paths de monorepo post-migración
 
 ---
 

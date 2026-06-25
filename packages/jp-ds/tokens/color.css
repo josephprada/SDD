@@ -1,0 +1,25 @@
+:root,
+[data-theme="light"] {
+  --color-accent: #059669;
+  --color-accent-bright: #07fba2;
+  --color-accent-deep: #047857;
+  --color-accent-muted: color-mix(in srgb, #059669 12%, transparent);
+  --color-accent-glow: color-mix(in srgb, #07fba2 25%, transparent);
+
+  --color-bg: #f4f6f8;
+  --color-surface-1: #ffffff;
+  --color-surface-2: #eef1f4;
+  --color-surface-glass: rgba(255, 255, 255, 0.72);
+  --color-glass-border: color-mix(in srgb, #059669 20%, transparent);
+
+  --color-border: #d1d5db;
+  --color-border-focus: #059669;
+
+  --color-text-primary: #0f1419;
+  --color-text-secondary: #525252;
+  --color-text-muted: #9ca3af;
+
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-success: #059669;
+}

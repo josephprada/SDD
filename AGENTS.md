@@ -31,13 +31,17 @@ No confundir ambos. Para colores, tipografía, glassmorphism, motion o component
 ## JP-DS en código
 
 ```
-packages/jp-ds/
-├── tokens/       # CSS custom properties (color, typography, spacing, dark.css, glass.css)
-├── components/   # Button, Input, IconButton, Avatar, Spinner
-└── src/motion/   # Motion tokens (fuente de verdad TS)
+apps/web/           # App Vite + React (alias @app/*)
+packages/jp-ds/     # Design system JP-DS (alias @jp-ds/*)
+convex/             # Backend Convex (alias @convex/* desde apps/web)
+├── tokens/         # CSS custom properties (color, typography, spacing, dark.css)
+├── components/     # Button, Input, IconButton, Avatar, Spinner
+└── src/motion/     # Motion tokens (fuente de verdad TS)
 ```
 
-La app consume JP-DS vía alias `@jp-ds/*`.
+La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex/_generated/api`.
+
+**Scripts raíz:** `bun dev` · `bun build` · `bun lint`
 
 ---
 
