@@ -266,6 +266,78 @@
               "fontWeight": "700"
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "HWNkO",
+          "name": "Month Switcher",
+          "reusable": true,
+          "width": 188,
+          "height": 38,
+          "fill": "$color-surface-2",
+          "cornerRadius": "$radius-pill",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "gap": 10,
+          "padding": [
+            6,
+            10
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "cetRT",
+              "name": "Month Prev",
+              "width": 18,
+              "height": 18,
+              "icon": "chevron-left",
+              "library": "lucide",
+              "fill": "$color-accent"
+            },
+            {
+              "type": "frame",
+              "id": "C4u9K",
+              "name": "Month Label Group",
+              "width": "fill_container",
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "HzGmj",
+                  "name": "Month Calendar Icon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "calendar",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "iwXa8",
+                  "name": "Month Label",
+                  "fill": "$color-text-primary",
+                  "content": "Junio 2026",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "750"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "b5dBgI",
+              "name": "Month Next",
+              "width": 18,
+              "height": 18,
+              "icon": "chevron-right",
+              "library": "lucide",
+              "fill": "$color-accent"
+            }
+          ]
         }
       ]
     },
@@ -417,199 +489,214 @@
         },
         {
           "type": "frame",
-          "id": "iZ6lD",
-          "name": "Quick Actions",
+          "id": "MhAOn",
+          "name": "Month Overview",
           "width": "fill_container",
-          "height": 44,
-          "gap": 8,
-          "children": [
-            {
-              "id": "hqjng",
-              "type": "ref",
-              "ref": "BFupb",
-              "name": "Action Add Expense",
-              "width": "fill_container",
-              "descendants": {
-                "fSynE": {
-                  "icon": "minus"
-                },
-                "GqcRn": {
-                  "content": "Gasto"
-                }
-              }
-            },
-            {
-              "id": "qDGT4",
-              "type": "ref",
-              "ref": "w63SRQ",
-              "name": "Action Add Income",
-              "width": "fill_container",
-              "descendants": {
-                "sXwAL": {
-                  "icon": "plus"
-                },
-                "PFpJB": {
-                  "content": "Ingreso"
-                }
-              }
-            },
-            {
-              "id": "UvGUd",
-              "type": "ref",
-              "ref": "w63SRQ",
-              "name": "Action Transfer",
-              "width": "fill_container",
-              "descendants": {
-                "sXwAL": {
-                  "icon": "arrow-right-left"
-                },
-                "PFpJB": {
-                  "content": "Mover"
-                }
-              }
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "J6d91l",
-          "name": "Monthly Summary",
-          "width": "fill_container",
-          "height": 94,
-          "gap": 8,
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 16,
           "children": [
             {
               "type": "frame",
-              "id": "qRSjQ",
-              "name": "Summary Ingresos",
+              "id": "w0Ui30",
+              "name": "Month Overview Header",
               "width": "fill_container",
-              "fill": "$color-surface-1",
-              "cornerRadius": "$radius-lg",
-              "stroke": "$color-border",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 5,
-              "padding": 12,
+              "justifyContent": "space_between",
+              "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "bhO9D",
-                  "name": "Summary Label Ingresos",
-                  "fill": "$color-text-secondary",
-                  "content": "Ingresos",
-                  "fontFamily": "$font-body",
-                  "fontSize": 11,
-                  "fontWeight": "650"
-                },
-                {
-                  "type": "text",
-                  "id": "PbYl3",
-                  "name": "Summary Value Ingresos",
-                  "fill": "$color-accent",
-                  "content": "$ 5.200.000",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 14,
-                  "fontWeight": "800"
-                },
-                {
-                  "type": "text",
-                  "id": "f8Nzb",
-                  "name": "Summary Meta Ingresos",
-                  "fill": "$color-text-muted",
-                  "content": "Este mes",
-                  "fontFamily": "$font-body",
-                  "fontSize": 10,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "SV5xa",
-              "name": "Summary Gastos",
-              "width": "fill_container",
-              "fill": "$color-surface-1",
-              "cornerRadius": "$radius-lg",
-              "stroke": "$color-border",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 5,
-              "padding": 12,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "LdJgF",
-                  "name": "Summary Label Gastos",
-                  "fill": "$color-text-secondary",
-                  "content": "Gastos",
-                  "fontFamily": "$font-body",
-                  "fontSize": 11,
-                  "fontWeight": "650"
-                },
-                {
-                  "type": "text",
-                  "id": "cLu5Z",
-                  "name": "Summary Value Gastos",
-                  "fill": "$color-danger",
-                  "content": "$ 920.000",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 14,
-                  "fontWeight": "800"
-                },
-                {
-                  "type": "text",
-                  "id": "eqiTA",
-                  "name": "Summary Meta Gastos",
-                  "fill": "$color-text-muted",
-                  "content": "Este mes",
-                  "fontFamily": "$font-body",
-                  "fontSize": 10,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "RtxLb",
-              "name": "Summary Neto",
-              "width": "fill_container",
-              "fill": "$color-surface-1",
-              "cornerRadius": "$radius-lg",
-              "stroke": "$color-border",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 5,
-              "padding": 12,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "oKdl5",
-                  "name": "Summary Label Neto",
-                  "fill": "$color-text-secondary",
-                  "content": "Neto",
-                  "fontFamily": "$font-body",
-                  "fontSize": 11,
-                  "fontWeight": "650"
-                },
-                {
-                  "type": "text",
-                  "id": "V1KK1F",
-                  "name": "Summary Value Neto",
+                  "id": "dbHXc",
+                  "name": "Month Overview Title",
                   "fill": "$color-text-primary",
-                  "content": "$ 4.280.000",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 14,
+                  "content": "Este mes",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
                   "fontWeight": "800"
                 },
                 {
+                  "id": "wLndQ",
+                  "type": "ref",
+                  "ref": "HWNkO",
+                  "name": "Month Switcher Mobile",
+                  "width": 172,
+                  "descendants": {
+                    "iwXa8": {
+                      "content": "Junio 2026"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ljNne",
+              "name": "Month Bars",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Nuo0n",
+                  "name": "Income Bar Row",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "w93GT",
+                      "name": "Income Label Row",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xkkMK",
+                          "name": "Income Label",
+                          "fill": "$color-text-secondary",
+                          "content": "Ingresos",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "650"
+                        },
+                        {
+                          "type": "text",
+                          "id": "smDhq",
+                          "name": "Income Amount",
+                          "fill": "$color-accent",
+                          "content": "$ 5.200.000",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 12,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ECuOg",
+                      "name": "Income Track",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$color-surface-2",
+                      "cornerRadius": "$radius-pill",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "O66F7P",
+                          "name": "Income Fill",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "$color-accent",
+                          "cornerRadius": "$radius-pill"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "xEksp",
+                  "name": "Expense Bar Row",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "TKiXV",
+                      "name": "Expense Label Row",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "sAi8O",
+                          "name": "Expense Label",
+                          "fill": "$color-text-secondary",
+                          "content": "Gastos",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "650"
+                        },
+                        {
+                          "type": "text",
+                          "id": "fd2fh",
+                          "name": "Expense Amount",
+                          "fill": "$color-danger",
+                          "content": "$ 920.000",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 12,
+                          "fontWeight": "800"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ydR3Q",
+                      "name": "Expense Track",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 8,
+                      "fill": "$color-surface-2",
+                      "cornerRadius": "$radius-pill",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "YARwp",
+                          "name": "Expense Fill",
+                          "width": 55,
+                          "height": "fill_container",
+                          "fill": "$color-danger",
+                          "cornerRadius": "$radius-pill"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LSfAC",
+              "name": "Month Net Row",
+              "width": "fill_container",
+              "padding": [
+                10,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
                   "type": "text",
-                  "id": "pOK5p",
-                  "name": "Summary Meta Neto",
-                  "fill": "$color-text-muted",
-                  "content": "Este mes",
+                  "id": "oQj4P",
+                  "name": "Net Label",
+                  "fill": "$color-text-secondary",
+                  "content": "Neto del mes",
                   "fontFamily": "$font-body",
-                  "fontSize": 10,
-                  "fontWeight": "normal"
+                  "fontSize": 13,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "NkenW",
+                  "name": "Net Amount",
+                  "fill": "$color-accent",
+                  "content": "+$ 4.280.000",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 16,
+                  "fontWeight": "800"
                 }
               ]
             }
@@ -872,6 +959,52 @@
                   "fontFamily": "$font-body",
                   "fontSize": 10,
                   "fontWeight": "650"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Sq0pX",
+              "name": "Nav Add Action",
+              "width": 56,
+              "height": "fill_container",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "XMulC",
+                  "name": "Nav Add Button",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "$color-accent",
+                  "cornerRadius": "$radius-pill",
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#07FBA259",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 14
+                  },
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "CIfRa",
+                      "name": "Nav Add Icon",
+                      "width": 24,
+                      "height": 24,
+                      "icon": "plus",
+                      "library": "lucide",
+                      "fill": "$color-bg"
+                    }
+                  ]
                 }
               ]
             },
@@ -1332,6 +1465,18 @@
                   ]
                 },
                 {
+                  "id": "P0572d",
+                  "type": "ref",
+                  "ref": "HWNkO",
+                  "name": "Month Switcher Desktop",
+                  "width": 196,
+                  "descendants": {
+                    "iwXa8": {
+                      "content": "Junio 2026"
+                    }
+                  }
+                },
+                {
                   "type": "frame",
                   "id": "H7ovSP",
                   "name": "Desktop Header Actions",
@@ -1622,8 +1767,143 @@
                       "children": [
                         {
                           "type": "frame",
+                          "id": "o81gR",
+                          "name": "Insight Bars",
+                          "width": 300,
+                          "layout": "vertical",
+                          "gap": 12,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "IMLN8",
+                              "name": "Insight Income Row",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "sDDzh",
+                                  "name": "Insight Income Label",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "c0fBmM",
+                                      "name": "Insight Income Text",
+                                      "fill": "$color-text-secondary",
+                                      "content": "Ingresos",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "650"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "c0ro6",
+                                      "name": "Insight Income Amount",
+                                      "fill": "$color-accent",
+                                      "content": "$ 5.200.000",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 13,
+                                      "fontWeight": "800"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "QKB1O",
+                                  "name": "Insight Income Track",
+                                  "clip": true,
+                                  "width": "fill_container",
+                                  "height": 8,
+                                  "fill": "$color-surface-2",
+                                  "cornerRadius": "$radius-pill",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "V0c5pc",
+                                      "name": "Insight Income Fill",
+                                      "width": "fill_container",
+                                      "height": "fill_container",
+                                      "fill": "$color-accent",
+                                      "cornerRadius": "$radius-pill"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "I4Tz1N",
+                              "name": "Insight Expense Row",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "lwbyg",
+                                  "name": "Insight Expense Label",
+                                  "width": "fill_container",
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "zBnVM",
+                                      "name": "Insight Expense Text",
+                                      "fill": "$color-text-secondary",
+                                      "content": "Gastos",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 13,
+                                      "fontWeight": "650"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "E62Jqu",
+                                      "name": "Insight Expense Amount",
+                                      "fill": "$color-danger",
+                                      "content": "$ 920.000",
+                                      "fontFamily": "$font-mono",
+                                      "fontSize": 13,
+                                      "fontWeight": "800"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Gw5A4",
+                                  "name": "Insight Expense Track",
+                                  "clip": true,
+                                  "width": "fill_container",
+                                  "height": 8,
+                                  "fill": "$color-surface-2",
+                                  "cornerRadius": "$radius-pill",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "N7F9Vq",
+                                      "name": "Insight Expense Fill",
+                                      "width": 53,
+                                      "height": "fill_container",
+                                      "fill": "$color-danger",
+                                      "cornerRadius": "$radius-pill"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
                           "id": "AQd9o",
+                          "x": 20,
+                          "y": 31,
                           "name": "Insight Gauge",
+                          "enabled": false,
                           "width": 88,
                           "height": 88,
                           "fill": "#07FBA21F",

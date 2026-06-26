@@ -53,11 +53,12 @@ Orden vertical:
 
 1. Header compacto existente.
 2. Card principal: balance total.
-3. Acciones rápidas: `+ Gasto`, `+ Ingreso`, `Transferir`.
-4. Resumen del mes: Ingresos, Gastos, Neto.
-5. Cuentas activas (scroll horizontal corto o lista compacta).
-6. Movimientos recientes.
-7. Empty state si no hay datos.
+3. Resumen del mes (`MonthOverview`): título “Este mes” + selector de mes (`MonthSwitcher`) y barras proporcionales de Ingresos vs Gastos con Neto destacado.
+4. Cuentas activas (scroll horizontal corto o lista compacta).
+5. Movimientos recientes.
+6. Empty state si no hay datos.
+
+> En mobile las acciones rápidas (`+ Gasto`, `+ Ingreso`, `Transferir`) se consolidan en un único botón de acción central (FAB `+`) dentro del nav inferior, que abre un action sheet con las tres opciones. Esto libera espacio vertical del dashboard. En desktop se mantienen como botones en la columna secundaria.
 
 ### Desktop 1280
 
@@ -65,6 +66,8 @@ Grid:
 
 - Columna principal: balance + resumen mensual + recientes.
 - Columna secundaria: cuentas activas + acciones rápidas.
+- Header de página: título a la izquierda; a la derecha un grupo de controles alineados (`MonthSwitcher` + `+ Gasto` + `Transferir`). El panel de insight muestra las barras Ingresos vs Gastos del mes seleccionado.
+- Sidebar: el bloque de usuario (avatar + nombre + tipo de cuenta) se ubica al inicio del panel; la navegación va debajo.
 
 ### Estados
 
@@ -79,6 +82,8 @@ Grid:
 
 - Balance: “Balance total”
 - Resumen: “Este mes”
+- Selector de mes: etiqueta `MMMM YYYY` (p. ej. “Junio 2026”); ‹ mes anterior, › mes siguiente
+- Neto del mes: “Neto del mes”
 - Neto positivo: “Te queda a favor”
 - Neto negativo: “Has gastado más de lo ingresado”
 
@@ -252,9 +257,11 @@ Los adjuntos viven dentro del formulario/detalle de transacción, no como pantal
 ### En app (`apps/web/src/components/*`)
 
 - `DashboardBalanceCard`
+- `MonthSwitcher` (selector de mes con navegación rápida ‹ ›; estado de mes seleccionado compartido por el dashboard)
+- `MonthOverview` (resumen del mes: barras proporcionales Ingresos/Gastos + Neto)
 - `MonthlySummaryCard`
 - `RecentTransactionsList`
-- `QuickActions`
+- `QuickActions` (desktop: botones en columna secundaria; mobile: colapsado en el FAB `+` del nav inferior que abre un action sheet)
 - `AccountCard`
 - `AccountForm`
 - `TransferForm`
