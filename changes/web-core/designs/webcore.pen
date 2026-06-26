@@ -6,13 +6,2063 @@
       "id": "bi8Au",
       "x": 0,
       "y": 0,
-      "name": "Frame",
+      "name": "Web Core Components",
       "clip": true,
-      "width": 800,
-      "height": 600,
-      "fill": "#FFFFFF",
-      "layout": "none"
+      "width": 920,
+      "height": 360,
+      "fill": "$color-bg",
+      "gap": 24,
+      "padding": 24,
+      "children": [
+        {
+          "type": "frame",
+          "id": "BFupb",
+          "name": "Button / Primary",
+          "reusable": true,
+          "width": 150,
+          "height": 44,
+          "fill": "$color-accent",
+          "cornerRadius": "$radius-pill",
+          "gap": 8,
+          "padding": [
+            10,
+            16
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "fSynE",
+              "name": "Button Icon",
+              "width": 18,
+              "height": 18,
+              "icon": "plus",
+              "library": "lucide",
+              "fill": "#0F1419"
+            },
+            {
+              "type": "text",
+              "id": "GqcRn",
+              "name": "Button Label",
+              "fill": "#0F1419",
+              "content": "Acción",
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "w63SRQ",
+          "name": "Button / Secondary",
+          "reusable": true,
+          "width": 150,
+          "height": 44,
+          "fill": "$color-surface-2",
+          "cornerRadius": "$radius-pill",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "gap": 8,
+          "padding": [
+            10,
+            16
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "sXwAL",
+              "name": "Button Icon",
+              "width": 18,
+              "height": 18,
+              "icon": "arrow-right-left",
+              "library": "lucide",
+              "fill": "$color-text-primary"
+            },
+            {
+              "type": "text",
+              "id": "PFpJB",
+              "name": "Button Label",
+              "fill": "$color-text-primary",
+              "content": "Acción",
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "650"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "IWlnd",
+          "name": "Card / Metric",
+          "reusable": true,
+          "width": 260,
+          "height": 128,
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 18,
+          "children": [
+            {
+              "type": "text",
+              "id": "mz6WX",
+              "name": "Metric Label",
+              "fill": "$color-text-secondary",
+              "content": "Label",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "W2Xax",
+              "name": "Metric Value",
+              "fill": "$color-text-primary",
+              "content": "$ 0",
+              "fontFamily": "$font-mono",
+              "fontSize": 28,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "AamQt",
+              "name": "Metric Hint",
+              "fill": "$color-text-muted",
+              "content": "Detalle",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cJZbf",
+          "name": "Card / Account Compact",
+          "reusable": true,
+          "width": 230,
+          "height": 112,
+          "fill": "$color-surface-2",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 8,
+          "padding": 16,
+          "children": [
+            {
+              "type": "text",
+              "id": "x1L40I",
+              "name": "Account Name",
+              "fill": "$color-text-primary",
+              "content": "Cuenta",
+              "fontFamily": "$font-body",
+              "fontSize": 14,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "z6vImH",
+              "name": "Account Type",
+              "fill": "$color-text-secondary",
+              "content": "Tipo",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "EbgRi",
+              "name": "Account Balance",
+              "fill": "$color-text-primary",
+              "content": "$ 0",
+              "fontFamily": "$font-mono",
+              "fontSize": 20,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "t7Mce",
+          "name": "Row / Transaction",
+          "reusable": true,
+          "width": 330,
+          "height": 64,
+          "gap": 12,
+          "padding": [
+            12,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "UyUNy",
+              "name": "Transaction Icon Bubble",
+              "width": 40,
+              "height": 40,
+              "fill": "$color-surface-2",
+              "cornerRadius": "$radius-pill",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "J3UXrU",
+                  "name": "Transaction Icon",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "utensils",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "kgA48",
+              "name": "Transaction Texts",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 3,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "JrvKc",
+                  "name": "Transaction Title",
+                  "fill": "$color-text-primary",
+                  "content": "Comida",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "YlQxr",
+                  "name": "Transaction Meta",
+                  "fill": "$color-text-secondary",
+                  "content": "Efectivo · Hoy",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Qw01i",
+              "name": "Transaction Amount",
+              "fill": "$color-danger",
+              "content": "-$ 0",
+              "fontFamily": "$font-mono",
+              "fontSize": 14,
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "e7ut5w",
+      "x": 0,
+      "y": 440,
+      "name": "Dashboard / Mobile 375",
+      "theme": {
+        "mode": "dark"
+      },
+      "clip": true,
+      "width": 375,
+      "height": 812,
+      "fill": "$color-bg",
+      "layout": "vertical",
+      "gap": 16,
+      "padding": [
+        18,
+        16,
+        88,
+        16
+      ],
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "xOgpP",
+          "layoutPosition": "absolute",
+          "x": 244,
+          "y": -58,
+          "name": "Ambient Glow Top",
+          "fill": "#07FBA226",
+          "width": 180,
+          "height": 180,
+          "effect": {
+            "type": "blur",
+            "radius": 42
+          }
+        },
+        {
+          "type": "frame",
+          "id": "tC9Ix",
+          "name": "Mobile Header",
+          "width": "fill_container",
+          "height": 44,
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ZZr8p",
+              "name": "Brand Lockup",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xDJ5U",
+                  "name": "Logo Bolt",
+                  "width": 28,
+                  "height": 28,
+                  "fill": "$color-accent",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "V0CH1u",
+                      "name": "Logo Mark",
+                      "fill": "#0F1419",
+                      "content": "JP",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "KTn7D",
+                  "name": "Greeting",
+                  "fill": "$color-text-primary",
+                  "content": "Hola, Joseph",
+                  "fontFamily": "$font-body",
+                  "fontSize": 15,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "icon",
+              "id": "arJaJ",
+              "name": "User Avatar Icon",
+              "width": 28,
+              "height": 28,
+              "icon": "circle-user-round",
+              "library": "lucide",
+              "fill": "$color-text-secondary"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AwdZQ",
+          "name": "Balance Hero Card",
+          "width": "fill_container",
+          "height": 150,
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 10,
+          "padding": 20,
+          "children": [
+            {
+              "type": "text",
+              "id": "M3Vovn",
+              "name": "Balance Label",
+              "fill": "$color-text-secondary",
+              "content": "Balance total",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "650"
+            },
+            {
+              "type": "text",
+              "id": "pInJZ",
+              "name": "Balance Value",
+              "fill": "$color-text-primary",
+              "content": "$ 4.280.000",
+              "fontFamily": "$font-mono",
+              "fontSize": 35,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "N0e6dX",
+              "name": "Balance Hint",
+              "fill": "$color-text-secondary",
+              "content": "3 cuentas activas · actualizado ahora",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "iZ6lD",
+          "name": "Quick Actions",
+          "width": "fill_container",
+          "height": 44,
+          "gap": 8,
+          "children": [
+            {
+              "id": "hqjng",
+              "type": "ref",
+              "ref": "BFupb",
+              "name": "Action Add Expense",
+              "width": "fill_container",
+              "descendants": {
+                "fSynE": {
+                  "icon": "minus"
+                },
+                "GqcRn": {
+                  "content": "Gasto"
+                }
+              }
+            },
+            {
+              "id": "qDGT4",
+              "type": "ref",
+              "ref": "w63SRQ",
+              "name": "Action Add Income",
+              "width": "fill_container",
+              "descendants": {
+                "sXwAL": {
+                  "icon": "plus"
+                },
+                "PFpJB": {
+                  "content": "Ingreso"
+                }
+              }
+            },
+            {
+              "id": "UvGUd",
+              "type": "ref",
+              "ref": "w63SRQ",
+              "name": "Action Transfer",
+              "width": "fill_container",
+              "descendants": {
+                "sXwAL": {
+                  "icon": "arrow-right-left"
+                },
+                "PFpJB": {
+                  "content": "Mover"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "J6d91l",
+          "name": "Monthly Summary",
+          "width": "fill_container",
+          "height": 94,
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "qRSjQ",
+              "name": "Summary Ingresos",
+              "width": "fill_container",
+              "fill": "$color-surface-1",
+              "cornerRadius": "$radius-lg",
+              "stroke": "$color-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 5,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "bhO9D",
+                  "name": "Summary Label Ingresos",
+                  "fill": "$color-text-secondary",
+                  "content": "Ingresos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 11,
+                  "fontWeight": "650"
+                },
+                {
+                  "type": "text",
+                  "id": "PbYl3",
+                  "name": "Summary Value Ingresos",
+                  "fill": "$color-accent",
+                  "content": "$ 5.200.000",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 14,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "f8Nzb",
+                  "name": "Summary Meta Ingresos",
+                  "fill": "$color-text-muted",
+                  "content": "Este mes",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "SV5xa",
+              "name": "Summary Gastos",
+              "width": "fill_container",
+              "fill": "$color-surface-1",
+              "cornerRadius": "$radius-lg",
+              "stroke": "$color-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 5,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "LdJgF",
+                  "name": "Summary Label Gastos",
+                  "fill": "$color-text-secondary",
+                  "content": "Gastos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 11,
+                  "fontWeight": "650"
+                },
+                {
+                  "type": "text",
+                  "id": "cLu5Z",
+                  "name": "Summary Value Gastos",
+                  "fill": "$color-danger",
+                  "content": "$ 920.000",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 14,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "eqiTA",
+                  "name": "Summary Meta Gastos",
+                  "fill": "$color-text-muted",
+                  "content": "Este mes",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "RtxLb",
+              "name": "Summary Neto",
+              "width": "fill_container",
+              "fill": "$color-surface-1",
+              "cornerRadius": "$radius-lg",
+              "stroke": "$color-border",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 5,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oKdl5",
+                  "name": "Summary Label Neto",
+                  "fill": "$color-text-secondary",
+                  "content": "Neto",
+                  "fontFamily": "$font-body",
+                  "fontSize": 11,
+                  "fontWeight": "650"
+                },
+                {
+                  "type": "text",
+                  "id": "V1KK1F",
+                  "name": "Summary Value Neto",
+                  "fill": "$color-text-primary",
+                  "content": "$ 4.280.000",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 14,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "pOK5p",
+                  "name": "Summary Meta Neto",
+                  "fill": "$color-text-muted",
+                  "content": "Este mes",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "G3qSR3",
+          "name": "Accounts Section",
+          "width": "fill_container",
+          "height": 141,
+          "layout": "vertical",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "id": "x5etd",
+              "name": "Accounts Heading",
+              "fill": "$color-text-primary",
+              "content": "Cuentas",
+              "fontFamily": "$font-body",
+              "fontSize": 16,
+              "fontWeight": "800"
+            },
+            {
+              "type": "frame",
+              "id": "kf1fE",
+              "name": "Accounts List",
+              "width": "fill_container",
+              "height": 112,
+              "gap": 10,
+              "children": [
+                {
+                  "id": "RA3ke",
+                  "type": "ref",
+                  "ref": "cJZbf",
+                  "name": "Account Efectivo",
+                  "width": "fill_container",
+                  "descendants": {
+                    "x1L40I": {
+                      "content": "Efectivo"
+                    },
+                    "z6vImH": {
+                      "content": "Cash"
+                    },
+                    "EbgRi": {
+                      "content": "$ 620.000"
+                    }
+                  }
+                },
+                {
+                  "id": "g3hRYB",
+                  "type": "ref",
+                  "ref": "cJZbf",
+                  "name": "Account Banco",
+                  "width": "fill_container",
+                  "descendants": {
+                    "x1L40I": {
+                      "content": "Banco"
+                    },
+                    "z6vImH": {
+                      "content": "Ahorros"
+                    },
+                    "EbgRi": {
+                      "content": "$ 3.660.000"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Phprn",
+          "name": "Recent Section",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "bb3BE",
+              "name": "Recent Header",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "v1qYA",
+                  "name": "Recent Heading",
+                  "fill": "$color-text-primary",
+                  "content": "Recientes",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "T8g19",
+                  "name": "Recent Link",
+                  "fill": "$color-accent",
+                  "content": "Ver todos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "id": "GZa34",
+              "type": "ref",
+              "ref": "t7Mce",
+              "name": "Movement Almuerzo",
+              "width": "fill_container",
+              "descendants": {
+                "J3UXrU": {
+                  "icon": "utensils",
+                  "fill": "$color-danger"
+                },
+                "JrvKc": {
+                  "content": "Almuerzo"
+                },
+                "YlQxr": {
+                  "content": "Efectivo · Hoy"
+                },
+                "Qw01i": {
+                  "content": "-$ 28.000",
+                  "fill": "$color-danger"
+                }
+              }
+            },
+            {
+              "id": "k9do3q",
+              "type": "ref",
+              "ref": "t7Mce",
+              "name": "Movement Salario",
+              "width": "fill_container",
+              "descendants": {
+                "J3UXrU": {
+                  "icon": "badge-dollar-sign",
+                  "fill": "$color-accent"
+                },
+                "JrvKc": {
+                  "content": "Salario"
+                },
+                "YlQxr": {
+                  "content": "Banco · Ayer"
+                },
+                "Qw01i": {
+                  "content": "+$ 5.200.000",
+                  "fill": "$color-accent"
+                }
+              }
+            },
+            {
+              "id": "YEBOP",
+              "type": "ref",
+              "ref": "t7Mce",
+              "name": "Movement Transferencia",
+              "width": "fill_container",
+              "descendants": {
+                "J3UXrU": {
+                  "icon": "arrow-right-left",
+                  "fill": "$color-text-primary"
+                },
+                "JrvKc": {
+                  "content": "Transferencia"
+                },
+                "YlQxr": {
+                  "content": "Efectivo → Banco"
+                },
+                "Qw01i": {
+                  "content": "$ 300.000",
+                  "fill": "$color-text-primary"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Q0NNnK",
+          "layoutPosition": "absolute",
+          "x": 16,
+          "y": 734,
+          "name": "Mobile Bottom Nav",
+          "width": 343,
+          "height": 60,
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "gap": 4,
+          "padding": [
+            8,
+            10
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "T6P5o",
+              "name": "Nav Inicio",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "sHWwm",
+                  "name": "Nav Icon Inicio",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "house",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                },
+                {
+                  "type": "text",
+                  "id": "uOp6F",
+                  "name": "Nav Label Inicio",
+                  "fill": "$color-accent",
+                  "content": "Inicio",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "650"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ypWKa",
+              "name": "Nav Movimientos",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "QV9B9",
+                  "name": "Nav Icon Movimientos",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "list",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "D8j89",
+                  "name": "Nav Label Movimientos",
+                  "fill": "$color-text-secondary",
+                  "content": "Movimientos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "650"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MnHr0",
+              "name": "Nav Cuentas",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "GhLDW",
+                  "name": "Nav Icon Cuentas",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "wallet",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "Y29kjj",
+                  "name": "Nav Label Cuentas",
+                  "fill": "$color-text-secondary",
+                  "content": "Cuentas",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "650"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zk5Zp",
+              "name": "Nav Más",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 3,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "E23eZ",
+                  "name": "Nav Icon Más",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "ellipsis",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "text",
+                  "id": "De7kS",
+                  "name": "Nav Label Más",
+                  "fill": "$color-text-secondary",
+                  "content": "Más",
+                  "fontFamily": "$font-body",
+                  "fontSize": 10,
+                  "fontWeight": "650"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "UniSK",
+      "x": 475,
+      "y": 440,
+      "name": "Dashboard / Desktop 1280",
+      "theme": {
+        "mode": "dark"
+      },
+      "clip": true,
+      "width": 1280,
+      "height": 900,
+      "fill": "$color-bg",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "eDENa",
+          "layoutPosition": "absolute",
+          "x": 1010,
+          "y": -130,
+          "name": "Desktop Ambient Glow",
+          "fill": "#07FBA21F",
+          "width": 320,
+          "height": 320,
+          "effect": {
+            "type": "blur",
+            "radius": 60
+          }
+        },
+        {
+          "type": "frame",
+          "id": "LamFj",
+          "name": "Desktop Sidebar",
+          "width": 260,
+          "height": "fill_container",
+          "fill": "$color-surface-1",
+          "stroke": "$color-border",
+          "strokeWidth": {
+            "right": 1
+          },
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            28,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Botf1",
+              "name": "Sidebar Brand",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UQCtF",
+                  "name": "Sidebar Logo",
+                  "width": 34,
+                  "height": 34,
+                  "fill": "$color-accent",
+                  "cornerRadius": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "RsQQb",
+                      "name": "Sidebar Logo Mark",
+                      "fill": "#0F1419",
+                      "content": "JP",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "800"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "RhVMA",
+                  "name": "Sidebar Title",
+                  "fill": "$color-text-primary",
+                  "content": "JP-WALLET",
+                  "fontFamily": "$font-body",
+                  "fontSize": 16,
+                  "fontWeight": "800"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "LF1ud",
+              "name": "Sidebar Nav",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UHgQw",
+                  "name": "Sidebar Nav Inicio",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#07FBA21F",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "VY3Ss",
+                      "name": "Sidebar Icon Inicio",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "layout-dashboard",
+                      "library": "lucide",
+                      "fill": "$color-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZNwbZ",
+                      "name": "Sidebar Label Inicio",
+                      "fill": "$color-text-primary",
+                      "content": "Inicio",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "750"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mm9cc",
+                  "name": "Sidebar Nav Movimientos",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "PCRKF",
+                      "name": "Sidebar Icon Movimientos",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "list",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "lxwzn",
+                      "name": "Sidebar Label Movimientos",
+                      "fill": "$color-text-secondary",
+                      "content": "Movimientos",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tEq3Q",
+                  "name": "Sidebar Nav Cuentas",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "YWbHh",
+                      "name": "Sidebar Icon Cuentas",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "wallet",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "e8TfDU",
+                      "name": "Sidebar Label Cuentas",
+                      "fill": "$color-text-secondary",
+                      "content": "Cuentas",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TRumZ",
+                  "name": "Sidebar Nav Categorías",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "f6URN",
+                      "name": "Sidebar Icon Categorías",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "tags",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xs0tj",
+                      "name": "Sidebar Label Categorías",
+                      "fill": "$color-text-secondary",
+                      "content": "Categorías",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Og5MK",
+                  "name": "Sidebar Nav Ajustes",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "PhDbW",
+                      "name": "Sidebar Icon Ajustes",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "settings",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "i31e8W",
+                      "name": "Sidebar Label Ajustes",
+                      "fill": "$color-text-secondary",
+                      "content": "Ajustes",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JueH6",
+              "name": "Sidebar User",
+              "width": "fill_container",
+              "gap": 10,
+              "padding": [
+                14,
+                0
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "KHlBW",
+                  "name": "Sidebar User Icon",
+                  "width": 28,
+                  "height": 28,
+                  "icon": "circle-user-round",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "frame",
+                  "id": "ruHvq",
+                  "name": "Sidebar User Text",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QDC47",
+                      "name": "Sidebar User Name",
+                      "fill": "$color-text-primary",
+                      "content": "Joseph",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YxELn",
+                      "name": "Sidebar User Meta",
+                      "fill": "$color-text-muted",
+                      "content": "Cuenta personal",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lFSCe",
+          "name": "Desktop Main",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "L4Ceub",
+              "name": "Desktop Page Header",
+              "width": "fill_container",
+              "height": 60,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "lXCvH",
+                  "name": "Desktop Title Block",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "huOxE",
+                      "name": "Desktop Title",
+                      "fill": "$color-text-primary",
+                      "content": "Inicio",
+                      "fontFamily": "$font-body",
+                      "fontSize": 28,
+                      "fontWeight": "850"
+                    },
+                    {
+                      "type": "text",
+                      "id": "l6KCkT",
+                      "name": "Desktop Subtitle",
+                      "fill": "$color-text-secondary",
+                      "content": "Resumen financiero del mes en curso",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "H7ovSP",
+                  "name": "Desktop Header Actions",
+                  "gap": 10,
+                  "children": [
+                    {
+                      "id": "dwWiq",
+                      "type": "ref",
+                      "ref": "BFupb",
+                      "name": "Desktop Add Expense",
+                      "descendants": {
+                        "fSynE": {
+                          "icon": "minus"
+                        },
+                        "GqcRn": {
+                          "content": "Gasto"
+                        }
+                      }
+                    },
+                    {
+                      "id": "R4fSnR",
+                      "type": "ref",
+                      "ref": "w63SRQ",
+                      "name": "Desktop Transfer",
+                      "descendants": {
+                        "sXwAL": {
+                          "icon": "arrow-right-left"
+                        },
+                        "PFpJB": {
+                          "content": "Transferir"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "SATk2",
+              "name": "Desktop Metrics",
+              "width": "fill_container",
+              "height": 128,
+              "gap": 16,
+              "children": [
+                {
+                  "id": "z3wH4K",
+                  "type": "ref",
+                  "ref": "IWlnd",
+                  "name": "Metric Balance total",
+                  "width": "fill_container",
+                  "descendants": {
+                    "mz6WX": {
+                      "content": "Balance total"
+                    },
+                    "W2Xax": {
+                      "content": "$ 4.280.000"
+                    },
+                    "AamQt": {
+                      "content": "3 cuentas activas"
+                    }
+                  }
+                },
+                {
+                  "id": "m6a87k",
+                  "type": "ref",
+                  "ref": "IWlnd",
+                  "name": "Metric Ingresos",
+                  "width": "fill_container",
+                  "descendants": {
+                    "mz6WX": {
+                      "content": "Ingresos"
+                    },
+                    "W2Xax": {
+                      "content": "$ 5.200.000"
+                    },
+                    "AamQt": {
+                      "content": "Este mes"
+                    }
+                  }
+                },
+                {
+                  "id": "SFefo",
+                  "type": "ref",
+                  "ref": "IWlnd",
+                  "name": "Metric Gastos",
+                  "width": "fill_container",
+                  "descendants": {
+                    "mz6WX": {
+                      "content": "Gastos"
+                    },
+                    "W2Xax": {
+                      "content": "$ 920.000"
+                    },
+                    "AamQt": {
+                      "content": "Este mes"
+                    }
+                  }
+                },
+                {
+                  "id": "TheAQ",
+                  "type": "ref",
+                  "ref": "IWlnd",
+                  "name": "Metric Neto",
+                  "width": "fill_container",
+                  "descendants": {
+                    "mz6WX": {
+                      "content": "Neto"
+                    },
+                    "W2Xax": {
+                      "content": "$ 4.280.000"
+                    },
+                    "AamQt": {
+                      "content": "A favor"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZgOmA",
+              "name": "Desktop Body Columns",
+              "width": "fill_container",
+              "height": "fill_container",
+              "gap": 24,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "wpwPY",
+                  "name": "Desktop Left Column",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Lm2N3",
+                      "name": "Recent Movements Panel",
+                      "width": "fill_container",
+                      "height": 380,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": 20,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "czMyK",
+                          "name": "Recent Movements Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "I9OWv",
+                              "name": "Recent Movements Title",
+                              "fill": "$color-text-primary",
+                              "content": "Movimientos recientes",
+                              "fontFamily": "$font-body",
+                              "fontSize": 18,
+                              "fontWeight": "800"
+                            },
+                            {
+                              "type": "text",
+                              "id": "b6o1R5",
+                              "name": "Recent Movements Link",
+                              "fill": "$color-accent",
+                              "content": "Ver todos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "MZpMg",
+                          "type": "ref",
+                          "ref": "t7Mce",
+                          "name": "Desktop Movement Almuerzo ejecutivo",
+                          "width": "fill_container",
+                          "descendants": {
+                            "J3UXrU": {
+                              "icon": "utensils",
+                              "fill": "$color-danger"
+                            },
+                            "JrvKc": {
+                              "content": "Almuerzo ejecutivo"
+                            },
+                            "YlQxr": {
+                              "content": "Comida · Efectivo · Hoy"
+                            },
+                            "Qw01i": {
+                              "content": "-$ 28.000",
+                              "fill": "$color-danger"
+                            }
+                          }
+                        },
+                        {
+                          "id": "N7WnW",
+                          "type": "ref",
+                          "ref": "t7Mce",
+                          "name": "Desktop Movement Salario mensual",
+                          "width": "fill_container",
+                          "descendants": {
+                            "J3UXrU": {
+                              "icon": "badge-dollar-sign",
+                              "fill": "$color-accent"
+                            },
+                            "JrvKc": {
+                              "content": "Salario mensual"
+                            },
+                            "YlQxr": {
+                              "content": "Salario · Banco · Ayer"
+                            },
+                            "Qw01i": {
+                              "content": "+$ 5.200.000",
+                              "fill": "$color-accent"
+                            }
+                          }
+                        },
+                        {
+                          "id": "kunLv",
+                          "type": "ref",
+                          "ref": "t7Mce",
+                          "name": "Desktop Movement Pago internet",
+                          "width": "fill_container",
+                          "descendants": {
+                            "J3UXrU": {
+                              "icon": "wifi",
+                              "fill": "$color-danger"
+                            },
+                            "JrvKc": {
+                              "content": "Pago internet"
+                            },
+                            "YlQxr": {
+                              "content": "Servicios · Banco · 24 jun"
+                            },
+                            "Qw01i": {
+                              "content": "-$ 120.000",
+                              "fill": "$color-danger"
+                            }
+                          }
+                        },
+                        {
+                          "id": "F1FXsu",
+                          "type": "ref",
+                          "ref": "t7Mce",
+                          "name": "Desktop Movement Transferencia a ahorros",
+                          "width": "fill_container",
+                          "descendants": {
+                            "J3UXrU": {
+                              "icon": "arrow-right-left",
+                              "fill": "$color-text-primary"
+                            },
+                            "JrvKc": {
+                              "content": "Transferencia a ahorros"
+                            },
+                            "YlQxr": {
+                              "content": "Efectivo → Banco · 23 jun"
+                            },
+                            "Qw01i": {
+                              "content": "$ 300.000",
+                              "fill": "$color-text-primary"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "LRj9w",
+                      "name": "Monthly Insight Panel",
+                      "width": "fill_container",
+                      "height": 150,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "gap": 18,
+                      "padding": 20,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "AQd9o",
+                          "name": "Insight Gauge",
+                          "width": 88,
+                          "height": 88,
+                          "fill": "#07FBA21F",
+                          "cornerRadius": "$radius-pill",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "arr8E",
+                              "name": "Insight Percent",
+                              "fill": "$color-accent",
+                              "content": "82%",
+                              "fontFamily": "$font-mono",
+                              "fontSize": 20,
+                              "fontWeight": "800"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Hs7SS",
+                          "name": "Insight Copy",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JCn5A",
+                              "name": "Insight Title",
+                              "fill": "$color-text-primary",
+                              "content": "Te queda a favor este mes",
+                              "fontFamily": "$font-body",
+                              "fontSize": 17,
+                              "fontWeight": "800"
+                            },
+                            {
+                              "type": "text",
+                              "id": "sDeQj",
+                              "name": "Insight Body",
+                              "fill": "$color-text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Tus gastos representan el 18% de tus ingresos registrados. Mantén el ritmo y registra los recibos pendientes.",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "v13nlE",
+                  "name": "Desktop Right Column",
+                  "width": 330,
+                  "height": "fill_container",
+                  "layout": "vertical",
+                  "gap": 18,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZlBLX",
+                      "name": "Accounts Panel",
+                      "width": "fill_container",
+                      "height": 360,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": 18,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "bASX4",
+                          "name": "Accounts Panel Header",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "TG33L",
+                              "name": "Accounts Panel Title",
+                              "fill": "$color-text-primary",
+                              "content": "Cuentas",
+                              "fontFamily": "$font-body",
+                              "fontSize": 17,
+                              "fontWeight": "800"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "SLSbF",
+                              "name": "Accounts Add Icon",
+                              "width": 20,
+                              "height": 20,
+                              "icon": "plus",
+                              "library": "lucide",
+                              "fill": "$color-accent"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "y9Kuq",
+                          "type": "ref",
+                          "ref": "cJZbf",
+                          "name": "Desktop Account Efectivo",
+                          "width": "fill_container",
+                          "descendants": {
+                            "x1L40I": {
+                              "content": "Efectivo"
+                            },
+                            "z6vImH": {
+                              "content": "Cash"
+                            },
+                            "EbgRi": {
+                              "content": "$ 620.000",
+                              "fill": "$color-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "id": "Q2C0UV",
+                          "type": "ref",
+                          "ref": "cJZbf",
+                          "name": "Desktop Account Bancolombia",
+                          "width": "fill_container",
+                          "descendants": {
+                            "x1L40I": {
+                              "content": "Bancolombia"
+                            },
+                            "z6vImH": {
+                              "content": "Ahorros"
+                            },
+                            "EbgRi": {
+                              "content": "$ 3.660.000",
+                              "fill": "$color-text-primary"
+                            }
+                          }
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Y0XeRf",
+                          "name": "Accounts See All Row",
+                          "width": "fill_container",
+                          "height": 36,
+                          "gap": 8,
+                          "padding": [
+                            10,
+                            0
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "UMIMT",
+                              "name": "Accounts See All Text",
+                              "fill": "$color-accent",
+                              "content": "Ver todas las cuentas",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "icon",
+                              "id": "BPtzG",
+                              "name": "Accounts See All Icon",
+                              "width": 16,
+                              "height": 16,
+                              "icon": "arrow-right",
+                              "library": "lucide",
+                              "fill": "$color-accent"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YuXAX",
+                      "name": "Quick Actions Panel",
+                      "width": "fill_container",
+                      "height": 190,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 10,
+                      "padding": 18,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "JyJs1",
+                          "name": "Quick Actions Title",
+                          "fill": "$color-text-primary",
+                          "content": "Acciones rápidas",
+                          "fontFamily": "$font-body",
+                          "fontSize": 17,
+                          "fontWeight": "800"
+                        },
+                        {
+                          "id": "H0NuQH",
+                          "type": "ref",
+                          "ref": "BFupb",
+                          "name": "Quick Income Desktop",
+                          "width": "fill_container",
+                          "descendants": {
+                            "fSynE": {
+                              "icon": "plus"
+                            },
+                            "GqcRn": {
+                              "content": "Registrar ingreso"
+                            }
+                          }
+                        },
+                        {
+                          "id": "DoUW1",
+                          "type": "ref",
+                          "ref": "w63SRQ",
+                          "name": "Quick Account Desktop",
+                          "width": "fill_container",
+                          "descendants": {
+                            "sXwAL": {
+                              "icon": "wallet"
+                            },
+                            "PFpJB": {
+                              "content": "Crear cuenta"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
+  "themes": {
+    "mode": [
+      "light",
+      "dark"
+    ]
+  },
+  "variables": {
+    "color-bg": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#F4F6F8",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#0F1419",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-surface-1": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#FFFFFF",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#1A1F26",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-surface-2": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#EEF1F4",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#232A33",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-border": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#D1D5DB",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#2F3742",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-text-primary": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#0F1419",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#FAFAFA",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-text-secondary": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#525252",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#A1A8B3",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-text-muted": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#9CA3AF",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#6B7280",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-accent": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#059669",
+          "theme": {
+            "mode": "light"
+          }
+        },
+        {
+          "value": "#07FBA2",
+          "theme": {
+            "mode": "dark"
+          }
+        }
+      ]
+    },
+    "color-danger": {
+      "type": "color",
+      "value": "#EF4444"
+    },
+    "color-warning": {
+      "type": "color",
+      "value": "#F59E0B"
+    },
+    "font-body": {
+      "type": "string",
+      "value": "Inter"
+    },
+    "font-mono": {
+      "type": "string",
+      "value": "JetBrains Mono"
+    },
+    "space-2": {
+      "type": "number",
+      "value": 8
+    },
+    "space-3": {
+      "type": "number",
+      "value": 12
+    },
+    "space-4": {
+      "type": "number",
+      "value": 16
+    },
+    "space-5": {
+      "type": "number",
+      "value": 24
+    },
+    "space-6": {
+      "type": "number",
+      "value": 32
+    },
+    "radius-md": {
+      "type": "number",
+      "value": 8
+    },
+    "radius-lg": {
+      "type": "number",
+      "value": 16
+    },
+    "radius-pill": {
+      "type": "number",
+      "value": 9999
+    }
+  },
   "fileToken": "d534d9c1-c6b5-49ed-88a3-56fee0810e60"
 }
