@@ -137,3 +137,30 @@ Cada artboard debe incluir:
 - Notas responsive.
 - Componentes candidatos a JP-DS.
 - Estados de foco/error/deshabilitado para formularios críticos.
+
+---
+
+## Estado de Artboards (`webcore.pen`)
+
+| Pantalla | Mobile 375 | Desktop 1280 | Notas |
+|----------|-----------|--------------|-------|
+| Dashboard | ✅ | ✅ | Incluye `MonthSwitcher`, barras Ingresos/Gastos, FAB de acciones (mobile) y panel Acciones rápidas (desktop) |
+| Movimientos | ✅ | ✅ | Mobile: search + chips + lista agrupada por día. Desktop: toolbar + tabla |
+| Cuentas | ✅ | ✅ | Grid de cuentas con estado de saldo negativo (Nu) y tile "Nueva cuenta" |
+| Categorías | ✅ | ✅ | Segmented Gastos/Ingresos/Transferencias; desktop con panel de edición (form) |
+| Adjuntos / Movimiento | ✅ | ✅ | Formulario + uploader, ítems imagen/PDF, estado de error de tipo y límite 5 |
+
+**Estado base implementado** ("con datos"); estados secundarios pendientes de diseñar como variantes: empty states, sin resultados por filtro, confirmación de archivar, y validación de formularios.
+
+### Componentes reutilizables en el `.pen`
+
+Base JP-DS candidatos generados como componentes Pencil:
+
+- `Button / Primary`, `Button / Secondary`
+- `Card / Metric`, `Card / Account Compact`
+- `Row / Transaction`, `Row / Category`
+- `Month Switcher`
+- `Filter Chip`
+- `Attachment Item`
+
+Marca: el logotipo reutiliza `public/icon.svg` (bolt "Green Bolt") reproducido como nodos `path` en headers mobile y desktop.
