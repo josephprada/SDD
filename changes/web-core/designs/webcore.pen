@@ -398,22 +398,72 @@
                   "type": "frame",
                   "id": "xDJ5U",
                   "name": "Logo Bolt",
-                  "width": 28,
+                  "width": 30,
                   "height": 28,
-                  "fill": "$color-accent",
-                  "cornerRadius": 8,
+                  "fill": "#07faa124",
+                  "cornerRadius": 30,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#07FBA259",
+                    "blur": 10
+                  },
                   "justifyContent": "center",
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "V0CH1u",
-                      "name": "Logo Mark",
-                      "fill": "#0F1419",
-                      "content": "JP",
-                      "fontFamily": "$font-body",
-                      "fontSize": 13,
-                      "fontWeight": "800"
+                      "type": "path",
+                      "id": "wjTWn",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Mobile Brand Main",
+                      "geometry": "M341.647 349.033c7.58 7.452 15.436 14.328 23.161 21.596l75.544 70.228 39.914 37.374c5.958 5.58 14.957 14.515 21.035 19.365 25.083-21.853 55.202-44.571 81.397-65.584l34.992-28.023c2.765-2.225 14.198-12.081 16.341-12.625 1.751 0.26 1.065-0.134 2.185 1.117 0.365 2.393-0.068 9.911-0.162 12.641l-0.871 25.621-1.968 58.751c-0.159 5.416 0.319 19.68-0.947 23.96-1.417-1.854-1.102-102.183-1.393-113.663-8.302 7.2-16.523 13.403-25.06 20.253l-49.831 39.769c-16.257 12.921-34.882 29.284-51.79 41.091 31.401 29.634 62.63 59.451 93.684 89.449 25.241 24.479 51.387 50.918 76.974 74.82l-1.546 0.359c-4.087-4.357-11.779-11.06-16.441-15.366l-32.207-29.819-100.992-94.28c-6.82 5.238-14.012 11.527-20.888 16.981l-75.206 59.925-23.158 18.452c-3.688 2.968-11.961 11.449-16.389 10.434-0.743-1.435-0.679-3.785-0.639-5.466 0.7-29.327 1.909-58.736 3.323-88.036 0.202-4.186 0.499-25.302 1.216-27.857 1.588 2.059 1.04 38.445 1.063 44.251l0.559 68.751c41.598-33.942 84.793-67.528 126.805-101.029-4.405-3.402-10.912-9.971-15.304-14.059-12.971-12.147-25.815-24.429-38.528-36.845l-98.52-94.926c-9.279-8.884-18.24-18.187-27.648-26.916l1.295-0.694z",
+                      "viewBox": [
+                        280,
+                        295,
+                        460,
+                        435
+                      ],
+                      "fill": "$color-accent",
+                      "width": 30,
+                      "height": 28
+                    },
+                    {
+                      "type": "path",
+                      "id": "GqF7n",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Mobile Brand Accent 1",
+                      "geometry": "M674.852 665.173c5.742 5.45 52.048 49.789 52.382 51.293l-0.538-0.734-0.667-0.141c-7.522-6.333-16.156-15.081-23.353-22.037l-29.37-28.022 1.546-0.359z",
+                      "viewBox": [
+                        280,
+                        295,
+                        460,
+                        435
+                      ],
+                      "fill": "#159563",
+                      "width": 30,
+                      "height": 28
+                    },
+                    {
+                      "type": "path",
+                      "id": "uW3GI",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "Mobile Brand Accent 2",
+                      "geometry": "M340.352 349.727c-6.645-5.739-14.982-14.462-21.681-20.615-4.318-3.966-18.914-17.504-21.763-21.547 4.003 2.25 12.857 11.477 16.669 15.084l28.07 26.384-1.295 0.694z",
+                      "viewBox": [
+                        280,
+                        295,
+                        460,
+                        435
+                      ],
+                      "fill": "#159563",
+                      "width": 30,
+                      "height": 28
                     }
                   ]
                 },
@@ -946,7 +996,7 @@
                   "name": "Nav Icon Movimientos",
                   "width": 18,
                   "height": 18,
-                  "icon": "list",
+                  "icon": "arrow-down-up",
                   "library": "lucide",
                   "fill": "$color-text-secondary"
                 },
@@ -1125,44 +1175,50 @@
           "children": [
             {
               "type": "frame",
-              "id": "Botf1",
-              "name": "Sidebar Brand",
+              "id": "JueH6",
+              "name": "Sidebar User",
               "width": "fill_container",
               "gap": 10,
               "alignItems": "center",
               "children": [
                 {
+                  "type": "icon",
+                  "id": "KHlBW",
+                  "name": "Sidebar User Icon",
+                  "width": 28,
+                  "height": 28,
+                  "icon": "circle-user-round",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
                   "type": "frame",
-                  "id": "UQCtF",
-                  "name": "Sidebar Logo",
-                  "width": 34,
-                  "height": 34,
-                  "fill": "$color-accent",
-                  "cornerRadius": 10,
-                  "justifyContent": "center",
-                  "alignItems": "center",
+                  "id": "ruHvq",
+                  "name": "Sidebar User Text",
+                  "layout": "vertical",
+                  "gap": 2,
                   "children": [
                     {
                       "type": "text",
-                      "id": "RsQQb",
-                      "name": "Sidebar Logo Mark",
-                      "fill": "#0F1419",
-                      "content": "JP",
+                      "id": "QDC47",
+                      "name": "Sidebar User Name",
+                      "fill": "$color-text-primary",
+                      "content": "Joseph",
                       "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "800"
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YxELn",
+                      "name": "Sidebar User Meta",
+                      "fill": "$color-text-muted",
+                      "content": "Cuenta personal",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
                     }
                   ]
-                },
-                {
-                  "type": "text",
-                  "id": "RhVMA",
-                  "name": "Sidebar Title",
-                  "fill": "$color-text-primary",
-                  "content": "JP-WALLET",
-                  "fontFamily": "$font-body",
-                  "fontSize": 16,
-                  "fontWeight": "800"
                 }
               ]
             },
@@ -1195,7 +1251,7 @@
                       "name": "Sidebar Icon Inicio",
                       "width": 18,
                       "height": 18,
-                      "icon": "layout-dashboard",
+                      "icon": "house",
                       "library": "lucide",
                       "fill": "$color-accent"
                     },
@@ -1232,7 +1288,7 @@
                       "name": "Sidebar Icon Movimientos",
                       "width": 18,
                       "height": 18,
-                      "icon": "list",
+                      "icon": "arrow-down-up",
                       "library": "lucide",
                       "fill": "$color-text-secondary"
                     },
@@ -1360,59 +1416,6 @@
                   ]
                 }
               ]
-            },
-            {
-              "type": "frame",
-              "id": "JueH6",
-              "name": "Sidebar User",
-              "width": "fill_container",
-              "gap": 10,
-              "padding": [
-                14,
-                0
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "KHlBW",
-                  "name": "Sidebar User Icon",
-                  "width": 28,
-                  "height": 28,
-                  "icon": "circle-user-round",
-                  "library": "lucide",
-                  "fill": "$color-text-secondary"
-                },
-                {
-                  "type": "frame",
-                  "id": "ruHvq",
-                  "name": "Sidebar User Text",
-                  "layout": "vertical",
-                  "gap": 2,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "QDC47",
-                      "name": "Sidebar User Name",
-                      "fill": "$color-text-primary",
-                      "content": "Joseph",
-                      "fontFamily": "$font-body",
-                      "fontSize": 13,
-                      "fontWeight": "700"
-                    },
-                    {
-                      "type": "text",
-                      "id": "YxELn",
-                      "name": "Sidebar User Meta",
-                      "fill": "$color-text-muted",
-                      "content": "Cuenta personal",
-                      "fontFamily": "$font-body",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
             }
           ]
         },
@@ -1437,76 +1440,132 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "lXCvH",
-                  "name": "Desktop Title Block",
-                  "layout": "vertical",
-                  "gap": 4,
+                  "id": "B4mvZ",
+                  "name": "Desktop Header Brand",
+                  "gap": 14,
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "huOxE",
-                      "name": "Desktop Title",
-                      "fill": "$color-text-primary",
-                      "content": "Inicio",
-                      "fontFamily": "$font-body",
-                      "fontSize": 28,
-                      "fontWeight": "850"
+                      "type": "frame",
+                      "id": "ayKEe",
+                      "name": "Header Logo Mark",
+                      "width": 42,
+                      "height": 40,
+                      "fill": "#07faa123",
+                      "cornerRadius": 30,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#07FBA259",
+                        "blur": 14
+                      },
+                      "layout": "vertical",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "path",
+                          "id": "cF96e",
+                          "layoutPosition": "absolute",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Brand Bolt Main",
+                          "geometry": "M341.647 349.033c7.58 7.452 15.436 14.328 23.161 21.596l75.544 70.228 39.914 37.374c5.958 5.58 14.957 14.515 21.035 19.365 25.083-21.853 55.202-44.571 81.397-65.584l34.992-28.023c2.765-2.225 14.198-12.081 16.341-12.625 1.751 0.26 1.065-0.134 2.185 1.117 0.365 2.393-0.068 9.911-0.162 12.641l-0.871 25.621-1.968 58.751c-0.159 5.416 0.319 19.68-0.947 23.96-1.417-1.854-1.102-102.183-1.393-113.663-8.302 7.2-16.523 13.403-25.06 20.253l-49.831 39.769c-16.257 12.921-34.882 29.284-51.79 41.091 31.401 29.634 62.63 59.451 93.684 89.449 25.241 24.479 51.387 50.918 76.974 74.82l-1.546 0.359c-4.087-4.357-11.779-11.06-16.441-15.366l-32.207-29.819-100.992-94.28c-6.82 5.238-14.012 11.527-20.888 16.981l-75.206 59.925-23.158 18.452c-3.688 2.968-11.961 11.449-16.389 10.434-0.743-1.435-0.679-3.785-0.639-5.466 0.7-29.327 1.909-58.736 3.323-88.036 0.202-4.186 0.499-25.302 1.216-27.857 1.588 2.059 1.04 38.445 1.063 44.251l0.559 68.751c41.598-33.942 84.793-67.528 126.805-101.029-4.405-3.402-10.912-9.971-15.304-14.059-12.971-12.147-25.815-24.429-38.528-36.845l-98.52-94.926c-9.279-8.884-18.24-18.187-27.648-26.916l1.295-0.694z",
+                          "viewBox": [
+                            280,
+                            295,
+                            460,
+                            435
+                          ],
+                          "fill": "$color-accent",
+                          "width": 42,
+                          "height": 40
+                        },
+                        {
+                          "type": "path",
+                          "id": "Q4MIgM",
+                          "layoutPosition": "absolute",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Brand Bolt Accent 1",
+                          "geometry": "M674.852 665.173c5.742 5.45 52.048 49.789 52.382 51.293l-0.538-0.734-0.667-0.141c-7.522-6.333-16.156-15.081-23.353-22.037l-29.37-28.022 1.546-0.359z",
+                          "viewBox": [
+                            280,
+                            295,
+                            460,
+                            435
+                          ],
+                          "fill": "#159563",
+                          "width": 42,
+                          "height": 40
+                        },
+                        {
+                          "type": "path",
+                          "id": "N11QNy",
+                          "layoutPosition": "absolute",
+                          "x": 0,
+                          "y": 0,
+                          "name": "Brand Bolt Accent 2",
+                          "geometry": "M340.352 349.727c-6.645-5.739-14.982-14.462-21.681-20.615-4.318-3.966-18.914-17.504-21.763-21.547 4.003 2.25 12.857 11.477 16.669 15.084l28.07 26.384-1.295 0.694z",
+                          "viewBox": [
+                            280,
+                            295,
+                            460,
+                            435
+                          ],
+                          "fill": "#159563",
+                          "width": 42,
+                          "height": 40
+                        }
+                      ]
                     },
                     {
-                      "type": "text",
-                      "id": "l6KCkT",
-                      "name": "Desktop Subtitle",
-                      "fill": "$color-text-secondary",
-                      "content": "Resumen financiero del mes en curso",
-                      "fontFamily": "$font-body",
-                      "fontSize": 14,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "lXCvH",
+                      "name": "Desktop Title Block",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "huOxE",
+                          "name": "Desktop Title",
+                          "fill": "$color-text-primary",
+                          "content": "Inicio",
+                          "fontFamily": "$font-body",
+                          "fontSize": 28,
+                          "fontWeight": "850"
+                        },
+                        {
+                          "type": "text",
+                          "id": "l6KCkT",
+                          "name": "Desktop Subtitle",
+                          "fill": "$color-text-secondary",
+                          "content": "Resumen financiero del mes en curso",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     }
                   ]
                 },
                 {
-                  "id": "P0572d",
-                  "type": "ref",
-                  "ref": "HWNkO",
-                  "name": "Month Switcher Desktop",
-                  "width": 196,
-                  "descendants": {
-                    "iwXa8": {
-                      "content": "Junio 2026"
-                    }
-                  }
-                },
-                {
                   "type": "frame",
-                  "id": "H7ovSP",
-                  "name": "Desktop Header Actions",
-                  "gap": 10,
+                  "id": "Lvdsb",
+                  "name": "Desktop Header Controls",
+                  "gap": 12,
+                  "alignItems": "center",
                   "children": [
                     {
-                      "id": "dwWiq",
+                      "id": "P0572d",
                       "type": "ref",
-                      "ref": "BFupb",
-                      "name": "Desktop Add Expense",
+                      "ref": "HWNkO",
+                      "name": "Month Switcher Desktop",
+                      "width": 196,
                       "descendants": {
-                        "fSynE": {
-                          "icon": "minus"
-                        },
-                        "GqcRn": {
-                          "content": "Gasto"
-                        }
-                      }
-                    },
-                    {
-                      "id": "R4fSnR",
-                      "type": "ref",
-                      "ref": "w63SRQ",
-                      "name": "Desktop Transfer",
-                      "descendants": {
-                        "sXwAL": {
-                          "icon": "arrow-right-left"
-                        },
-                        "PFpJB": {
-                          "content": "Transferir"
+                        "iwXa8": {
+                          "content": "Junio 2026"
                         }
                       }
                     }
@@ -1973,7 +2032,7 @@
                       "id": "ZlBLX",
                       "name": "Accounts Panel",
                       "width": "fill_container",
-                      "height": 360,
+                      "height": 350,
                       "fill": "$color-surface-1",
                       "cornerRadius": "$radius-lg",
                       "stroke": "$color-border",
@@ -2092,7 +2151,7 @@
                       "id": "YuXAX",
                       "name": "Quick Actions Panel",
                       "width": "fill_container",
-                      "height": 190,
+                      "height": 232,
                       "fill": "$color-surface-1",
                       "cornerRadius": "$radius-lg",
                       "stroke": "$color-border",
@@ -2112,32 +2171,47 @@
                           "fontWeight": "800"
                         },
                         {
-                          "id": "H0NuQH",
+                          "id": "S0bs4",
                           "type": "ref",
                           "ref": "BFupb",
-                          "name": "Quick Income Desktop",
+                          "name": "QA Gasto",
                           "width": "fill_container",
                           "descendants": {
                             "fSynE": {
-                              "icon": "plus"
+                              "icon": "minus"
                             },
                             "GqcRn": {
+                              "content": "Registrar gasto"
+                            }
+                          }
+                        },
+                        {
+                          "id": "Lwlmy",
+                          "type": "ref",
+                          "ref": "w63SRQ",
+                          "name": "QA Ingreso",
+                          "width": "fill_container",
+                          "descendants": {
+                            "sXwAL": {
+                              "icon": "plus"
+                            },
+                            "PFpJB": {
                               "content": "Registrar ingreso"
                             }
                           }
                         },
                         {
-                          "id": "DoUW1",
+                          "id": "voF5Y",
                           "type": "ref",
                           "ref": "w63SRQ",
-                          "name": "Quick Account Desktop",
+                          "name": "QA Transferir",
                           "width": "fill_container",
                           "descendants": {
                             "sXwAL": {
-                              "icon": "wallet"
+                              "icon": "arrow-right-left"
                             },
                             "PFpJB": {
-                              "content": "Crear cuenta"
+                              "content": "Transferir"
                             }
                           }
                         }

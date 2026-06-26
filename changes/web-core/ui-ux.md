@@ -29,6 +29,10 @@ Convertir el shell autenticado en una herramienta diaria de registro financiero.
 | `/categories` | Categorías | Gestión ligera de clasificación |
 | `/settings` | Ajustes | Permanece como placeholder de configuración completa |
 
+**Iconografía de navegación (lucide, consistente mobile/desktop):** Inicio `house`, Movimientos `arrow-down-up`, Cuentas `wallet`, Categorías `tags`, Ajustes `settings`. En el nav inferior mobile, `Más` (`ellipsis`) agrupa Categorías/Ajustes y el FAB central usa `plus`.
+
+**Marca:** el logotipo es el mismo `public/icon.svg` que ya usa la app web en desarrollo (bolt "Green Bolt" en `#07FBA2` con acentos `#159563`); se reproduce vectorialmente en el header desktop y en el header mobile, no se usa un placeholder.
+
 ### Mobile nav
 
 Bottom nav con 4 entradas principales: Inicio, Movimientos, Cuentas, Más.
@@ -66,7 +70,8 @@ Grid:
 
 - Columna principal: balance + resumen mensual + recientes.
 - Columna secundaria: cuentas activas + acciones rápidas.
-- Header de página: título a la izquierda; a la derecha un grupo de controles alineados (`MonthSwitcher` + `+ Gasto` + `Transferir`). El panel de insight muestra las barras Ingresos vs Gastos del mes seleccionado.
+- Header de página: a la izquierda el logo de marca (rayo verde "Green Bolt") + título/subtítulo; a la derecha el selector de mes (`MonthSwitcher`). El panel de insight muestra las barras Ingresos vs Gastos del mes seleccionado.
+- Acciones rápidas (columna secundaria): set de acciones de transacción — `Registrar gasto` (primaria), `Registrar ingreso`, `Transferir`. La creación de cuentas vive en el panel de Cuentas (`+` y "Ver todas las cuentas"), no se duplica aquí.
 - Sidebar: el bloque de usuario (avatar + nombre + tipo de cuenta) se ubica al inicio del panel; la navegación va debajo.
 
 ### Estados
