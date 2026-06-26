@@ -533,6 +533,46 @@
               "fill": "$color-text-secondary"
             }
           ]
+        },
+        {
+          "type": "frame",
+          "id": "t67iz",
+          "name": "Category Choice",
+          "reusable": true,
+          "height": 38,
+          "fill": "$color-surface-2",
+          "cornerRadius": "$radius-pill",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "gap": 8,
+          "padding": [
+            8,
+            12
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "hRPGT",
+              "name": "CC Icon",
+              "width": 16,
+              "height": 16,
+              "icon": "tag",
+              "library": "lucide",
+              "fill": "$color-text-secondary"
+            },
+            {
+              "type": "text",
+              "id": "ZaMuT",
+              "name": "CC Name",
+              "fill": "$color-text-secondary",
+              "content": "Categoría",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "650"
+            }
+          ]
         }
       ]
     },
@@ -7367,6 +7407,133 @@
         },
         {
           "type": "frame",
+          "id": "S2YTba",
+          "name": "NM Categoria Picker",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "type": "text",
+              "id": "xP9s6",
+              "name": "NM Cat Label",
+              "fill": "$color-text-secondary",
+              "content": "Categoría",
+              "fontFamily": "$font-body",
+              "fontSize": 12,
+              "fontWeight": "650"
+            },
+            {
+              "type": "frame",
+              "id": "QqsJb",
+              "name": "NM Cat Row 1",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "id": "SlS6r",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Comida",
+                  "fill": "#07FBA21F",
+                  "stroke": "$color-accent",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "utensils",
+                      "fill": "$color-accent"
+                    },
+                    "ZaMuT": {
+                      "content": "Comida",
+                      "fill": "$color-accent",
+                      "fontWeight": "750"
+                    }
+                  }
+                },
+                {
+                  "id": "OGUdH",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Hogar",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "house"
+                    },
+                    "ZaMuT": {
+                      "content": "Hogar"
+                    }
+                  }
+                },
+                {
+                  "id": "T7LsMy",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Transporte",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "car"
+                    },
+                    "ZaMuT": {
+                      "content": "Transporte"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "rVP6C",
+              "name": "NM Cat Row 2",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "id": "q3FFO",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Servicios",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "zap"
+                    },
+                    "ZaMuT": {
+                      "content": "Servicios"
+                    }
+                  }
+                },
+                {
+                  "id": "cdzDl",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Salud",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "heart-pulse"
+                    },
+                    "ZaMuT": {
+                      "content": "Salud"
+                    }
+                  }
+                },
+                {
+                  "id": "I0jUs",
+                  "type": "ref",
+                  "ref": "t67iz",
+                  "name": "CC Otros",
+                  "descendants": {
+                    "hRPGT": {
+                      "icon": "ellipsis"
+                    },
+                    "ZaMuT": {
+                      "content": "Otros"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
           "id": "uAy1D",
           "name": "F Cuenta",
           "width": "fill_container",
@@ -7414,65 +7581,6 @@
                   "type": "icon",
                   "id": "gL9fT",
                   "name": "FIC Cuenta",
-                  "width": 18,
-                  "height": 18,
-                  "icon": "chevron-down",
-                  "library": "lucide",
-                  "fill": "$color-text-muted"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "lkBgY",
-          "name": "F Categoría",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 6,
-          "children": [
-            {
-              "type": "text",
-              "id": "exg96",
-              "name": "FL Categoría",
-              "fill": "$color-text-secondary",
-              "content": "Categoría",
-              "fontFamily": "$font-body",
-              "fontSize": 12,
-              "fontWeight": "650"
-            },
-            {
-              "type": "frame",
-              "id": "g7XrBw",
-              "name": "FI Categoría",
-              "width": "fill_container",
-              "height": 46,
-              "fill": "$color-surface-1",
-              "cornerRadius": "$radius-md",
-              "stroke": "$color-border",
-              "strokeWidth": 1,
-              "padding": [
-                0,
-                14
-              ],
-              "justifyContent": "space_between",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "rIlQJ",
-                  "name": "FV Categoría",
-                  "fill": "$color-text-primary",
-                  "content": "Comida",
-                  "fontFamily": "$font-body",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "icon",
-                  "id": "NmbTX",
-                  "name": "FIC Categoría",
                   "width": 18,
                   "height": 18,
                   "icon": "chevron-down",
@@ -8188,6 +8296,133 @@
                     },
                     {
                       "type": "frame",
+                      "id": "NyZZv",
+                      "name": "NMD Categoria Picker",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ETyqR",
+                          "name": "NMD Cat Label",
+                          "fill": "$color-text-secondary",
+                          "content": "Categoría",
+                          "fontFamily": "$font-body",
+                          "fontSize": 12,
+                          "fontWeight": "650"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "MRagT",
+                          "name": "NMD Cat Row 1",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "id": "p7C52",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Comida",
+                              "fill": "#07FBA21F",
+                              "stroke": "$color-accent",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "utensils",
+                                  "fill": "$color-accent"
+                                },
+                                "ZaMuT": {
+                                  "content": "Comida",
+                                  "fill": "$color-accent",
+                                  "fontWeight": "750"
+                                }
+                              }
+                            },
+                            {
+                              "id": "Ytv12",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Hogar",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "house"
+                                },
+                                "ZaMuT": {
+                                  "content": "Hogar"
+                                }
+                              }
+                            },
+                            {
+                              "id": "C1AIH",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Transporte",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "car"
+                                },
+                                "ZaMuT": {
+                                  "content": "Transporte"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "HLoSW",
+                          "name": "NMD Cat Row 2",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "children": [
+                            {
+                              "id": "sEZ3u",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Servicios",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "zap"
+                                },
+                                "ZaMuT": {
+                                  "content": "Servicios"
+                                }
+                              }
+                            },
+                            {
+                              "id": "xMcIV",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Salud",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "heart-pulse"
+                                },
+                                "ZaMuT": {
+                                  "content": "Salud"
+                                }
+                              }
+                            },
+                            {
+                              "id": "vbFXk",
+                              "type": "ref",
+                              "ref": "t67iz",
+                              "name": "DCC Otros",
+                              "descendants": {
+                                "hRPGT": {
+                                  "icon": "ellipsis"
+                                },
+                                "ZaMuT": {
+                                  "content": "Otros"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
                       "id": "DK4Rc",
                       "name": "Form Row 1",
                       "width": "fill_container",
@@ -8359,65 +8594,6 @@
                                   "type": "icon",
                                   "id": "SJLMo",
                                   "name": "FIC Cuenta",
-                                  "width": 18,
-                                  "height": 18,
-                                  "icon": "chevron-down",
-                                  "library": "lucide",
-                                  "fill": "$color-text-muted"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "t92C1X",
-                          "name": "F Categoría",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 6,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Nij8Y",
-                              "name": "FL Categoría",
-                              "fill": "$color-text-secondary",
-                              "content": "Categoría",
-                              "fontFamily": "$font-body",
-                              "fontSize": 12,
-                              "fontWeight": "650"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "TXEzR",
-                              "name": "FI Categoría",
-                              "width": "fill_container",
-                              "height": 46,
-                              "fill": "$color-surface-2",
-                              "cornerRadius": "$radius-md",
-                              "stroke": "$color-border",
-                              "strokeWidth": 1,
-                              "padding": [
-                                0,
-                                14
-                              ],
-                              "justifyContent": "space_between",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "zcmHv",
-                                  "name": "FV Categoría",
-                                  "fill": "$color-text-primary",
-                                  "content": "Comida",
-                                  "fontFamily": "$font-body",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "icon",
-                                  "id": "Kzb8o",
-                                  "name": "FIC Categoría",
                                   "width": 18,
                                   "height": 18,
                                   "icon": "chevron-down",
@@ -8773,6 +8949,1472 @@
                       "fontFamily": "$font-body",
                       "fontSize": 12,
                       "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "pTgtd",
+      "x": 9095,
+      "y": 440,
+      "name": "Estados Secundarios / Mobile 375",
+      "theme": {
+        "mode": "dark"
+      },
+      "clip": true,
+      "width": 375,
+      "height": 1168,
+      "fill": "$color-bg",
+      "layout": "vertical",
+      "gap": 18,
+      "padding": [
+        18,
+        16,
+        24,
+        16
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "cJiAD",
+          "name": "States Mobile Header",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "children": [
+            {
+              "type": "text",
+              "id": "WyIfy",
+              "name": "States Mobile Title",
+              "fill": "$color-text-primary",
+              "content": "Estados mobile",
+              "fontFamily": "$font-body",
+              "fontSize": 22,
+              "fontWeight": "850"
+            },
+            {
+              "type": "text",
+              "id": "XK8Bw",
+              "name": "States Mobile Subtitle",
+              "fill": "$color-text-secondary",
+              "content": "Empty, filtros, confirmación y errores",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "V7xRx9",
+          "name": "Empty Dashboard State",
+          "width": "fill_container",
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 18,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SwUL9",
+              "name": "Empty Icon Wrap",
+              "width": 52,
+              "height": 52,
+              "fill": "$color-surface-2",
+              "cornerRadius": "$radius-pill",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "xAwnQ",
+                  "name": "Empty Icon",
+                  "width": 24,
+                  "height": 24,
+                  "icon": "wallet",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "aVEqG",
+              "name": "Empty Title",
+              "fill": "$color-text-primary",
+              "content": "Crea tu primera cuenta",
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "rxrRV",
+              "name": "Empty Body",
+              "fill": "$color-text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Agrega una cuenta para empezar a registrar ingresos, gastos y transferencias.",
+              "textAlign": "center",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "R67bTz",
+              "type": "ref",
+              "ref": "BFupb",
+              "name": "Empty CTA",
+              "width": "fill_container",
+              "descendants": {
+                "fSynE": {
+                  "icon": "plus"
+                },
+                "GqcRn": {
+                  "content": "Crear cuenta"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "JEcCW",
+          "name": "No Results State",
+          "width": "fill_container",
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 18,
+          "children": [
+            {
+              "type": "frame",
+              "id": "eoH36",
+              "name": "No Results Head",
+              "width": "fill_container",
+              "gap": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KJwpB",
+                  "name": "No Results Icon Wrap",
+                  "width": 42,
+                  "height": 42,
+                  "fill": "$color-surface-2",
+                  "cornerRadius": "$radius-pill",
+                  "layout": "vertical",
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nfpmD",
+                      "name": "No Results Icon",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "search-x",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WqqBr",
+                  "name": "No Results Text",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kcfPM",
+                      "name": "No Results Title",
+                      "fill": "$color-text-primary",
+                      "content": "Sin resultados",
+                      "fontFamily": "$font-body",
+                      "fontSize": 15,
+                      "fontWeight": "800"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zLcfS",
+                      "name": "No Results Meta",
+                      "fill": "$color-text-muted",
+                      "content": "Gastos · Junio 2026 · Banco",
+                      "fontFamily": "$font-body",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "a7d6g",
+              "name": "No Results Body",
+              "fill": "$color-text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "No encontramos movimientos con estos filtros. Ajusta la búsqueda o limpia los filtros activos.",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "D4DIL",
+              "name": "No Results Actions",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "fGbpk",
+                  "type": "ref",
+                  "ref": "w63SRQ",
+                  "name": "Clear Filters",
+                  "width": "fill_container",
+                  "descendants": {
+                    "sXwAL": {
+                      "icon": "x"
+                    },
+                    "PFpJB": {
+                      "content": "Limpiar"
+                    }
+                  }
+                },
+                {
+                  "id": "yeob8",
+                  "type": "ref",
+                  "ref": "BFupb",
+                  "name": "New Movement",
+                  "width": "fill_container",
+                  "descendants": {
+                    "fSynE": {
+                      "icon": "plus"
+                    },
+                    "GqcRn": {
+                      "content": "Crear"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "o6L48",
+          "name": "Archive Confirmation Sheet",
+          "width": "fill_container",
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-border",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 14,
+          "padding": 18,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Y0KIz",
+              "name": "Archive Icon Wrap",
+              "width": 46,
+              "height": 46,
+              "fill": "$color-surface-2",
+              "cornerRadius": "$radius-pill",
+              "layout": "vertical",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "jTBqt",
+                  "name": "Archive Icon",
+                  "width": 22,
+                  "height": 22,
+                  "icon": "archive",
+                  "library": "lucide",
+                  "fill": "$color-warning"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "MCLMH",
+              "name": "Archive Title",
+              "fill": "$color-text-primary",
+              "content": "Archivar categoria",
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "otX0e",
+              "name": "Archive Body",
+              "fill": "$color-text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Las transacciones existentes conservaran esta categoria. Podras reactivarla despues desde categorias archivadas.",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "NWkW7",
+              "name": "Archive Category Row",
+              "width": "fill_container",
+              "fill": "$color-surface-2",
+              "cornerRadius": "$radius-md",
+              "gap": 10,
+              "padding": [
+                10,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "gzBBu",
+                  "name": "Archive Category Icon",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "utensils",
+                  "library": "lucide",
+                  "fill": "$color-accent"
+                },
+                {
+                  "type": "text",
+                  "id": "t4P4hI",
+                  "name": "Archive Category Name",
+                  "fill": "$color-text-primary",
+                  "content": "Comida · 24 movimientos",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "c2TM1",
+              "name": "Archive Actions",
+              "width": "fill_container",
+              "gap": 10,
+              "children": [
+                {
+                  "id": "zEv5t",
+                  "type": "ref",
+                  "ref": "w63SRQ",
+                  "name": "Archive Cancel",
+                  "width": "fill_container",
+                  "descendants": {
+                    "sXwAL": {
+                      "icon": "x"
+                    },
+                    "PFpJB": {
+                      "content": "Cancelar"
+                    }
+                  }
+                },
+                {
+                  "id": "i0Lve4",
+                  "type": "ref",
+                  "ref": "BFupb",
+                  "name": "Archive Confirm",
+                  "width": "fill_container",
+                  "descendants": {
+                    "fSynE": {
+                      "icon": "archive"
+                    },
+                    "GqcRn": {
+                      "content": "Archivar"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Zylo6",
+          "name": "Validation Error State",
+          "width": "fill_container",
+          "fill": "$color-surface-1",
+          "cornerRadius": "$radius-lg",
+          "stroke": "$color-danger",
+          "strokeWidth": 1,
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 18,
+          "children": [
+            {
+              "type": "text",
+              "id": "W2Iu5",
+              "name": "Error State Title",
+              "fill": "$color-text-primary",
+              "content": "Revisa el movimiento",
+              "fontFamily": "$font-body",
+              "fontSize": 17,
+              "fontWeight": "800"
+            },
+            {
+              "type": "text",
+              "id": "Hd41s",
+              "name": "Error State Body",
+              "fill": "$color-text-secondary",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Hay campos requeridos pendientes antes de guardar.",
+              "fontFamily": "$font-body",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "WX7r3",
+              "name": "Error Field Amount",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Cc9Zt",
+                  "name": "Error Field Amount Label",
+                  "fill": "$color-text-secondary",
+                  "content": "Monto",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "650"
+                },
+                {
+                  "type": "frame",
+                  "id": "fx6TR",
+                  "name": "Error Field Amount Input",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$color-surface-2",
+                  "cornerRadius": "$radius-md",
+                  "stroke": "$color-danger",
+                  "strokeWidth": 1,
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "S3a4b",
+                      "name": "Error Field Amount Text",
+                      "fill": "$color-text-muted",
+                      "content": "$ 0",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "RTpe0",
+                  "name": "Error Field Amount Help",
+                  "fill": "$color-danger",
+                  "content": "Ingresa un monto mayor a cero.",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fd24G",
+              "name": "Error Field Account",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "pOzA5",
+                  "name": "Error Field Account Label",
+                  "fill": "$color-text-secondary",
+                  "content": "Cuenta",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "650"
+                },
+                {
+                  "type": "frame",
+                  "id": "E2Rw5q",
+                  "name": "Error Field Account Input",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "$color-surface-2",
+                  "cornerRadius": "$radius-md",
+                  "stroke": "$color-danger",
+                  "strokeWidth": 1,
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "wuQpE",
+                      "name": "Error Field Account Text",
+                      "fill": "$color-text-muted",
+                      "content": "Selecciona una cuenta",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "OaHD3",
+                      "name": "Error Field Account Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "chevron-down",
+                      "library": "lucide",
+                      "fill": "$color-text-muted"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Owl93",
+                  "name": "Error Field Account Help",
+                  "fill": "$color-danger",
+                  "content": "La cuenta es obligatoria.",
+                  "fontFamily": "$font-body",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "k9UwJ",
+      "x": 9550,
+      "y": 440,
+      "name": "Estados Secundarios / Desktop 1280",
+      "theme": {
+        "mode": "dark"
+      },
+      "clip": true,
+      "width": 1280,
+      "height": 900,
+      "fill": "$color-bg",
+      "children": [
+        {
+          "type": "frame",
+          "id": "d1tMfl",
+          "name": "States Sidebar",
+          "width": 260,
+          "height": "fill_container",
+          "fill": "$color-surface-1",
+          "stroke": "$color-border",
+          "strokeWidth": {
+            "right": 1
+          },
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            28,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "gjBIJ",
+              "name": "Sidebar User",
+              "width": "fill_container",
+              "gap": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "ivW6U",
+                  "name": "Sidebar User Icon",
+                  "width": 28,
+                  "height": 28,
+                  "icon": "circle-user-round",
+                  "library": "lucide",
+                  "fill": "$color-text-secondary"
+                },
+                {
+                  "type": "frame",
+                  "id": "kI5Wu",
+                  "name": "Sidebar User Text",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Lei88",
+                      "name": "Sidebar User Name",
+                      "fill": "$color-text-primary",
+                      "content": "Joseph",
+                      "fontFamily": "$font-body",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "drAn4",
+                      "name": "Sidebar User Meta",
+                      "fill": "$color-text-muted",
+                      "content": "Cuenta personal",
+                      "fontFamily": "$font-body",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ok4xS",
+              "name": "Sidebar Nav",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "IVHxk",
+                  "name": "Sidebar Nav Inicio",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#07FBA21F",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "tLdj4",
+                      "name": "Sidebar Icon Inicio",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "house",
+                      "library": "lucide",
+                      "fill": "$color-accent"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gdBhQ",
+                      "name": "Sidebar Label Inicio",
+                      "fill": "$color-text-primary",
+                      "content": "Inicio",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "750"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "s4wlGn",
+                  "name": "Sidebar Nav Movimientos",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "J5IRS",
+                      "name": "Sidebar Icon Movimientos",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "arrow-down-up",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tI4qj",
+                      "name": "Sidebar Label Movimientos",
+                      "fill": "$color-text-secondary",
+                      "content": "Movimientos",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I0cxcs",
+                  "name": "Sidebar Nav Cuentas",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "pan4b",
+                      "name": "Sidebar Icon Cuentas",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "wallet",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "cFhOm",
+                      "name": "Sidebar Label Cuentas",
+                      "fill": "$color-text-secondary",
+                      "content": "Cuentas",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kGWmB",
+                  "name": "Sidebar Nav Categorías",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "H88xV",
+                      "name": "Sidebar Icon Categorías",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "tags",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "y9EZEm",
+                      "name": "Sidebar Label Categorías",
+                      "fill": "$color-text-secondary",
+                      "content": "Categorías",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I0PHvP",
+                  "name": "Sidebar Nav Ajustes",
+                  "width": "fill_container",
+                  "height": 44,
+                  "fill": "#00000000",
+                  "cornerRadius": "$radius-md",
+                  "gap": 10,
+                  "padding": [
+                    12,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "dCMt8",
+                      "name": "Sidebar Icon Ajustes",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "settings",
+                      "library": "lucide",
+                      "fill": "$color-text-secondary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "DQw8c",
+                      "name": "Sidebar Label Ajustes",
+                      "fill": "$color-text-secondary",
+                      "content": "Ajustes",
+                      "fontFamily": "$font-body",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kWvE5",
+          "name": "States Desktop Main",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": 32,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Q6Ftp6",
+              "name": "States Desktop Header",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "o5BXN",
+                  "name": "States Desktop Title",
+                  "fill": "$color-text-primary",
+                  "content": "Estados secundarios",
+                  "fontFamily": "$font-body",
+                  "fontSize": 28,
+                  "fontWeight": "850"
+                },
+                {
+                  "type": "text",
+                  "id": "bvxrn",
+                  "name": "States Desktop Subtitle",
+                  "fill": "$color-text-secondary",
+                  "content": "Patrones de empty, filtros, confirmacion y validacion para web-core",
+                  "fontFamily": "$font-body",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "q35Fuc",
+              "name": "States Desktop Grid",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "e1IDw",
+                  "name": "States Desktop Row 1",
+                  "width": "fill_container",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZXFLr",
+                      "name": "Desktop Empty Dashboard",
+                      "width": "fill_container",
+                      "height": 300,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": 22,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "b2mbrY",
+                          "name": "D Empty Icon Wrap",
+                          "width": 58,
+                          "height": 58,
+                          "fill": "$color-surface-2",
+                          "cornerRadius": "$radius-pill",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "t8JMd",
+                              "name": "D Empty Icon",
+                              "width": 26,
+                              "height": 26,
+                              "icon": "wallet",
+                              "library": "lucide",
+                              "fill": "$color-accent"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "btqTd",
+                          "name": "D Empty Title",
+                          "fill": "$color-text-primary",
+                          "content": "Crea tu primera cuenta",
+                          "fontFamily": "$font-body",
+                          "fontSize": 20,
+                          "fontWeight": "850"
+                        },
+                        {
+                          "type": "text",
+                          "id": "m1cSHG",
+                          "name": "D Empty Body",
+                          "fill": "$color-text-secondary",
+                          "textGrowth": "fixed-width",
+                          "width": 360,
+                          "content": "El dashboard se activa cuando tienes al menos una cuenta. Empieza creando una cuenta inicial.",
+                          "textAlign": "center",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "id": "TddwL",
+                          "type": "ref",
+                          "ref": "BFupb",
+                          "name": "D Empty CTA",
+                          "width": 180,
+                          "descendants": {
+                            "fSynE": {
+                              "icon": "plus"
+                            },
+                            "GqcRn": {
+                              "content": "Crear cuenta"
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BTrBA",
+                      "name": "Desktop No Results Table",
+                      "width": "fill_container",
+                      "height": 300,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": 22,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Issyh",
+                          "name": "D No Results Top",
+                          "width": "fill_container",
+                          "justifyContent": "space_between",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Z85u8",
+                              "name": "D No Results Title",
+                              "fill": "$color-text-primary",
+                              "content": "Movimientos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 18,
+                              "fontWeight": "850"
+                            },
+                            {
+                              "id": "W63Bi",
+                              "type": "ref",
+                              "ref": "iA1GD",
+                              "name": "D No Results Filter",
+                              "descendants": {
+                                "bY7EN": {
+                                  "content": "Gastos · Banco"
+                                }
+                              }
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "F4aVL",
+                          "name": "D Empty Table Box",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "$color-surface-2",
+                          "cornerRadius": "$radius-md",
+                          "stroke": "$color-border",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 10,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "LVm76",
+                              "name": "D No Results Icon",
+                              "width": 28,
+                              "height": 28,
+                              "icon": "search-x",
+                              "library": "lucide",
+                              "fill": "$color-text-muted"
+                            },
+                            {
+                              "type": "text",
+                              "id": "gs1Do",
+                              "name": "D No Results Head",
+                              "fill": "$color-text-primary",
+                              "content": "Sin resultados para estos filtros",
+                              "fontFamily": "$font-body",
+                              "fontSize": 16,
+                              "fontWeight": "800"
+                            },
+                            {
+                              "type": "text",
+                              "id": "seDRq",
+                              "name": "D No Results Copy",
+                              "fill": "$color-text-secondary",
+                              "textGrowth": "fixed-width",
+                              "width": 380,
+                              "content": "Ajusta el rango de fechas, cambia la cuenta o limpia los filtros para ver mas movimientos.",
+                              "textAlign": "center",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "gZEZM",
+                              "name": "D No Results Actions",
+                              "gap": 10,
+                              "children": [
+                                {
+                                  "id": "WeiKY",
+                                  "type": "ref",
+                                  "ref": "w63SRQ",
+                                  "name": "D Clear Filters",
+                                  "descendants": {
+                                    "sXwAL": {
+                                      "icon": "x"
+                                    },
+                                    "PFpJB": {
+                                      "content": "Limpiar filtros"
+                                    }
+                                  }
+                                },
+                                {
+                                  "id": "T7Ba7f",
+                                  "type": "ref",
+                                  "ref": "BFupb",
+                                  "name": "D New Movement",
+                                  "width": 180,
+                                  "descendants": {
+                                    "fSynE": {
+                                      "icon": "plus"
+                                    },
+                                    "GqcRn": {
+                                      "content": "Nuevo movimiento"
+                                    }
+                                  }
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WfeRM",
+                  "name": "States Desktop Row 2",
+                  "width": "fill_container",
+                  "gap": 20,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "v0j7sF",
+                      "name": "Desktop Archive Modal",
+                      "width": "fill_container",
+                      "height": 310,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-border",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": 22,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "PfNVN",
+                          "name": "D Archive Icon Wrap",
+                          "width": 50,
+                          "height": 50,
+                          "fill": "$color-surface-2",
+                          "cornerRadius": "$radius-pill",
+                          "layout": "vertical",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "vwaBP",
+                              "name": "D Archive Icon",
+                              "width": 24,
+                              "height": 24,
+                              "icon": "archive",
+                              "library": "lucide",
+                              "fill": "$color-warning"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "l2HWjh",
+                          "name": "D Archive Title",
+                          "fill": "$color-text-primary",
+                          "content": "Archivar categoria",
+                          "fontFamily": "$font-body",
+                          "fontSize": 20,
+                          "fontWeight": "850"
+                        },
+                        {
+                          "type": "text",
+                          "id": "x5tE5",
+                          "name": "D Archive Copy",
+                          "fill": "$color-text-secondary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Las transacciones existentes conservaran esta categoria. Podras reactivarla despues desde categorias archivadas.",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "T43iRF",
+                          "name": "D Archive Category",
+                          "width": "fill_container",
+                          "height": 48,
+                          "fill": "$color-surface-2",
+                          "cornerRadius": "$radius-md",
+                          "gap": 10,
+                          "padding": [
+                            0,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "JQUmR",
+                              "name": "D Archive Cat Icon",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "utensils",
+                              "library": "lucide",
+                              "fill": "$color-accent"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ZYTtM",
+                              "name": "D Archive Cat Text",
+                              "fill": "$color-text-primary",
+                              "content": "Comida · 24 movimientos",
+                              "fontFamily": "$font-body",
+                              "fontSize": 14,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "K1yDG",
+                          "name": "D Archive Actions",
+                          "width": "fill_container",
+                          "gap": 10,
+                          "children": [
+                            {
+                              "id": "KZhWN",
+                              "type": "ref",
+                              "ref": "w63SRQ",
+                              "name": "D Archive Cancel",
+                              "width": "fill_container",
+                              "descendants": {
+                                "sXwAL": {
+                                  "icon": "x"
+                                },
+                                "PFpJB": {
+                                  "content": "Cancelar"
+                                }
+                              }
+                            },
+                            {
+                              "id": "QM5zV",
+                              "type": "ref",
+                              "ref": "BFupb",
+                              "name": "D Archive Confirm",
+                              "width": "fill_container",
+                              "descendants": {
+                                "fSynE": {
+                                  "icon": "archive"
+                                },
+                                "GqcRn": {
+                                  "content": "Archivar"
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qtO6y",
+                      "name": "Desktop Validation Form",
+                      "width": "fill_container",
+                      "height": 310,
+                      "fill": "$color-surface-1",
+                      "cornerRadius": "$radius-lg",
+                      "stroke": "$color-danger",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 14,
+                      "padding": 22,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "hLt0a",
+                          "name": "D Validation Title",
+                          "fill": "$color-text-primary",
+                          "content": "Formulario con errores",
+                          "fontFamily": "$font-body",
+                          "fontSize": 20,
+                          "fontWeight": "850"
+                        },
+                        {
+                          "type": "text",
+                          "id": "jW6Mf",
+                          "name": "D Validation Copy",
+                          "fill": "$color-text-secondary",
+                          "content": "Los errores quedan junto al campo y el panel comunica el estado.",
+                          "fontFamily": "$font-body",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G1BcTd",
+                          "name": "D Validation Row",
+                          "width": "fill_container",
+                          "gap": 16,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "QP70Q",
+                              "name": "D Field Monto",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "mxCk2",
+                                  "name": "D Field Label Monto",
+                                  "fill": "$color-text-secondary",
+                                  "content": "Monto",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "650"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "DeIZw",
+                                  "name": "D Field Input Monto",
+                                  "width": "fill_container",
+                                  "height": 44,
+                                  "fill": "$color-surface-2",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$color-danger",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    0,
+                                    14
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "LhMN7",
+                                      "name": "D Field Value Monto",
+                                      "fill": "$color-text-muted",
+                                      "content": "$ 0",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 14,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "y2BUEd",
+                                  "name": "D Field Help Monto",
+                                  "fill": "$color-danger",
+                                  "content": "Ingresa un monto mayor a cero.",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "E1fCQx",
+                              "name": "D Field Cuenta",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "szTZB",
+                                  "name": "D Field Label Cuenta",
+                                  "fill": "$color-text-secondary",
+                                  "content": "Cuenta",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "650"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ELjEF",
+                                  "name": "D Field Input Cuenta",
+                                  "width": "fill_container",
+                                  "height": 44,
+                                  "fill": "$color-surface-2",
+                                  "cornerRadius": "$radius-md",
+                                  "stroke": "$color-danger",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    0,
+                                    14
+                                  ],
+                                  "justifyContent": "space_between",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "PsItU",
+                                      "name": "D Field Value Cuenta",
+                                      "fill": "$color-text-muted",
+                                      "content": "Selecciona una cuenta",
+                                      "fontFamily": "$font-body",
+                                      "fontSize": 14,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "U6gVhr",
+                                  "name": "D Field Help Cuenta",
+                                  "fill": "$color-danger",
+                                  "content": "La cuenta es obligatoria.",
+                                  "fontFamily": "$font-body",
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "s6HjS",
+                          "name": "D Error Summary",
+                          "width": "fill_container",
+                          "fill": "$color-surface-2",
+                          "cornerRadius": "$radius-md",
+                          "stroke": "$color-danger",
+                          "strokeWidth": 1,
+                          "gap": 10,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "ucrHR",
+                              "name": "D Error Summary Icon",
+                              "width": 18,
+                              "height": 18,
+                              "icon": "circle-alert",
+                              "library": "lucide",
+                              "fill": "$color-danger"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Z0Cv8h",
+                              "name": "D Error Summary Text",
+                              "fill": "$color-danger",
+                              "content": "Corrige los campos marcados antes de guardar.",
+                              "fontFamily": "$font-body",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }

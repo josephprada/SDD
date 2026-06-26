@@ -149,8 +149,9 @@ Cada artboard debe incluir:
 | Cuentas | ✅ | ✅ | Grid de cuentas con estado de saldo negativo (Nu) y tile "Nueva cuenta" |
 | Categorías | ✅ | ✅ | Segmented Gastos/Ingresos/Transferencias; desktop con panel de edición (form) |
 | Adjuntos / Movimiento | ✅ | ✅ | Formulario + uploader, ítems imagen/PDF, estado de error de tipo y límite 5 |
+| Estados secundarios | ✅ | ✅ | Empty dashboard, sin resultados por filtro, confirmación de archivar y validación de formularios |
 
-**Estado base implementado** ("con datos"); estados secundarios pendientes de diseñar como variantes: empty states, sin resultados por filtro, confirmación de archivar, y validación de formularios.
+**Estado de diseño visual**: artboards base y estados secundarios críticos completados. Pendientes opcionales: variantes de loading/skeleton y estado de permisos/restricción si aparecen durante implementación.
 
 ### Componentes reutilizables en el `.pen`
 
@@ -162,5 +163,6 @@ Base JP-DS candidatos generados como componentes Pencil:
 - `Month Switcher`
 - `Filter Chip`
 - `Attachment Item`
+- `Category Choice`
 
 Marca: el logotipo reutiliza `public/icon.svg` (bolt "Green Bolt") reproducido como nodos `path` en headers mobile y desktop.
