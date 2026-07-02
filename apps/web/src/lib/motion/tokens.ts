@@ -1,8 +1,8 @@
 export {
-  duration,
-  ease,
-  spring,
-  distance,
-  stagger,
-  shake,
+	duration,
+	ease,
+	spring,
+	distance,
+	stagger,
+	shake,
 } from "@jp-ds/index";

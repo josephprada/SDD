@@ -6,6 +6,7 @@
 - Change 1 `web-foundation` disponible en la rama base
 - Convex dev corriendo
 - `.env.local` raíz configurado
+- Si ya tenías usuario de `web-foundation`, ejecuta una vez en el dashboard de Convex la mutation `migrations.backfillCategories` para rellenar `archived`, `isSystem` y `updatedAt` en categorías existentes.
 
 ## Comandos
 

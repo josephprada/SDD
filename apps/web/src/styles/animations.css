@@ -1,330 +1,343 @@
 /* ── Entrance keyframes ───────────────────────────────────────────── */
 
 @keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(var(--distance-lg, 16px));
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(var(--distance-lg, 16px));
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes slide-down {
-  from {
-    opacity: 0;
-    transform: translateY(calc(var(--distance-lg, 16px) * -1));
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(calc(var(--distance-lg, 16px) * -1));
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(var(--distance-lg, 16px));
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(var(--distance-lg, 16px));
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes slide-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(calc(var(--distance-lg, 16px) * -1));
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateX(calc(var(--distance-lg, 16px) * -1));
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
 }
 
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.88);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: scale(0.88);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 @keyframes logo-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
 }
 
 @keyframes glow-pulse {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 12px var(--color-accent-glow));
-  }
-  50% {
-    filter: drop-shadow(0 0 24px var(--color-accent-glow));
-  }
+	0%,
+	100% {
+		filter: drop-shadow(0 0 12px var(--color-accent-glow));
+	}
+	50% {
+		filter: drop-shadow(0 0 24px var(--color-accent-glow));
+	}
 }
 
 @keyframes icon-swap {
-  from {
-    opacity: 0;
-    transform: rotate(-90deg) scale(0.6);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: rotate(-90deg) scale(0.6);
+	}
+	to {
+		opacity: 1;
+		transform: rotate(0) scale(1);
+	}
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+	0% {
+		background-position: -200% center;
+	}
+	100% {
+		background-position: 200% center;
+	}
 }
 
 @keyframes menu-in {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-8px) scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
 }
 
 /* ── Utility classes ──────────────────────────────────────────────── */
 
 .animate-fade-up {
-  animation: fade-up var(--duration-slow) var(--ease-out) both;
+	animation: fade-up var(--duration-slow) var(--ease-out) both;
 }
 
 .animate-fade-in {
-  animation: fade-in var(--duration-base) var(--ease-out) both;
+	animation: fade-in var(--duration-base) var(--ease-out) both;
 }
 
 .animate-slide-down {
-  animation: slide-down var(--duration-slow) var(--ease-out) both;
+	animation: slide-down var(--duration-slow) var(--ease-out) both;
 }
 
 .animate-slide-up {
-  animation: slide-up var(--duration-slow) var(--ease-out) both;
+	animation: slide-up var(--duration-slow) var(--ease-out) both;
 }
 
 .animate-slide-in-left {
-  animation: slide-in-left var(--duration-slow) var(--ease-out) both;
+	animation: slide-in-left var(--duration-slow) var(--ease-out) both;
 }
 
 .animate-scale-in {
-  animation: scale-in var(--duration-slow) var(--ease-spring) both;
+	animation: scale-in var(--duration-slow) var(--ease-spring) both;
 }
 
 .animate-page-enter {
-  animation: fade-up var(--duration-slow) var(--ease-out) both;
+	animation: fade-up var(--duration-slow) var(--ease-out) both;
 }
 
 .animate-logo-float {
-  animation: logo-float 4s var(--ease-in-out) infinite;
+	animation: logo-float 4s var(--ease-in-out) infinite;
 }
 
 .animate-glow-pulse {
-  animation: glow-pulse 3s var(--ease-in-out) infinite;
+	animation: glow-pulse 3s var(--ease-in-out) infinite;
 }
 
 .animate-menu-in {
-  animation: menu-in var(--duration-fast) var(--ease-spring) both;
+	animation: menu-in var(--duration-fast) var(--ease-spring) both;
+}
+
+.animate-modal-in {
+	animation: modal-in var(--duration-normal, 220ms) var(--ease-spring) both;
+}
+
+@keyframes modal-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.97);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
 }
 
 /* Stagger children — delays match JP-DS stagger tokens (60ms / item) */
 .animate-stagger > .animate-stagger-item:nth-child(1) {
-  animation-delay: 0ms;
+	animation-delay: 0ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(2) {
-  animation-delay: 60ms;
+	animation-delay: 60ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(3) {
-  animation-delay: 120ms;
+	animation-delay: 120ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(4) {
-  animation-delay: 180ms;
+	animation-delay: 180ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(5) {
-  animation-delay: 240ms;
+	animation-delay: 240ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(6) {
-  animation-delay: 300ms;
+	animation-delay: 300ms;
 }
 .animate-stagger > .animate-stagger-item:nth-child(7) {
-  animation-delay: 360ms;
+	animation-delay: 360ms;
 }
 
 .animate-stagger-item {
-  animation: fade-up var(--duration-slow) var(--ease-out) both;
+	animation: fade-up var(--duration-slow) var(--ease-out) both;
 }
 
 /* ── Interactive motion ─────────────────────────────────────────── */
 
 .interactive-lift {
-  transition:
-    transform var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
+	transition: transform var(--duration-fast) var(--ease-out), box-shadow
+		var(--duration-fast) var(--ease-out), border-color var(--duration-fast)
+		var(--ease-out), background var(--duration-fast) var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .interactive-lift:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-glow);
-  }
+	.interactive-lift:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--shadow-glow);
+	}
 }
 
 .interactive-lift:active {
-  transform: translateY(0) scale(0.98);
+	transform: translateY(0) scale(0.98);
 }
 
 .nav-item,
 .sidebar-link {
-  transition:
-    color var(--duration-fast) var(--ease-out),
-    transform var(--duration-fast) var(--ease-spring),
-    filter var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out),
-    border-color var(--duration-fast) var(--ease-out);
+	transition:
+		color var(--duration-fast) var(--ease-out),
+		transform var(--duration-fast) var(--ease-spring),
+		filter var(--duration-fast) var(--ease-out),
+		background var(--duration-fast) var(--ease-out),
+		border-color var(--duration-fast) var(--ease-out);
 }
 
 .nav-item:active,
 .sidebar-link:active {
-  transform: scale(0.94);
+	transform: scale(0.94);
 }
 
 .sidebar-link:not(.sidebar-link--active):hover {
-  background: var(--color-surface-2);
+	background: var(--color-surface-2);
 }
 
 .theme-toggle-icon {
-  display: inline-flex;
-  animation: icon-swap var(--duration-base) var(--ease-spring) both;
+	display: inline-flex;
+	animation: icon-swap var(--duration-base) var(--ease-spring) both;
 }
 
 .user-menu__dropdown {
-  transform-origin: top right;
+	transform-origin: top right;
 }
 
 .user-menu__item {
-  transition: background var(--duration-fast) var(--ease-out);
+	transition: background var(--duration-fast) var(--ease-out);
 }
 
 .loading-screen {
-  display: grid;
-  place-items: center;
-  min-height: 100dvh;
-  gap: var(--space-4);
-  animation: fade-in var(--duration-base) var(--ease-out) both;
+	display: grid;
+	place-items: center;
+	min-height: 100dvh;
+	gap: var(--space-4);
+	animation: fade-in var(--duration-base) var(--ease-out) both;
 }
 
 .loading-screen__label {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  animation: fade-in var(--duration-slow) var(--ease-out) both;
-  animation-delay: 120ms;
+	font-size: var(--text-sm);
+	color: var(--color-text-secondary);
+	animation: fade-in var(--duration-slow) var(--ease-out) both;
+	animation-delay: 120ms;
 }
 
 .not-found-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-4);
-  text-align: center;
-  padding: var(--space-6);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-4);
+	text-align: center;
+	padding: var(--space-6);
 }
 
 .not-found-content > * {
-  animation: fade-up var(--duration-slow) var(--ease-out) both;
+	animation: fade-up var(--duration-slow) var(--ease-out) both;
 }
 
 .not-found-content > *:nth-child(1) {
-  animation-delay: 0ms;
+	animation-delay: 0ms;
 }
 .not-found-content > *:nth-child(2) {
-  animation-delay: 80ms;
+	animation-delay: 80ms;
 }
 .not-found-content > *:nth-child(3) {
-  animation-delay: 160ms;
+	animation-delay: 160ms;
 }
 .not-found-content > *:nth-child(4) {
-  animation-delay: 240ms;
+	animation-delay: 240ms;
 }
 
 /* ── Reduced motion ─────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-up,
-  .animate-fade-in,
-  .animate-slide-down,
-  .animate-slide-up,
-  .animate-slide-in-left,
-  .animate-scale-in,
-  .animate-page-enter,
-  .animate-stagger-item,
-  .animate-logo-float,
-  .animate-glow-pulse,
-  .animate-menu-in,
-  .theme-toggle-icon,
-  .not-found-content > *,
-  .loading-screen,
-  .loading-screen__label {
-    animation: none !important;
-  }
+	.animate-fade-up,
+	.animate-fade-in,
+	.animate-slide-down,
+	.animate-slide-up,
+	.animate-slide-in-left,
+	.animate-scale-in,
+	.animate-page-enter,
+	.animate-stagger-item,
+	.animate-logo-float,
+	.animate-glow-pulse,
+	.animate-menu-in,
+	.theme-toggle-icon,
+	.not-found-content > *,
+	.loading-screen,
+	.loading-screen__label {
+		animation: none !important;
+	}
 
-  .aurora-orb {
-    animation: none !important;
-    transform: none !important;
-    opacity: 1 !important;
-  }
+	.aurora-orb {
+		animation: none !important;
+		transform: none !important;
+		opacity: 1 !important;
+	}
 
-  .aurora-orb-wrap,
-  .galaxy-canvas {
-    transform: none !important;
-    transition: none !important;
-  }
+	.aurora-orb-wrap,
+	.galaxy-canvas {
+		transform: none !important;
+		transition: none !important;
+	}
 
-  .interactive-lift:hover,
-  .interactive-lift:active,
-  .nav-item:active,
-  .sidebar-link:active {
-    transform: none;
-  }
+	.interactive-lift:hover,
+	.interactive-lift:active,
+	.nav-item:active,
+	.sidebar-link:active {
+		transform: none;
+	}
 
-  .nav-item,
-  .sidebar-link,
-  .interactive-lift,
-  .user-menu__item,
-  .user-menu__trigger:active {
-    transition: none;
-    transform: none;
-  }
+	.nav-item,
+	.sidebar-link,
+	.interactive-lift,
+	.user-menu__item,
+	.user-menu__trigger:active {
+		transition: none;
+		transform: none;
+	}
 }

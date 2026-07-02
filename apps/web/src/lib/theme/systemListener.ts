@@ -8,42 +8,42 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Set<Listener>();
 
 function notify() {
-  const resolved = resolveTheme("system");
-  for (const listener of listeners) {
-    listener(resolved);
-  }
+	const resolved = resolveTheme("system");
+	for (const listener of listeners) {
+		listener(resolved);
+	}
 }
 
 function onSystemChange() {
-  if (debounceTimer) {
-    clearTimeout(debounceTimer);
-  }
-  debounceTimer = setTimeout(notify, 100);
+	if (debounceTimer) {
+		clearTimeout(debounceTimer);
+	}
+	debounceTimer = setTimeout(notify, 100);
 }
 
 export function startSystemListener(mode: ThemeMode) {
-  if (typeof window === "undefined") {
-    return () => {};
-  }
+	if (typeof window === "undefined") {
+		return () => {};
+	}
 
-  mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-  const handler = () => {
-    if (mode === "system") {
-      onSystemChange();
-    }
-  };
+	mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+	const handler = () => {
+		if (mode === "system") {
+			onSystemChange();
+		}
+	};
 
-  mediaQuery.addEventListener("change", handler);
+	mediaQuery.addEventListener("change", handler);
 
-  return () => {
-    mediaQuery?.removeEventListener("change", handler);
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
-    }
-  };
+	return () => {
+		mediaQuery?.removeEventListener("change", handler);
+		if (debounceTimer) {
+			clearTimeout(debounceTimer);
+		}
+	};
 }
 
 export function subscribeSystemTheme(listener: Listener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
+	listeners.add(listener);
+	return () => listeners.delete(listener);
 }

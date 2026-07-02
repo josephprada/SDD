@@ -1,9 +1,10 @@
 # Change 2 — Web Core
 
-**Versión**: 1.0.0
-**Estado**: Borrador
+**Versión**: 1.1.0
+**Estado**: En progreso (refinamiento UI desktop)
 **Change**: web-core
 **Creado**: 2026-06-25
+**Actualizado**: 2026-07-02
 
 ---
 
@@ -90,6 +91,19 @@ El sistema DEBE permitir archivar una cuenta y NO DEBE permitir el borrado duro 
 - WHEN el usuario crea una nueva transacción
 - THEN la cuenta archivada NO DEBE aparecer como opción seleccionable
 
+#### Requisito: Orden de Cuentas
+El sistema DEBE permitir reordenar cuentas activas y reflejar ese orden en toda la UI.
+
+**Escenario: Reordenar cuentas**
+- GIVEN al menos dos cuentas activas en `/accounts`
+- WHEN el usuario arrastra una card sobre otra
+- THEN el orden DEBE persistirse y reflejarse en la lista de cuentas
+
+**Escenario: Orden en selectores**
+- GIVEN cuentas con orden personalizado
+- WHEN el usuario abre un selector de cuenta (p. ej. en el formulario de transacción)
+- THEN las opciones DEBEN aparecer en el mismo orden que en la pantalla de cuentas
+
 #### Requisito: Saldo en Tiempo Real
 El sistema DEBE mostrar el saldo actualizado de cada cuenta tras cada operación.
 
@@ -148,6 +162,20 @@ El sistema DEBE archivar categorías y conservar las transacciones que la refere
 - GIVEN la categoría de sistema "Transferencia"
 - WHEN el usuario intenta editarla o archivarla
 - THEN el sistema NO DEBE permitirlo (categoría protegida)
+
+#### Requisito: Iconografía y Colores de Categorías
+El sistema DEBE ofrecer una galería amplia de iconos Lucide y paleta de colores para categorías.
+
+**Escenario: Galería de iconos agrupada**
+- GIVEN el formulario de nueva/editar categoría
+- WHEN el usuario abre el selector de icono
+- THEN DEBE ver iconos organizados por grupos temáticos (comida, transporte, finanzas, etc.)
+- AND la galería DEBE usar iconos Lucide (no emojis) con fallback legacy para datos antiguos
+
+**Escenario: Paleta ampliada**
+- GIVEN el selector de color
+- WHEN el usuario crea una categoría
+- THEN DEBE poder elegir entre al menos 25 colores predefinidos
 
 ---
 
@@ -220,6 +248,31 @@ El sistema DEBE listar transacciones y permitir filtrarlas por fecha, categoría
 - WHEN se aplica el filtro
 - THEN la lista DEBE mostrar un estado vacío informativo, sin error
 
+#### Requisito: Lista de Movimientos (UI)
+La pantalla de movimientos DEBE alinearse con el diseño Pencil y ofrecer interacciones de lista mejoradas.
+
+**Escenario: Filtro por mes**
+- GIVEN el usuario en `/transactions`
+- WHEN abre la pantalla
+- THEN el mes en curso DEBE estar seleccionado por defecto vía `MonthSwitcher` (reutilizado del dashboard)
+- AND el filtro de mes DEBE ser independiente de los demás filtros (búsqueda, tipo, etc.)
+
+**Escenario: Editar por click en fila**
+- GIVEN una transacción en la lista (móvil o tabla desktop)
+- WHEN el usuario hace click en la fila
+- THEN DEBE abrirse el modal de edición
+- AND NO DEBE mostrarse un botón separado de editar (solo eliminar en acciones)
+
+**Escenario: Reordenar mismo día**
+- GIVEN dos o más movimientos con la misma fecha
+- WHEN el usuario arrastra una fila sobre otra del mismo día
+- THEN el orden DEBE persistirse vía `sortOrder` y reflejarse en listas y dashboard
+
+**Escenario: Montos con énfasis visual**
+- GIVEN una transacción en la lista
+- WHEN se muestra el monto
+- THEN gastos DEBEN verse en rojo, ingresos en verde y transferencias en blanco
+
 ---
 
 ### Dominio: attachments
@@ -284,25 +337,102 @@ El dashboard DEBE mostrar el total de ingresos y gastos del mes en curso.
 - THEN DEBE ver ingresos `$ 2.000.000` y gastos `$ 550.000` del periodo
 
 #### Requisito: Transacciones Recientes
-El dashboard DEBE listar las transacciones más recientes.
+El dashboard DEBE listar las transacciones más recientes **del mes seleccionado**.
 
-**Escenario: Últimas transacciones**
-- GIVEN al menos una transacción registrada
+**Escenario: Últimas transacciones del mes**
+- GIVEN al menos una transacción registrada en el mes en curso
 - WHEN el usuario abre el dashboard
-- THEN DEBE ver una lista de las transacciones más recientes ordenadas por fecha descendente
+- THEN DEBE ver una lista de las transacciones más recientes de ese mes, ordenadas por fecha descendente (y `sortOrder` dentro del mismo día)
+
+**Escenario: Navegación a detalle**
+- GIVEN una transacción en la lista de recientes
+- WHEN el usuario hace click en la fila
+- THEN DEBE navegar a `/transactions?id={id}` y abrir el modal de edición con los detalles
+
+**Escenario: Meta de fila en dashboard**
+- GIVEN una transacción con nota en el dashboard
+- WHEN se muestra en la lista de recientes
+- THEN la línea secundaria DEBE mostrar `fecha · cuenta · nota` (descripción del movimiento)
 
 **Escenario: Dashboard sin datos**
 - GIVEN un usuario nuevo sin cuentas ni transacciones
 - WHEN abre el dashboard
 - THEN DEBE ver un estado vacío que invite a crear su primera cuenta y transacción
 
-#### Requisito: Acciones Rápidas
-El dashboard DEBE ofrecer accesos directos para registrar ingreso y gasto.
+#### Requisito: Layout del Dashboard (desktop)
+El dashboard DEBE distribuir el contenido en dos columnas: **Recientes** (columna principal) y **Cuentas + Este mes** (sidebar).
 
-**Escenario: Acción rápida de gasto**
-- GIVEN el usuario en el dashboard
-- WHEN hace click en "+ Gasto"
-- THEN DEBE abrirse el formulario de transacción precargado con tipo gasto
+**Escenario: Distribución en desktop**
+- GIVEN viewport ≥ 1024 px
+- WHEN el usuario abre el dashboard
+- THEN la card **Recientes** DEBE ocupar la columna izquierda (~1.6fr) y **Cuentas** + **Este mes** la columna derecha (~1fr)
+- AND la card **Recientes** DEBE tener la misma altura que el bloque **Cuentas + Este mes**, ajustándose al viewport disponible
+- AND el grid DEBE tener margen inferior para que las cards no queden pegadas al borde inferior de la pantalla
+- AND la cantidad de movimientos mostrados DEBE adaptarse dinámicamente al espacio vertical disponible (entre 5 y 30)
+
+#### Requisito: Acciones Rápidas (FAB global)
+El sistema DEBE ofrecer un botón flotante (FAB) para registrar gastos desde las pantallas core.
+
+**Escenario: FAB en pantallas core**
+- GIVEN el usuario en `/`, `/transactions` o `/accounts`
+- WHEN visualiza la pantalla
+- THEN DEBE ver un FAB fijo en la esquina inferior derecha
+
+**Escenario: Registrar gasto directo**
+- GIVEN el usuario hace click en el FAB
+- WHEN se abre el formulario
+- THEN DEBE abrirse directamente el modal global de **registrar gasto** (sin sheet intermedio)
+- AND el foco DEBE estar en el input de monto al abrir
+
+**Escenario: Modal global**
+- GIVEN el modal de transacción abierto desde cualquier ruta
+- WHEN el usuario guarda o cancela
+- THEN el modal DEBE cerrarse sin requerir estar en la pestaña de movimientos
+
+---
+
+## Refinamientos de UI implementados (2026-07-02)
+
+Resumen de ajustes aplicados en código alineados con `webcore.pen` y feedback de sesión. **Pendiente**: refinamiento mobile completo.
+
+### Shell y navegación
+- Eliminado brand pill del sidebar desktop; avatar con fallback y `referrerPolicy` para imágenes de Google
+- FAB global (`TransactionFab` + `TransactionModalHost`) en `/`, `/transactions`, `/accounts`
+- FAB abre directamente modal de **registrar gasto**; tamaño compacto (48px)
+- Nav móvil sin FAB central (4 ítems equilibrados)
+
+### Dashboard
+- `BrandLogoMark` en header desktop; métricas del mes; `MonthSwitcher` sin palabra "de" (`Junio 2026`)
+- Recientes filtrados al mes seleccionado; layout 2 columnas (Recientes | Cuentas + Este mes)
+- Altura al viewport; límite dinámico de filas; margen inferior en cards
+- Click en movimiento → `/transactions?id=` + modal edición; meta con nota del movimiento
+- Iconos de categoría vía Lucide (`CategoryIcon`)
+
+### Movimientos
+- Header con `BrandLogoMark`; filtro por mes con `MonthSwitcher`
+- Montos con color por tipo (`TransactionAmount`); columna alineada a la derecha
+- Modal centrado (div + ARIA, no `<dialog>` nativo); scroll con estilos de marca; footer fijo
+- Selects y date inputs estilados (flecha, options, icono calendario blanco)
+- Click en fila abre edición; solo botón eliminar en acciones
+- Reordenamiento drag-and-drop entre movimientos del mismo día (`sortOrder`)
+
+### Cuentas y categorías
+- `BrandLogoMark` en headers de cuentas y categorías
+- Reordenamiento drag-and-drop de cards de cuenta (`sortOrder`); selects respetan orden
+- Galería de iconos Lucide agrupada + 28 colores en picker de categorías
+
+### Backend (Convex)
+- `transactions.sortOrder`, `accounts.sortOrder`
+- Mutations `transactions.reorderWithinDate`, `accounts.reorder`
+- Queries `transactions.get`; dashboard filtra recientes por mes
+- Seed y defaults con nombres de icono Lucide (no emojis)
+
+### Componentes clave añadidos
+- `apps/web/src/stores/transactionModal.ts` — estado global del modal de transacciones
+- `apps/web/src/components/transactions/TransactionModalHost.tsx` — modal global en Shell
+- `apps/web/src/lib/core/categoryIcon.tsx` — biblioteca de iconos de categoría
+- `apps/web/src/lib/dashboard/useRecentListLimit.ts` — cálculo dinámico de filas recientes
+- `apps/web/src/styles/core.css` — estilos de dominio web-core
 
 ---
 
@@ -316,6 +446,14 @@ El dashboard DEBE ofrecer accesos directos para registrar ingreso y gasto.
 - [ ] Adjuntar imágenes (JPEG/PNG) y PDFs a una transacción con validación de tipo y tamaño
 - [ ] Previsualizar, descargar y eliminar adjuntos; eliminar remueve el archivo del storage
 - [ ] Dashboard muestra balance total, resumen mensual (ingresos vs gastos) y transacciones recientes
+- [x] Transacciones recientes del mes en curso (no globales)
+- [x] Layout dashboard desktop: Recientes | Cuentas + Este mes con altura al viewport
+- [x] FAB global abre modal de registrar gasto con foco en monto
+- [x] Click en fila de movimiento abre edición (sin botón editar separado)
+- [x] Reordenamiento de movimientos del mismo día y cuentas por drag-and-drop
+- [x] Iconos Lucide en categorías con galería agrupada y paleta ampliada
+- [x] Alineación visual con diseño Pencil (headers, montos, modales, month switcher)
+- [ ] Refinamiento mobile completo (pendiente próxima sesión)
 - [ ] Acciones rápidas del dashboard abren el formulario de transacción precargado
 - [ ] Montos formateados como COP (`$ 1.234.567`) en toda la UI
 - [ ] Estados vacíos informativos en dashboard y listas sin datos

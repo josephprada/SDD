@@ -1,25 +1,35 @@
 import { Outlet, useLocation } from "react-router";
-import { SkipToContent } from "./SkipToContent";
-import { Header } from "./Header";
-import { NavMobile } from "./NavMobile";
+import { TransactionFab } from "@app/components/transactions/TransactionFab";
+import { TransactionModalHost } from "@app/components/transactions/TransactionModalHost";
 import { NavDesktop } from "./NavDesktop";
+import { NavMobile } from "./NavMobile";
+import { SkipToContent } from "./SkipToContent";
+
+const TRANSACTION_FAB_ROUTES = new Set(["/", "/transactions", "/accounts"]);
 
 export function Shell() {
-  const location = useLocation();
+	const location = useLocation();
+	const showTransactionFab = TRANSACTION_FAB_ROUTES.has(location.pathname);
 
-  return (
-    <div className="shell shell-bg">
-      <SkipToContent />
-      <NavDesktop />
-      <div className="shell-content">
-        <Header />
-        <main id="main-content" className="shell__main">
-          <div key={location.pathname} className="page-content animate-page-enter">
-            <Outlet />
-          </div>
-        </main>
-      </div>
-      <NavMobile />
-    </div>
-  );
+	return (
+		<div
+			className={`shell shell-bg${showTransactionFab ? " shell--with-fab" : ""}`}
+		>
+			<SkipToContent />
+			<NavDesktop />
+			<div className="shell-content">
+				<main id="main-content" className="shell__main">
+					<div
+						key={location.pathname}
+						className="page-content animate-page-enter"
+					>
+						<Outlet />
+					</div>
+				</main>
+			</div>
+			{showTransactionFab ? <TransactionFab /> : null}
+			<TransactionModalHost />
+			<NavMobile />
+		</div>
+	);
 }

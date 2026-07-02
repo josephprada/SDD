@@ -1,23 +1,23 @@
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
 }
 
 html,
 body,
 #root {
-  min-height: 100%;
+	min-height: 100%;
 }
 
 body {
-  background: var(--color-bg);
+	background: var(--color-bg);
 }
 
 a {
-  color: inherit;
+	color: inherit;
 }
 
 button {
-  font-family: inherit;
+	font-family: inherit;
 }

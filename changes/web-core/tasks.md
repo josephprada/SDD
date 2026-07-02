@@ -24,13 +24,13 @@ To execute manually: `/speckit.git.commit`
 
 **Purpose**: Preparar rutas, carpetas, helpers y contratos de UI compartidos para implementar dominios core.
 
-- [ ] T001 Crear estructura de carpetas core en `apps/web/src/components/{dashboard,accounts,transactions,categories,attachments}/`
-- [ ] T002 [P] Crear rutas placeholder `apps/web/src/routes/accounts.tsx`, `apps/web/src/routes/transactions.tsx`, `apps/web/src/routes/categories.tsx`
-- [ ] T003 [P] Crear helpers de moneda COP en `apps/web/src/lib/format/currency.ts`
-- [ ] T004 [P] Crear helpers de fecha/rango mensual en `apps/web/src/lib/format/date.ts`
-- [ ] T005 [P] Crear constantes de iconografía core en `apps/web/src/lib/core/icons.ts` (`house`, `arrow-down-up`, `wallet`, `tags`, `settings`)
-- [ ] T006 Crear tipos compartidos de formularios/filtros en `apps/web/src/lib/core/types.ts`
-- [ ] T007 Actualizar `apps/web/src/routes/router.tsx` para registrar `/accounts`, `/transactions`, `/categories`
+- [X] T001 Crear estructura de carpetas core en `apps/web/src/components/{dashboard,accounts,transactions,categories,attachments}/`
+- [X] T002 [P] Crear rutas placeholder `apps/web/src/routes/accounts.tsx`, `apps/web/src/routes/transactions.tsx`, `apps/web/src/routes/categories.tsx`
+- [X] T003 [P] Crear helpers de moneda COP en `apps/web/src/lib/format/currency.ts`
+- [X] T004 [P] Crear helpers de fecha/rango mensual en `apps/web/src/lib/format/date.ts`
+- [X] T005 [P] Crear constantes de iconografía core en `apps/web/src/lib/core/icons.ts` (`house`, `arrow-down-up`, `wallet`, `tags`, `settings`)
+- [X] T006 Crear tipos compartidos de formularios/filtros en `apps/web/src/lib/core/types.ts`
+- [X] T007 Actualizar `apps/web/src/routes/router.tsx` para registrar `/accounts`, `/transactions`, `/categories`
 
 **Checkpoint**: Las rutas core existen y renderizan placeholders protegidos dentro del shell.
 
@@ -42,15 +42,15 @@ To execute manually: `/speckit.git.commit`
 
 ⚠️ Ninguna US debe empezar hasta completar esta fase.
 
-- [ ] T008 Modificar `convex/schema.ts` para añadir tabla `accounts` con índices `by_user`, `by_user_archived`
-- [ ] T009 Modificar `convex/schema.ts` para añadir tabla `transactions` con índices `by_user`, `by_user_date`, `by_user_account`, `by_user_category`
-- [ ] T010 Modificar `convex/schema.ts` para añadir tabla `attachments` con índices `by_user`, `by_entity`
-- [ ] T011 Modificar `convex/schema.ts` para extender `categories` con `archived`, `isSystem`, `updatedAt`, `archivedAt` e índices por tipo/archived
-- [ ] T012 Modificar `convex/seed.ts` para asegurar categorías default con `archived: false`, `isSystem`, `updatedAt` y categoría sistema `Transferencia`
-- [ ] T013 Crear helpers de auth/ownership en `convex/lib/auth.ts` para resolver usuario autenticado y validar ownership
-- [ ] T014 Crear validadores de dominio en `convex/lib/validators.ts` para tipos de cuenta, categoría, transacción, adjunto y enteros COP
-- [ ] T015 Crear helpers de saldo en `convex/lib/balance.ts` para calcular deltas `income`, `expense`, `transfer`
-- [ ] T016 Crear mutation dev opcional `convex/migrations.ts` para backfill de categorías existentes (`archived`, `isSystem`, `updatedAt`)
+- [X] T008 Modificar `convex/schema.ts` para añadir tabla `accounts` con índices `by_user`, `by_user_archived`
+- [X] T009 Modificar `convex/schema.ts` para añadir tabla `transactions` con índices `by_user`, `by_user_date`, `by_user_account`, `by_user_category`
+- [X] T010 Modificar `convex/schema.ts` para añadir tabla `attachments` con índices `by_user`, `by_entity`
+- [X] T011 Modificar `convex/schema.ts` para extender `categories` con `archived`, `isSystem`, `updatedAt`, `archivedAt` e índices por tipo/archived
+- [X] T012 Modificar `convex/seed.ts` para asegurar categorías default con `archived: false`, `isSystem`, `updatedAt` y categoría sistema `Transferencia`
+- [X] T013 Crear helpers de auth/ownership en `convex/lib/auth.ts` para resolver usuario autenticado y validar ownership
+- [X] T014 Crear validadores de dominio en `convex/lib/validators.ts` para tipos de cuenta, categoría, transacción, adjunto y enteros COP
+- [X] T015 Crear helpers de saldo en `convex/lib/balance.ts` para calcular deltas `income`, `expense`, `transfer`
+- [X] T016 Crear mutation dev opcional `convex/migrations.ts` para backfill de categorías existentes (`archived`, `isSystem`, `updatedAt`)
 
 **Checkpoint**: `bunx convex dev` genera tipos sin errores y los tipos `_generated` reflejan las tablas nuevas.
 
@@ -64,15 +64,15 @@ To execute manually: `/speckit.git.commit`
 
 ### Implementation
 
-- [ ] T017 [US1] Crear `convex/accounts.ts` con query `list({ includeArchived })` ordenada por `createdAt`
-- [ ] T018 [US1] Implementar mutation `accounts.create` en `convex/accounts.ts` con `initialBalance` default `$ 0` y `balance = initialBalance`
-- [ ] T019 [US1] Implementar mutation `accounts.update` en `convex/accounts.ts` sin alterar `balance`
-- [ ] T020 [US1] Implementar mutation `accounts.archive` en `convex/accounts.ts` con soft delete y `archivedAt`
-- [ ] T021 [P] [US1] Crear `apps/web/src/components/accounts/AccountCard.tsx` con estado visual para saldo negativo
-- [ ] T022 [P] [US1] Crear `apps/web/src/components/accounts/AccountForm.tsx` con validación de nombre y saldo inicial
-- [ ] T023 [P] [US1] Crear `apps/web/src/components/accounts/AccountList.tsx` con empty state y grid responsive
-- [ ] T024 [US1] Implementar `apps/web/src/routes/accounts.tsx` conectando `accounts.list/create/update/archive`
-- [ ] T025 [US1] Añadir acción `Crear cuenta` y link `Ver todas las cuentas` desde dashboard/components hacia `/accounts`
+- [X] T017 [US1] Crear `convex/accounts.ts` con query `list({ includeArchived })` ordenada por `createdAt`
+- [X] T018 [US1] Implementar mutation `accounts.create` en `convex/accounts.ts` con `initialBalance` default `$ 0` y `balance = initialBalance`
+- [X] T019 [US1] Implementar mutation `accounts.update` en `convex/accounts.ts` sin alterar `balance`
+- [X] T020 [US1] Implementar mutation `accounts.archive` en `convex/accounts.ts` con soft delete y `archivedAt`
+- [X] T021 [P] [US1] Crear `apps/web/src/components/accounts/AccountCard.tsx` con estado visual para saldo negativo
+- [X] T022 [P] [US1] Crear `apps/web/src/components/accounts/AccountForm.tsx` con validación de nombre y saldo inicial
+- [X] T023 [P] [US1] Crear `apps/web/src/components/accounts/AccountList.tsx` con empty state y grid responsive
+- [X] T024 [US1] Implementar `apps/web/src/routes/accounts.tsx` conectando `accounts.list/create/update/archive`
+- [X] T025 [US1] Añadir acción `Crear cuenta` y link `Ver todas las cuentas` desde dashboard/components hacia `/accounts`
 
 **Checkpoint**: `/accounts` permite CRUD básico de cuentas y muestra saldos en formato COP.
 
@@ -86,15 +86,15 @@ To execute manually: `/speckit.git.commit`
 
 ### Implementation
 
-- [ ] T026 [US2] Crear `convex/categories.ts` con query `list({ type, includeArchived })`
-- [ ] T027 [US2] Implementar mutation `categories.create` en `convex/categories.ts` con validación de duplicado activo por `userId + type`
-- [ ] T028 [US2] Implementar mutation `categories.update` en `convex/categories.ts` bloqueando `isSystem`
-- [ ] T029 [US2] Implementar mutation `categories.archive` en `convex/categories.ts` bloqueando `isSystem` y preservando históricos
-- [ ] T030 [P] [US2] Crear `apps/web/src/components/categories/CategoryList.tsx` con segmented control `Gastos/Ingresos/Transferencias`
-- [ ] T031 [P] [US2] Crear `apps/web/src/components/categories/CategoryForm.tsx` con selector visual de icono/color y errores de duplicado
-- [ ] T032 [P] [US2] Crear `apps/web/src/components/categories/ArchiveCategoryDialog.tsx` con copy de preservación histórica
-- [ ] T033 [US2] Implementar `apps/web/src/routes/categories.tsx` conectando list/create/update/archive
-- [ ] T034 [US2] Hacer que categorías archivadas no aparezcan en selectores de nuevos movimientos en `apps/web/src/components/transactions/TransactionForm.tsx`
+- [X] T026 [US2] Crear `convex/categories.ts` con query `list({ type, includeArchived })`
+- [X] T027 [US2] Implementar mutation `categories.create` en `convex/categories.ts` con validación de duplicado activo por `userId + type`
+- [X] T028 [US2] Implementar mutation `categories.update` en `convex/categories.ts` bloqueando `isSystem`
+- [X] T029 [US2] Implementar mutation `categories.archive` en `convex/categories.ts` bloqueando `isSystem` y preservando históricos
+- [X] T030 [P] [US2] Crear `apps/web/src/components/categories/CategoryList.tsx` con segmented control `Gastos/Ingresos/Transferencias`
+- [X] T031 [P] [US2] Crear `apps/web/src/components/categories/CategoryForm.tsx` con selector visual de icono/color y errores de duplicado
+- [X] T032 [P] [US2] Crear `apps/web/src/components/categories/ArchiveCategoryDialog.tsx` con copy de preservación histórica
+- [X] T033 [US2] Implementar `apps/web/src/routes/categories.tsx` conectando list/create/update/archive
+- [X] T034 [US2] Hacer que categorías archivadas no aparezcan en selectores de nuevos movimientos en `apps/web/src/components/transactions/TransactionForm.tsx`
 
 **Checkpoint**: `/categories` permite gestión completa y respeta categorías sistema/archivadas.
 
@@ -108,18 +108,18 @@ To execute manually: `/speckit.git.commit`
 
 ### Implementation
 
-- [ ] T035 [US3] Crear `convex/transactions.ts` con query `list` para fecha, cuenta, categoría, monto, búsqueda textual y `limit`
-- [ ] T036 [US3] Crear query `transactions.recent` en `convex/transactions.ts` con default `5` y máximo `20`
-- [ ] T037 [US3] Implementar mutation `transactions.create` en `convex/transactions.ts` validando amount, ownership, categoría compatible y deltas
-- [ ] T038 [US3] Implementar mutation `transactions.update` en `convex/transactions.ts` revirtiendo delta anterior y aplicando delta nuevo
-- [ ] T039 [US3] Implementar mutation `transactions.remove` en `convex/transactions.ts` revirtiendo saldo y eliminando adjuntos asociados
-- [ ] T040 [US3] Implementar validación de transferencia origen ≠ destino en `convex/transactions.ts`
-- [ ] T041 [P] [US3] Crear `apps/web/src/components/transactions/TransactionFilters.tsx` con search, chips y filtros inline desktop
-- [ ] T042 [P] [US3] Crear `apps/web/src/components/transactions/TransactionList.tsx` con cards mobile y tabla desktop
-- [ ] T043 [P] [US3] Crear `apps/web/src/components/transactions/TransactionForm.tsx` con tipo, monto, fecha, cuentas, categoría visual, nota y validaciones
-- [ ] T044 [P] [US3] Crear `apps/web/src/components/accounts/TransferForm.tsx` para transferencia origen/destino
-- [ ] T045 [US3] Implementar `apps/web/src/routes/transactions.tsx` conectando list/create/update/remove y estados sin resultados
-- [ ] T046 [US3] Integrar FAB mobile del shell/dashboard con action sheet `Gasto/Ingreso/Transferir` en `apps/web/src/components/transactions/QuickActionSheet.tsx`
+- [X] T035 [US3] Crear `convex/transactions.ts` con query `list` para fecha, cuenta, categoría, monto, búsqueda textual y `limit`
+- [X] T036 [US3] Crear query `transactions.recent` en `convex/transactions.ts` con default `5` y máximo `20`
+- [X] T037 [US3] Implementar mutation `transactions.create` en `convex/transactions.ts` validando amount, ownership, categoría compatible y deltas
+- [X] T038 [US3] Implementar mutation `transactions.update` en `convex/transactions.ts` revirtiendo delta anterior y aplicando delta nuevo
+- [X] T039 [US3] Implementar mutation `transactions.remove` en `convex/transactions.ts` revirtiendo saldo y eliminando adjuntos asociados
+- [X] T040 [US3] Implementar validación de transferencia origen ≠ destino en `convex/transactions.ts`
+- [X] T041 [P] [US3] Crear `apps/web/src/components/transactions/TransactionFilters.tsx` con search, chips y filtros inline desktop
+- [X] T042 [P] [US3] Crear `apps/web/src/components/transactions/TransactionList.tsx` con cards mobile y tabla desktop
+- [X] T043 [P] [US3] Crear `apps/web/src/components/transactions/TransactionForm.tsx` con tipo, monto, fecha, cuentas, categoría visual, nota y validaciones
+- [X] T044 [P] [US3] Crear `apps/web/src/components/accounts/TransferForm.tsx` para transferencia origen/destino
+- [X] T045 [US3] Implementar `apps/web/src/routes/transactions.tsx` conectando list/create/update/remove y estados sin resultados
+- [X] T046 [US3] Integrar FAB mobile del shell/dashboard con action sheet `Gasto/Ingreso/Transferir` en `apps/web/src/components/transactions/QuickActionSheet.tsx`
 
 **Checkpoint**: `/transactions` permite registrar y corregir movimientos; saldos se mantienen consistentes.
 
@@ -133,16 +133,16 @@ To execute manually: `/speckit.git.commit`
 
 ### Implementation
 
-- [ ] T047 [US4] Crear `convex/dashboard.ts` con query `overview({ monthStart, monthEnd, recentLimit })`
-- [ ] T048 [US4] Agregar agregación mensual en `convex/dashboard.ts` usando transacciones del rango seleccionado
-- [ ] T049 [US4] Asegurar que `dashboard.overview` excluye cuentas archivadas de `activeAccounts`
-- [ ] T050 [P] [US4] Crear `apps/web/src/components/dashboard/DashboardBalanceCard.tsx`
-- [ ] T051 [P] [US4] Crear `apps/web/src/components/dashboard/MonthSwitcher.tsx` con navegación mes anterior/siguiente
-- [ ] T052 [P] [US4] Crear `apps/web/src/components/dashboard/MonthOverview.tsx` con barras proporcionales Ingresos/Gastos y Neto
-- [ ] T053 [P] [US4] Crear `apps/web/src/components/dashboard/RecentTransactionsList.tsx`
-- [ ] T054 [P] [US4] Crear `apps/web/src/components/dashboard/QuickActions.tsx` para desktop y mapping del FAB mobile
-- [ ] T055 [US4] Reemplazar placeholder en `apps/web/src/routes/home.tsx` por dashboard real conectado a `dashboard.overview`
-- [ ] T056 [US4] Implementar empty state de dashboard sin cuentas en `apps/web/src/routes/home.tsx`
+- [X] T047 [US4] Crear `convex/dashboard.ts` con query `overview({ monthStart, monthEnd, recentLimit })`
+- [X] T048 [US4] Agregar agregación mensual en `convex/dashboard.ts` usando transacciones del rango seleccionado
+- [X] T049 [US4] Asegurar que `dashboard.overview` excluye cuentas archivadas de `activeAccounts`
+- [X] T050 [P] [US4] Crear `apps/web/src/components/dashboard/DashboardBalanceCard.tsx`
+- [X] T051 [P] [US4] Crear `apps/web/src/components/dashboard/MonthSwitcher.tsx` con navegación mes anterior/siguiente
+- [X] T052 [P] [US4] Crear `apps/web/src/components/dashboard/MonthOverview.tsx` con barras proporcionales Ingresos/Gastos y Neto
+- [X] T053 [P] [US4] Crear `apps/web/src/components/dashboard/RecentTransactionsList.tsx`
+- [X] T054 [P] [US4] Crear `apps/web/src/components/dashboard/QuickActions.tsx` para desktop y mapping del FAB mobile
+- [X] T055 [US4] Reemplazar placeholder en `apps/web/src/routes/home.tsx` por dashboard real conectado a `dashboard.overview`
+- [X] T056 [US4] Implementar empty state de dashboard sin cuentas en `apps/web/src/routes/home.tsx`
 
 **Checkpoint**: `/` refleja datos reales y permite cambiar el mes visualizado sin afectar el balance total.
 
@@ -156,15 +156,15 @@ To execute manually: `/speckit.git.commit`
 
 ### Implementation
 
-- [ ] T057 [US5] Crear `convex/attachments.ts` con mutation `generateUploadUrl`
-- [ ] T058 [US5] Implementar query `attachments.listByTransaction` en `convex/attachments.ts` validando ownership
-- [ ] T059 [US5] Implementar mutation `attachments.create` en `convex/attachments.ts` validando MIME, tamaño, ownership y máximo 5 adjuntos
-- [ ] T060 [US5] Implementar mutation `attachments.remove` en `convex/attachments.ts` borrando metadata y archivo de storage
-- [ ] T061 [US5] Implementar query `attachments.getUrl` en `convex/attachments.ts`
-- [ ] T062 [P] [US5] Crear `apps/web/src/components/attachments/AttachmentUploader.tsx` con validación cliente de tipo/tamaño/límite
-- [ ] T063 [P] [US5] Crear `apps/web/src/components/attachments/AttachmentList.tsx` con preview imagen, PDF y eliminación
-- [ ] T064 [US5] Integrar `AttachmentUploader` y `AttachmentList` en `apps/web/src/components/transactions/TransactionForm.tsx`
-- [ ] T065 [US5] Integrar eliminación de adjuntos al eliminar transacción en `convex/transactions.ts`
+- [X] T057 [US5] Crear `convex/attachments.ts` con mutation `generateUploadUrl`
+- [X] T058 [US5] Implementar query `attachments.listByTransaction` en `convex/attachments.ts` validando ownership
+- [X] T059 [US5] Implementar mutation `attachments.create` en `convex/attachments.ts` validando MIME, tamaño, ownership y máximo 5 adjuntos
+- [X] T060 [US5] Implementar mutation `attachments.remove` en `convex/attachments.ts` borrando metadata y archivo de storage
+- [X] T061 [US5] Implementar query `attachments.getUrl` en `convex/attachments.ts`
+- [X] T062 [P] [US5] Crear `apps/web/src/components/attachments/AttachmentUploader.tsx` con validación cliente de tipo/tamaño/límite
+- [X] T063 [P] [US5] Crear `apps/web/src/components/attachments/AttachmentList.tsx` con preview imagen, PDF y eliminación
+- [X] T064 [US5] Integrar `AttachmentUploader` y `AttachmentList` en `apps/web/src/components/transactions/TransactionForm.tsx`
+- [X] T065 [US5] Integrar eliminación de adjuntos al eliminar transacción en `convex/transactions.ts`
 
 **Checkpoint**: Los adjuntos funcionan dentro del detalle/formulario de movimiento y respetan validaciones de cliente y servidor.
 
@@ -174,13 +174,13 @@ To execute manually: `/speckit.git.commit`
 
 **Purpose**: Conectar navegación core, componentes compartidos y estados comunes derivados del diseño Pencil.
 
-- [ ] T066 Actualizar `apps/web/src/components/shell/NavMobile.tsx` con Inicio `house`, Movimientos `arrow-down-up`, Cuentas `wallet`, Más `ellipsis` y FAB central
-- [ ] T067 Actualizar `apps/web/src/components/shell/NavDesktop.tsx` con usuario arriba, navegación core y marca según `public/icon.svg`
-- [ ] T068 Crear `apps/web/src/components/ui/EmptyState.tsx` para dashboard/listas vacías
-- [ ] T069 Crear `apps/web/src/components/ui/ConfirmDialog.tsx` para archivar categoría/cuenta y eliminar movimientos/adjuntos
-- [ ] T070 Crear `apps/web/src/components/ui/FieldError.tsx` o patrón equivalente para errores con `aria-describedby`
-- [ ] T071 Crear `apps/web/src/components/ui/SegmentedControl.tsx` si se reutiliza en transacciones/categorías
-- [ ] T072 Crear `apps/web/src/components/ui/CategoryChoice.tsx` para selección visual de categorías con seleccionada primero
+- [X] T066 Actualizar `apps/web/src/components/shell/NavMobile.tsx` con Inicio `house`, Movimientos `arrow-down-up`, Cuentas `wallet`, Más `ellipsis` y FAB central
+- [X] T067 Actualizar `apps/web/src/components/shell/NavDesktop.tsx` con usuario arriba, navegación core y marca según `public/icon.svg`
+- [X] T068 Crear `apps/web/src/components/ui/EmptyState.tsx` para dashboard/listas vacías
+- [X] T069 Crear `apps/web/src/components/ui/ConfirmDialog.tsx` para archivar categoría/cuenta y eliminar movimientos/adjuntos
+- [X] T070 Crear `apps/web/src/components/ui/FieldError.tsx` o patrón equivalente para errores con `aria-describedby`
+- [X] T071 Crear `apps/web/src/components/ui/SegmentedControl.tsx` si se reutiliza en transacciones/categorías
+- [X] T072 Crear `apps/web/src/components/ui/CategoryChoice.tsx` para selección visual de categorías con seleccionada primero
 
 **Checkpoint**: Mobile y desktop comparten navegación/iconografía y estados visuales consistentes.
 
@@ -190,16 +190,16 @@ To execute manually: `/speckit.git.commit`
 
 **Purpose**: Validación responsive, accesibilidad, performance y cierre de documentación.
 
-- [ ] T073 Validar manualmente flujo `quickstart.md` completo en `http://localhost:5173`
-- [ ] T074 Ejecutar `bun run build` desde raíz y corregir errores de TypeScript/build
-- [ ] T075 Ejecutar `bun run lint` desde raíz y corregir errores introducidos
-- [ ] T076 Revisar responsive 320/375/768/1024/1280 en Dashboard, Movimientos, Cuentas, Categorías y Adjuntos
-- [ ] T077 Verificar accesibilidad de formularios en `apps/web/src/components/{accounts,transactions,categories,attachments}/` (labels, foco, `aria-describedby`)
-- [ ] T078 Verificar que estados negativos no dependan solo de color en `AccountCard`, `MonthOverview` y listas de movimientos
-- [ ] T079 Verificar `prefers-reduced-motion` en formularios/dialogs/action sheet según `ui-ux.md`
-- [ ] T080 Actualizar `changes/web-core/quickstart.md` con cualquier ajuste real del flujo QA post-implementación
-- [ ] T081 Actualizar `changes/web-core/spec.md` con decisiones de implementación si se desvía del diseño aprobado
-- [ ] T082 Revisar `changes/web-core/designs/design-brief.md` y marcar cualquier variante no implementada
+- [X] T073 Validar manualmente flujo `quickstart.md` completo en `http://localhost:5173`
+- [X] T074 Ejecutar `bun run build` desde raíz y corregir errores de TypeScript/build
+- [X] T075 Ejecutar `bun run lint` desde raíz y corregir errores introducidos
+- [X] T076 Revisar responsive 320/375/768/1024/1280 en Dashboard, Movimientos, Cuentas, Categorías y Adjuntos
+- [X] T077 Verificar accesibilidad de formularios en `apps/web/src/components/{accounts,transactions,categories,attachments}/` (labels, foco, `aria-describedby`)
+- [X] T078 Verificar que estados negativos no dependan solo de color en `AccountCard`, `MonthOverview` y listas de movimientos
+- [X] T079 Verificar `prefers-reduced-motion` en formularios/dialogs/action sheet según `ui-ux.md`
+- [X] T080 Actualizar `changes/web-core/quickstart.md` con cualquier ajuste real del flujo QA post-implementación
+- [X] T081 Actualizar `changes/web-core/spec.md` con decisiones de implementación si se desvía del diseño aprobado
+- [X] T082 Revisar `changes/web-core/designs/design-brief.md` y marcar cualquier variante no implementada
 
 ---
 
