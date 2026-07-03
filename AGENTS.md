@@ -61,14 +61,17 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change activo: web-foundation
+## Change activo: web-deploy
 
 | Artefacto | Ruta |
 |-----------|------|
-| Spec | `changes/web-foundation/spec.md` |
-| Propuesta | `changes/web-foundation/proposal.md` |
-| Diseño técnico | `changes/web-foundation/design.md` |
-| Diseños Pencil | `changes/web-foundation/designs/*.pen` |
+| Spec | `changes/web-deploy/spec.md` |
+| Propuesta | `changes/web-deploy/proposal.md` |
+| Diseño técnico | `changes/web-deploy/design.md` |
+| Auditoría VPS | `changes/web-deploy/research.md` |
+| Tareas | `changes/web-deploy/tasks.md` |
+| Quickstart prod | `changes/web-deploy/quickstart.md` |
+| Plantillas | `changes/web-deploy/templates/` |
 
 ---
 

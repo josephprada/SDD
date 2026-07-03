@@ -466,6 +466,9 @@ packages/jp-ds/
    - Adjuntos por transacción (imágenes y PDFs)
    - Dashboard real con balance, resumen mensual y recientes
    - UI responsive mobile-first alineada a `webcore.pen`
+3b. **Change 2b: web-deploy** (en revisión — ver `changes/web-deploy/`)
+   - Producción en `wallet.lavalex.co` (VPS Nginx + Convex Cloud prod)
+   - CI/CD: GitHub Actions al push a `main`
 4. **Change 3: Configuración completa**
    - Panel: tema, agrupación temporal (semana/mes/trimestre/semestre), gestión de categorías, idioma, notificaciones
 5. **Change 4: Presupuestos + Reportes + Panel de Resultados**
