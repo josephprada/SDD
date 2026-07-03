@@ -4,6 +4,8 @@
 
 **Prerequisites**: `web-foundation` completado ✅ · spec/design/data-model/contracts ✅ · artboards Pencil base + estados secundarios ✅
 
+**Cierre**: 2026-07-03 — Change completado. Entrega en rama `testing` (merge desde `feat/web-core`). Incluye refinamiento responsive mobile-first, modales sheet, FAB en bottom nav, cards de cuentas clickeables y cierre de sesión en sidebar desktop / ajustes móvil.
+
 **Visual source of truth**: [`desing.md`](../../desing.md) + `changes/web-core/designs/webcore.pen`
 
 **Tests**: No hay solicitud explícita de TDD. Se omiten tareas formales de test-first; se incluyen validaciones manuales, `bun run build`, `bun run lint` y checks del `quickstart.md`.

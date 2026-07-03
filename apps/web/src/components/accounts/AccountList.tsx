@@ -80,6 +80,11 @@ export function AccountList({
 		setDropTargetId(null);
 	};
 
+	const handleOpen = (account: Doc<"accounts">) => {
+		if (suppressClickRef.current) return;
+		onEdit?.(account);
+	};
+
 	return (
 		<div className="account-grid">
 			{accounts.map((account) => (
@@ -93,7 +98,7 @@ export function AccountList({
 					onDragOver={(event) => handleDragOver(event, account)}
 					onDrop={(event) => handleDrop(event, account)}
 					onDragEnd={handleDragEnd}
-					onEdit={onEdit ? () => onEdit(account) : undefined}
+					onSelect={onEdit ? () => handleOpen(account) : undefined}
 					onArchive={onArchive ? () => onArchive(account) : undefined}
 				/>
 			))}

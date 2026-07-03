@@ -22,8 +22,8 @@ export const RecentTransactionsList = forwardRef<
 			aria-label="Movimientos recientes"
 		>
 			<div className="section-header">
-				<h2 className="section-title">Recientes</h2>
-				<Link to="/transactions" className="link-accent">
+				<h2 className="section-title">Últimos movimientos</h2>
+				<Link to="/transactions" className="link-accent show-desktop">
 					Ver todas
 				</Link>
 			</div>

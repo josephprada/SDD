@@ -51,58 +51,62 @@ export function CategoryForm({
 	};
 
 	return (
-		<form className="modal-form" onSubmit={handleSubmit} noValidate>
-			<Input
-				label="Nombre"
-				value={values.name}
-				onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
-				required
-			/>
-			<FieldError message={error || serverError} />
+		<form className="tx-form tx-form--modal" onSubmit={handleSubmit} noValidate>
+			<div className="tx-form__scroll brand-scroll">
+				<Input
+					label="Nombre"
+					value={values.name}
+					onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
+					required
+				/>
+				<FieldError message={error || serverError} />
 
-			<span className="jp-input-label">Icono</span>
-			<div className="icon-picker brand-scroll" aria-label="Icono">
-				{CATEGORY_ICON_GROUPS.map((group) => (
-					<div key={group.label} className="icon-picker__group">
-						<span className="icon-picker__group-label">{group.label}</span>
-						<div className="icon-picker__grid">
-							{group.icons.map((iconName) => (
-								<button
-									key={iconName}
-									type="button"
-									aria-pressed={values.icon === iconName}
-									className={`icon-picker__item${values.icon === iconName ? " icon-picker__item--active" : ""}`}
-									onClick={() => setValues((v) => ({ ...v, icon: iconName }))}
-								>
-									<CategoryIcon
-										icon={iconName}
-										size={18}
-										color={
-											values.icon === iconName
-												? "var(--color-accent)"
-												: "var(--color-text-secondary)"
+				<span className="jp-input-label">Icono</span>
+				<div className="icon-picker" aria-label="Icono">
+					{CATEGORY_ICON_GROUPS.map((group) => (
+						<div key={group.label} className="icon-picker__group">
+							<span className="icon-picker__group-label">{group.label}</span>
+							<div className="icon-picker__grid">
+								{group.icons.map((iconName) => (
+									<button
+										key={iconName}
+										type="button"
+										aria-pressed={values.icon === iconName}
+										className={`icon-picker__item${values.icon === iconName ? " icon-picker__item--active" : ""}`}
+										onClick={() =>
+											setValues((v) => ({ ...v, icon: iconName }))
 										}
-									/>
-								</button>
-							))}
+									>
+										<CategoryIcon
+											icon={iconName}
+											size={18}
+											color={
+												values.icon === iconName
+													? "var(--color-accent)"
+													: "var(--color-text-secondary)"
+											}
+										/>
+									</button>
+								))}
+							</div>
 						</div>
-					</div>
-				))}
-			</div>
+					))}
+				</div>
 
-			<span className="jp-input-label">Color</span>
-			<div className="color-picker" aria-label="Color">
-				{CATEGORY_COLORS.map((color) => (
-					<button
-						key={color}
-						type="button"
-						aria-pressed={values.color === color}
-						className={`color-picker__item${values.color === color ? " color-picker__item--active" : ""}`}
-						style={{ backgroundColor: color }}
-						aria-label={color}
-						onClick={() => setValues((v) => ({ ...v, color }))}
-					/>
-				))}
+				<span className="jp-input-label">Color</span>
+				<div className="color-picker" aria-label="Color">
+					{CATEGORY_COLORS.map((color) => (
+						<button
+							key={color}
+							type="button"
+							aria-pressed={values.color === color}
+							className={`color-picker__item${values.color === color ? " color-picker__item--active" : ""}`}
+							style={{ backgroundColor: color }}
+							aria-label={color}
+							onClick={() => setValues((v) => ({ ...v, color }))}
+						/>
+					))}
+				</div>
 			</div>
 
 			<div className="form-panel__actions">

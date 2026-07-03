@@ -461,10 +461,11 @@ packages/jp-ds/
 2. ✅ **Change 1: web-foundation** (completado 2026-06-24, en `testing`)
    - Google OAuth popup end-to-end (`@convex-dev/auth`)
    - App shell, ruteo, JP-DS, tema (lógica completa; UI toggle diferida)
-3. **Change 2: Core (Cuentas + Categorías + Transacciones) + Dashboard + Adjuntos**
-   - CRUD de los 3
-   - Adjuntos (imágenes y PDFs) por transacción
-   - Dashboard real con balance y resumen mensual
+3. ✅ **Change 2: web-core** (completado 2026-07-03, en `testing`)
+   - CRUD cuentas, categorías y transacciones + transferencias
+   - Adjuntos por transacción (imágenes y PDFs)
+   - Dashboard real con balance, resumen mensual y recientes
+   - UI responsive mobile-first alineada a `webcore.pen`
 4. **Change 3: Configuración completa**
    - Panel: tema, agrupación temporal (semana/mes/trimestre/semestre), gestión de categorías, idioma, notificaciones
 5. **Change 4: Presupuestos + Reportes + Panel de Resultados**

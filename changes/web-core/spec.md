@@ -1,10 +1,11 @@
 # Change 2 — Web Core
 
 **Versión**: 1.1.0
-**Estado**: En progreso (refinamiento UI desktop)
+**Estado**: Completada
 **Change**: web-core
 **Creado**: 2026-06-25
-**Actualizado**: 2026-07-02
+**Completada**: 2026-07-03
+**Rama de entrega**: `testing` (merge desde `feat/web-core`)
 
 ---
 

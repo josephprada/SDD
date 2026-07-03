@@ -10,9 +10,10 @@ import { ACCOUNT_TYPE_LABELS, CoreIcon } from "@app/lib/core/icons";
 import { formatCOP } from "@app/lib/format/currency";
 import { addMonths, monthRange } from "@app/lib/format/date";
 import { useRecentListLimit } from "@app/lib/dashboard/useRecentListLimit";
+import { MEDIA_DESKTOP } from "@app/lib/core/breakpoints";
 import { useMediaQuery } from "@app/lib/core/useMediaQuery";
 import { api } from "@convex/_generated/api";
-import { Avatar, Button } from "@jp-ds";
+import { Avatar } from "@jp-ds";
 import { useQuery } from "convex/react";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
@@ -23,7 +24,7 @@ export function HomeRoute() {
 	const [month, setMonth] = useState(() => new Date());
 	const range = monthRange(month);
 	const recentSectionRef = useRef<HTMLElement>(null);
-	const isDesktop = useMediaQuery("(min-width: 1024px)");
+	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const recentLimit = useRecentListLimit(recentSectionRef, isDesktop);
 
 	const overview = useQuery(api.dashboard.overview, {
@@ -58,7 +59,12 @@ export function HomeRoute() {
 	return (
 		<div className="dashboard-page animate-stagger">
 			<header className="dash-greeting show-mobile animate-stagger-item">
-				<div>
+				<div className="dash-greeting__brand">
+					<BrandLogoMark
+						size={30}
+						height={28}
+						className="brand-logo-mark--greeting"
+					/>
 					<span className="dash-greeting__hi">Hola, {firstName}</span>
 				</div>
 				<Link to="/settings" aria-label="Perfil">
@@ -123,18 +129,18 @@ export function HomeRoute() {
 
 				<aside className="dashboard-aside">
 					<section
-						className="accounts-compact glass"
+						className="accounts-compact accounts-compact--scroll glass"
 						aria-label="Cuentas activas"
 					>
 						<div className="section-header">
 							<h2 className="section-title">Cuentas</h2>
-							<Link to="/accounts" className="link-accent">
+							<Link to="/accounts" className="link-accent show-desktop">
 								Ver todas
 							</Link>
 						</div>
 						<div className="accounts-compact__grid">
 							{overview.activeAccounts.map((account) => (
-								<div key={account._id} className="account-compact glass">
+								<div key={account._id} className="account-compact">
 									<span className="account-compact__name">{account.name}</span>
 									<span className="account-compact__type">
 										{ACCOUNT_TYPE_LABELS[account.type]}
@@ -158,15 +164,6 @@ export function HomeRoute() {
 				</aside>
 			</div>
 
-			<div className="show-mobile dash-see-all">
-				<Button
-					variant="secondary"
-					fullWidth
-					onClick={() => navigate("/transactions")}
-				>
-					Ver todos los movimientos
-				</Button>
-			</div>
 		</div>
 	);
 }

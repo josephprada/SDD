@@ -5,6 +5,7 @@ import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { Modal } from "@app/components/ui/Modal";
 import { CoreIcon } from "@app/lib/core/icons";
 import type { CategoryFormValues, CategoryType } from "@app/lib/core/types";
+import { MEDIA_DESKTOP } from "@app/lib/core/breakpoints";
 import { useMediaQuery } from "@app/lib/core/useMediaQuery";
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
@@ -13,7 +14,7 @@ import { useMutation, useQuery } from "convex/react";
 import { useMemo, useState } from "react";
 
 export function CategoriesRoute() {
-	const isDesktop = useMediaQuery("(min-width: 1024px)");
+	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const categories =
 		useQuery(api.categories.list, { includeArchived: false }) ?? [];
 	const transactions = useQuery(api.transactions.list, {}) ?? [];

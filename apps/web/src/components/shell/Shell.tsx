@@ -5,7 +5,13 @@ import { NavDesktop } from "./NavDesktop";
 import { NavMobile } from "./NavMobile";
 import { SkipToContent } from "./SkipToContent";
 
-const TRANSACTION_FAB_ROUTES = new Set(["/", "/transactions", "/accounts"]);
+const TRANSACTION_FAB_ROUTES = new Set([
+	"/",
+	"/transactions",
+	"/accounts",
+	"/categories",
+	"/settings",
+]);
 
 export function Shell() {
 	const location = useLocation();
@@ -29,7 +35,7 @@ export function Shell() {
 			</div>
 			{showTransactionFab ? <TransactionFab /> : null}
 			<TransactionModalHost />
-			<NavMobile />
+			<NavMobile showFab={showTransactionFab} />
 		</div>
 	);
 }

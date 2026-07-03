@@ -12,6 +12,14 @@ body,
 
 body {
 	background: var(--color-bg);
+	overflow-x: clip;
+}
+
+img,
+svg,
+video {
+	max-width: 100%;
+	height: auto;
 }
 
 a {

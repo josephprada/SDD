@@ -1,10 +1,16 @@
 import { useAuth } from "@app/lib/auth/useAuth";
 import { CoreIcon } from "@app/lib/core/icons";
 import { Avatar } from "@jp-ds";
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 
 export function NavDesktop() {
-	const { session } = useAuth();
+	const { session, signOut } = useAuth();
+	const navigate = useNavigate();
+
+	const handleSignOut = async () => {
+		await signOut();
+		navigate("/login", { replace: true });
+	};
 
 	return (
 		<aside className="sidebar glass animate-slide-in-left" aria-label="Sidebar">
@@ -19,11 +25,7 @@ export function NavDesktop() {
 			) : null}
 
 			<nav
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					gap: "var(--space-2)",
-				}}
+				className="sidebar-nav"
 			>
 				<NavLink
 					to="/"
@@ -72,6 +74,18 @@ export function NavDesktop() {
 					Ajustes
 				</NavLink>
 			</nav>
+
+			{session ? (
+				<div className="sidebar-footer">
+					<button
+						type="button"
+						className="sidebar-sign-out"
+						onClick={handleSignOut}
+					>
+						Cerrar sesión
+					</button>
+				</div>
+			) : null}
 		</aside>
 	);
 }

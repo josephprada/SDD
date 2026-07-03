@@ -12,7 +12,7 @@ type AccountCardProps = {
 	onDragOver?: (event: React.DragEvent<HTMLElement>) => void;
 	onDrop?: (event: React.DragEvent<HTMLElement>) => void;
 	onDragEnd?: () => void;
-	onEdit?: () => void;
+	onSelect?: () => void;
 	onArchive?: () => void;
 };
 
@@ -25,7 +25,7 @@ export function AccountCard({
 	onDragOver,
 	onDrop,
 	onDragEnd,
-	onEdit,
+	onSelect,
 	onArchive,
 }: AccountCardProps) {
 	const isNegative = account.balance < 0;
@@ -36,12 +36,26 @@ export function AccountCard({
 				"account-card glass interactive-lift",
 				isNegative ? "account-card--negative" : "",
 				draggable ? "account-card--draggable" : "",
+				onSelect ? "account-card--selectable" : "",
 				isDragging ? "account-card--dragging" : "",
 				isDropTarget ? "account-card--drop-target" : "",
 			]
 				.filter(Boolean)
 				.join(" ")}
 			draggable={draggable}
+			onClick={onSelect}
+			onKeyDown={
+				onSelect
+					? (event) => {
+							if (event.key === "Enter" || event.key === " ") {
+								event.preventDefault();
+								onSelect();
+							}
+						}
+					: undefined
+			}
+			role={onSelect ? "button" : undefined}
+			tabIndex={onSelect ? 0 : undefined}
 			onDragStart={onDragStart}
 			onDragOver={onDragOver}
 			onDragLeave={() => undefined}
@@ -50,25 +64,20 @@ export function AccountCard({
 		>
 			<div className="account-card__top">
 				<span className="account-card__name">{account.name}</span>
-				<div
-					className="account-card__actions"
-					onMouseDown={(event) => event.stopPropagation()}
-					onClick={(event) => event.stopPropagation()}
-				>
-					{onEdit ? (
-						<IconButton aria-label={`Editar ${account.name}`} onClick={onEdit}>
-							<CoreIcon name="edit" size={16} />
-						</IconButton>
-					) : null}
-					{onArchive && !account.archived ? (
+				{onArchive && !account.archived ? (
+					<div
+						className="account-card__actions"
+						onMouseDown={(event) => event.stopPropagation()}
+						onClick={(event) => event.stopPropagation()}
+					>
 						<IconButton
 							aria-label={`Archivar ${account.name}`}
 							onClick={onArchive}
 						>
 							<CoreIcon name="trash" size={16} />
 						</IconButton>
-					) : null}
-				</div>
+					</div>
+				) : null}
 			</div>
 			<span className="account-card__type">
 				{ACCOUNT_TYPE_LABELS[account.type]}
