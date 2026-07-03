@@ -7,6 +7,8 @@ import { useEffect } from "react";
 import {
 	fetchGoogleOAuthRedirect,
 	openGoogleOAuthPopup,
+	OAUTH_NEXT_STORAGE_KEY,
+	shouldUseOAuthRedirect,
 } from "./googlePopupSignIn";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL as string;
@@ -38,6 +40,17 @@ export function useAuth() {
 		signInWithGoogle: async () => {
 			if (!convexUrl) {
 				throw new Error("VITE_CONVEX_URL no está configurada.");
+			}
+
+			if (shouldUseOAuthRedirect()) {
+				const next = new URLSearchParams(window.location.search).get(
+					"next",
+				);
+				if (next) {
+					sessionStorage.setItem(OAUTH_NEXT_STORAGE_KEY, next);
+				}
+				await signIn("google", { redirectTo: "/login" });
+				return;
 			}
 
 			const redirect = await fetchGoogleOAuthRedirect(convexUrl);

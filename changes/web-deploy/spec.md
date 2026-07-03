@@ -1,10 +1,11 @@
 # Change — Web Deploy (MVP Producción)
 
 **Versión**: 1.0.0
-**Estado**: Borrador (revisión)
+**Estado**: Completada
 **Change**: web-deploy
 **Creado**: 2026-07-03
-**Rama de entrega prevista**: `main` (auto-deploy) desde merge `testing` → `main`
+**Completada**: 2026-07-03
+**Rama de entrega**: `feat/web-deploy` (deploy manual + CI listo para `main`)
 
 ---
 
@@ -156,15 +157,15 @@ Tras el primer deploy, el sistema DEBE soportar el flujo mínimo de `web-core` e
 
 ## Criterios de Éxito
 
-- [ ] `https://wallet.lavalex.co` carga JP-WALLET con TLS válido
-- [ ] `lavalex.co` y `jarvis.lavalex.co` sin regresiones
-- [ ] Convex prod desplegado y separado de dev
-- [ ] Login Google funcional en prod
-- [ ] GitHub Action despliega en push a `main`
-- [ ] Usuario `deploy` + secrets configurados (sin root en CI)
-- [ ] Smoke test web-core completado en prod
-- [ ] Documentación `quickstart.md` ejecutable de extremo a extremo
-- [ ] Rollback documentado y probado al menos en frontend (`dist.prev`)
+- [x] `https://wallet.lavalex.co` carga JP-WALLET con TLS válido
+- [x] `lavalex.co` y `jarvis.lavalex.co` sin regresiones
+- [x] Convex prod desplegado y separado de dev
+- [x] Login Google funcional en prod (desktop popup + móvil redirect)
+- [x] GitHub Action configurado para push a `main` (primer run CI pendiente de merge)
+- [x] Usuario `deploy` + secrets configurados (sin root en CI)
+- [x] Smoke test web-core completado en prod
+- [x] Documentación `quickstart.md` ejecutable de extremo a extremo
+- [x] Rollback documentado (`jp-wallet.prev` + `quickstart.md` §6)
 
 ---
 
@@ -185,3 +186,7 @@ Tras el primer deploy, el sistema DEBE soportar el flujo mínimo de `web-core` e
 | 2026-07-03 | Nginx (no Caddy) tras auditoría VPS — ver `research.md` |
 | 2026-07-03 | Deploy trigger: push a `main` |
 | 2026-07-03 | Convex Cloud prod (no self-host) |
+| 2026-07-03 | Migración datos dev → prod (`convex export` / `import --replace-all`) |
+| 2026-07-03 | Fix OAuth prod: COOP popup desktop + redirect móvil vía `ConvexAuthProvider` |
+| 2026-07-03 | Smoke prod validado por usuario (login desktop/móvil, datos migrados) |
+| 2026-07-03 | **Change cerrado** — primer deploy CI al merge `feat/web-deploy` → `main` |

@@ -1,30 +1,45 @@
 import { Spinner } from "@jp-ds/index";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
+function notifyPopupOpener(code: string | null, error: string | null) {
+	window.opener?.postMessage(
+		{
+			type: "jp-wallet-oauth-code",
+			code: error ? null : code,
+			error,
+		},
+		window.location.origin,
+	);
+}
+
+/**
+ * Solo para OAuth en popup (desktop). En móvil el callback es `/login?code=…`
+ * y `ConvexAuthProvider` completa el sign-in automáticamente.
+ */
 export function OAuthCallbackRoute() {
-	useEffect(() => {
-		const url = new URL(window.location.href);
-		const code = url.searchParams.get("code");
-		const error = url.searchParams.get("error");
+	const started = useRef(false);
 
-		if (window.opener) {
-			window.opener.postMessage(
-				{
-					type: "jp-wallet-oauth-code",
-					code: error ? null : code,
-					error,
-				},
-				window.location.origin,
-			);
-			window.close();
+	useEffect(() => {
+		if (started.current) {
+			return;
+		}
+		started.current = true;
+
+		const search = window.location.search;
+		const isPopupFlow =
+			window.opener != null && window.opener !== window;
+
+		if (!isPopupFlow) {
+			window.location.replace(`/login${search}`);
 			return;
 		}
 
-		if (code) {
-			window.location.replace(`/?code=${encodeURIComponent(code)}`);
-		} else {
-			window.location.replace("/login");
-		}
+		const url = new URL(window.location.href);
+		notifyPopupOpener(
+			url.searchParams.get("code"),
+			url.searchParams.get("error"),
+		);
+		window.close();
 	}, []);
 
 	return (

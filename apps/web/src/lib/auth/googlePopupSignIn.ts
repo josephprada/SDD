@@ -41,8 +41,49 @@ export async function fetchGoogleOAuthRedirect(
 	return result.redirect;
 }
 
+/** Popups OAuth no son fiables en móvil / touch. */
+export function shouldUseOAuthRedirect(): boolean {
+	if (typeof window === "undefined") {
+		return false;
+	}
+	const ua = navigator.userAgent;
+	const isMobileUA =
+		/Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+			ua,
+		);
+	if (isMobileUA) {
+		return true;
+	}
+	return (
+		window.matchMedia("(max-width: 768px)").matches ||
+		window.matchMedia("(pointer: coarse)").matches
+	);
+}
+
+export const OAUTH_NEXT_STORAGE_KEY = "jp-wallet-oauth-next";
+
 const POPUP_WIDTH = 520;
 const POPUP_HEIGHT = 660;
+const OAUTH_CHANNEL = "jp-wallet-oauth";
+
+function isPopupClosed(popup: Window): boolean | null {
+	try {
+		return popup.closed;
+	} catch {
+		// COOP puede bloquear popup.closed mientras el popup está en Google
+		return null;
+	}
+}
+
+function closePopup(popup: Window) {
+	try {
+		if (!popup.closed) {
+			popup.close();
+		}
+	} catch {
+		// COOP puede bloquear popup.close en algunos navegadores
+	}
+}
 
 export function openGoogleOAuthPopup(redirectUrl: string): Promise<string> {
 	const left = Math.max(
@@ -70,11 +111,49 @@ export function openGoogleOAuthPopup(redirectUrl: string): Promise<string> {
 
 	return new Promise((resolve, reject) => {
 		const origin = window.location.origin;
+		let settled = false;
+		const channel = new BroadcastChannel(OAUTH_CHANNEL);
+
+		const settle = (
+			handler: "resolve" | "reject",
+			value: string | Error,
+		) => {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			cleanup();
+			if (handler === "resolve") {
+				resolve(value as string);
+			} else {
+				reject(value);
+			}
+		};
 
 		const cleanup = () => {
 			window.clearInterval(pollTimer);
 			window.clearTimeout(timeoutTimer);
 			window.removeEventListener("message", onMessage);
+			channel.removeEventListener("message", onChannelMessage);
+			channel.close();
+		};
+
+		const handleOAuthResult = (code: string | null, error: string | null) => {
+			closePopup(popup);
+
+			if (error) {
+				settle("reject", new Error("Google rechazó el inicio de sesión."));
+				return;
+			}
+
+			if (code) {
+				settle("resolve", code);
+			} else {
+				settle(
+					"reject",
+					new Error("No se recibió el código de autorización."),
+				);
+			}
 		};
 
 		const onMessage = (event: MessageEvent) => {
@@ -85,31 +164,34 @@ export function openGoogleOAuthPopup(redirectUrl: string): Promise<string> {
 				return;
 			}
 
-			cleanup();
+			handleOAuthResult(
+				(event.data.code as string | null) ?? null,
+				(event.data.error as string | null) ?? null,
+			);
+		};
 
-			if (!popup.closed) {
-				popup.close();
-			}
-
-			if (event.data.error) {
-				reject(new Error("Google rechazó el inicio de sesión."));
+		const onChannelMessage = (event: MessageEvent) => {
+			if (event.data?.type !== "jp-wallet-oauth-code") {
 				return;
 			}
 
-			const code = event.data.code as string | undefined;
-			if (code) {
-				resolve(code);
-			} else {
-				reject(new Error("No se recibió el código de autorización."));
-			}
+			handleOAuthResult(
+				(event.data.code as string | null) ?? null,
+				(event.data.error as string | null) ?? null,
+			);
 		};
 
 		window.addEventListener("message", onMessage);
+		channel.addEventListener("message", onChannelMessage);
 
 		const pollTimer = window.setInterval(() => {
-			if (popup.closed) {
-				cleanup();
-				reject(new Error("Inicio de sesión cancelado."));
+			const closed = isPopupClosed(popup);
+			if (closed === true) {
+				settle("reject", new Error("Inicio de sesión cancelado."));
+				return;
+			}
+
+			if (closed === null) {
 				return;
 			}
 
@@ -120,32 +202,21 @@ export function openGoogleOAuthPopup(redirectUrl: string): Promise<string> {
 				}
 
 				const url = new URL(popupUrl);
-				const code = url.searchParams.get("code");
-				const error = url.searchParams.get("error");
-
-				if (error) {
-					cleanup();
-					popup.close();
-					reject(new Error("Google rechazó el inicio de sesión."));
-					return;
-				}
-
-				if (code) {
-					cleanup();
-					popup.close();
-					resolve(code);
-				}
+				handleOAuthResult(
+					url.searchParams.get("code"),
+					url.searchParams.get("error"),
+				);
 			} catch {
 				// Cross-origin mientras está en accounts.google.com
 			}
 		}, 250);
 
 		const timeoutTimer = window.setTimeout(() => {
-			cleanup();
-			if (!popup.closed) {
-				popup.close();
-			}
-			reject(new Error("Tiempo de espera agotado al iniciar sesión."));
+			closePopup(popup);
+			settle(
+				"reject",
+				new Error("Tiempo de espera agotado al iniciar sesión."),
+			);
 		}, 120_000);
 	});
 }

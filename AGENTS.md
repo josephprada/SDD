@@ -61,17 +61,18 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change activo: web-deploy
+## Último change cerrado: web-deploy ✅ (2026-07-03)
+
+Producción: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
 
 | Artefacto | Ruta |
 |-----------|------|
 | Spec | `changes/web-deploy/spec.md` |
 | Propuesta | `changes/web-deploy/proposal.md` |
 | Diseño técnico | `changes/web-deploy/design.md` |
-| Auditoría VPS | `changes/web-deploy/research.md` |
-| Tareas | `changes/web-deploy/tasks.md` |
 | Quickstart prod | `changes/web-deploy/quickstart.md` |
-| Plantillas | `changes/web-deploy/templates/` |
+
+**Siguiente change planificado** (ver `SPEC.md` roadmap): **Change 3 — Configuración completa**.
 
 ---
 

@@ -16,12 +16,12 @@
 
 ## Precondiciones
 
-- [ ] `web-core` mergeado en `testing` y listo para `main`
-- [ ] DNS `wallet.lavalex.co` → `69.6.234.237`
-- [ ] Deployment Convex prod creado
-- [ ] Google OAuth con URIs de prod
-- [ ] Usuario `deploy` en VPS
-- [ ] GitHub Secrets configurados (ver `design.md`)
+- [x] `web-core` mergeado en `testing` y listo para `main`
+- [x] DNS `wallet.lavalex.co` → `69.6.234.237`
+- [x] Deployment Convex prod creado
+- [x] Google OAuth con URIs de prod
+- [x] Usuario `deploy` en VPS
+- [x] GitHub Secrets configurados (ver `GITHUB_SECRETS.md`)
 
 ---
 
@@ -173,10 +173,13 @@ Prod y dev permanecen **aislados**.
 | 404 en rutas `/accounts` | Nginx sin `try_files` | Revisar `wallet.lavalex.co.conf` |
 | Certificado inválido en wallet | SAN faltante | `certbot --expand` |
 | Deploy CI falla SSH | Clave/usuario deploy | Revisar `VPS_SSH_*` secrets |
-| Datos de dev en prod | URL Convex dev en build | Verificar `VITE_CONVEX_URL_PROD` en workflow |
+| Login móvil spinner infinito | Popup OAuth en touch | Redirect a `/login?code=` vía `signIn({ redirectTo })` |
+| COOP bloquea popup desktop | Header / polling `popup.closed` | `same-origin-allow-popups` en Nginx + fix popup |
 
 ---
 
-## Siguiente paso
+## Estado del change
 
-Tras revisar este change con el usuario → ejecutar **Phase 1** de `tasks.md` e implementar plantillas en el repo.
+**Completado** (2026-07-03). App en prod: `https://wallet.lavalex.co`.
+
+**Siguiente paso git**: merge `feat/web-deploy` → `testing` → `main` para activar el primer deploy CI.

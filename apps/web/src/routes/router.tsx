@@ -1,4 +1,5 @@
 import { LoadingScreen } from "@app/components/shell/LoadingScreen";
+import { OAUTH_NEXT_STORAGE_KEY } from "@app/lib/auth/googlePopupSignIn";
 import { useAuth } from "@app/lib/auth/useAuth";
 import { useThemeStore } from "@app/stores/theme";
 import { useConvexAuth } from "convex/react";
@@ -42,15 +43,42 @@ function GuestGate({ children }: { children: React.ReactNode }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+	const searchParams = new URLSearchParams(location.search);
+	const hasOAuthCode = searchParams.has("code");
+	const oauthError = searchParams.get("error");
+
+	useEffect(() => {
+		if (oauthError && !hasOAuthCode) {
+			navigate("/login?error=oauth_denied", { replace: true });
+		}
+	}, [oauthError, hasOAuthCode, navigate]);
 
 	useEffect(() => {
 		if (!isLoading && isAuthenticated) {
-			const next = new URLSearchParams(location.search).get("next") ?? "/";
+			const params = new URLSearchParams(location.search);
+			const next =
+				params.get("next") ??
+				sessionStorage.getItem(OAUTH_NEXT_STORAGE_KEY) ??
+				"/";
+			sessionStorage.removeItem(OAUTH_NEXT_STORAGE_KEY);
 			navigate(next, { replace: true });
 		}
 	}, [isAuthenticated, isLoading, location.search, navigate]);
 
-	if (isLoading || isAuthenticated) {
+	useEffect(() => {
+		if (!hasOAuthCode || isAuthenticated) {
+			return;
+		}
+		const timer = window.setTimeout(() => {
+			if (!isAuthenticated) {
+				sessionStorage.removeItem(OAUTH_NEXT_STORAGE_KEY);
+				navigate("/login?error=signin_failed", { replace: true });
+			}
+		}, 20_000);
+		return () => window.clearTimeout(timer);
+	}, [hasOAuthCode, isAuthenticated, navigate]);
+
+	if (isLoading || isAuthenticated || hasOAuthCode) {
 		return <LoadingScreen />;
 	}
 

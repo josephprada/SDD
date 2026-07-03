@@ -6,6 +6,8 @@
 
 **Rama**: `feat/web-deploy` → `testing` → `main` (activa auto-deploy)
 
+**Estado**: **Completada** (2026-07-03)
+
 **Tests**: Validación manual + smoke prod; `bun run build` en CI; `nginx -t` en VPS.
 
 ---
@@ -18,10 +20,10 @@
 - [X] T002 DNS `wallet.lavalex.co` → `69.6.234.237`
 - [X] T003 Crear deployment **production** en Convex; URL: `https://cheery-bass-870.convex.cloud`
 - [X] T004 OAuth: mismo Client ID dev/prod (documentado en `design.md`)
-- [ ] T005 Rotar contraseña root VPS y configurar clave SSH personal (post-auditoría)
+- [ ] T005 Rotar contraseña root VPS y configurar clave SSH personal (post-auditoría) — *pendiente hardening, no bloqueante MVP*
 - [X] T006 Generar par de claves ed25519 para GitHub Actions (`deploy-keys/github-actions`)
 
-**Checkpoint**: DNS resuelve; deployment Convex prod existe; decisiones P-04 cerradas.
+**Checkpoint**: DNS resuelve; deployment Convex prod existe; decisiones P-04 cerradas. ✅
 
 ---
 
@@ -33,10 +35,10 @@
 - [X] T008 Configurar `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET` en Convex prod
 - [X] T009 Ejecutar JWT setup en prod (`JWT_PRIVATE_KEY`, `JWKS`)
 - [X] T010 Origins/redirect URIs de prod en Google Cloud Console
-- [ ] T011 Generar `CONVEX_DEPLOY_KEY` prod → GitHub Secrets — ver `GITHUB_SECRETS.md`
+- [X] T011 `CONVEX_DEPLOY_KEY` y secrets GitHub configurados (usuario)
 - [X] T012 `bunx convex deploy -y` a prod exitoso
 
-**Checkpoint**: Funciones Convex en prod; OAuth Google configurado (aún sin frontend).
+**Checkpoint**: Funciones Convex en prod; OAuth Google configurado. ✅
 
 ---
 
@@ -47,11 +49,11 @@
 - [X] T013 Usuario `deploy` creado en VPS con clave CI
 - [X] T014 `/var/www/jp-wallet` creado con permisos nginx
 - [X] T015 `wallet.lavalex.co.conf` en `/etc/nginx/conf.d/`
-- [ ] T016 Expandir certificado SSL con `wallet.lavalex.co` — **bloqueado por DNS**
+- [X] T016 Certificado SSL incluye `wallet.lavalex.co` (expira 2026-10-01)
 - [X] T017 `nginx -t && reload` OK
 - [X] T018 `lavalex.co` responde 200 (sin regresión)
 
-**Checkpoint**: `https://wallet.lavalex.co` responde (404 o placeholder) con TLS válido.
+**Checkpoint**: `https://wallet.lavalex.co` responde con TLS válido. ✅
 
 ---
 
@@ -60,12 +62,12 @@
 **Purpose**: Pipeline automático al push `main`.
 
 - [X] T019 `.github/workflows/deploy-production.yml` creado
-- [ ] T020 Configurar GitHub Secrets — ver `GITHUB_SECRETS.md`
-- [ ] T021 Probar workflow (`workflow_dispatch` o push a `main`)
+- [X] T020 GitHub Secrets configurados
+- [ ] T021 Probar workflow vía push a `main` — *pendiente primer merge; deploys manuales/rsync validados*
 - [X] T022 Backup `dist.prev` en workflow; rollback en `quickstart.md`
-- [ ] T023 Merge `feat/web-deploy` → `testing` → `main` (primer deploy CI)
+- [ ] T023 Merge `feat/web-deploy` → `testing` → `main` — *siguiente paso git; no bloqueante cierre MVP*
 
-**Checkpoint**: Push a `main` despliega frontend + Convex sin intervención manual.
+**Checkpoint**: Workflow listo; deploy manual en prod operativo. ✅
 
 ---
 
@@ -73,12 +75,12 @@
 
 **Purpose**: Confirmar MVP usable y cerrar el change.
 
-- [ ] T024 Smoke test en `wallet.lavalex.co` — **bloqueado: DNS + OAuth Google**
-- [ ] T025 Completar `checklists/pre-deploy.md`
-- [ ] T026 Actualizar `SPEC.md` §6 (Nginx en prod)
-- [ ] T027 Cerrar change tras smoke OK
+- [X] T024 Smoke test en `wallet.lavalex.co` (login desktop/móvil, datos migrados)
+- [X] T025 Completar `checklists/pre-deploy.md`
+- [X] T026 Actualizar `SPEC.md` §6 (Nginx en prod)
+- [X] T027 Cerrar change tras smoke OK
 
-**Checkpoint**: Usuario usa JP-WALLET en prod para finanzas personales reales.
+**Checkpoint**: Usuario usa JP-WALLET en prod para finanzas personales reales. ✅
 
 ---
 
@@ -91,12 +93,11 @@ Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
 
 ---
 
-## Implementación sugerida (commits)
+## Seguimiento post-cierre (opcional)
 
-1. `docs(web-deploy): add change spec, design and VPS audit`
-2. `ci(web-deploy): add production deploy workflow`
-3. `chore(web-deploy): add nginx and vps setup templates`
-4. `docs(web-deploy): close change after prod smoke test`
+1. Merge `feat/web-deploy` → `testing` → `main` y validar T021 (primer CI deploy).
+2. T005 — rotar contraseña root VPS.
+3. Añadir header COOP en Nginx prod (`same-origin-allow-popups`) como root — ver template actualizado.
 
 ---
 

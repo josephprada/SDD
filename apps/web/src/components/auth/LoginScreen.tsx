@@ -1,12 +1,31 @@
 import { AuroraOrbs } from "@app/components/shell/AuroraOrbs";
 import { useAuth } from "@app/lib/auth/useAuth";
 import { Button, Spinner } from "@jp-ds/index";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+
+const OAUTH_ERRORS: Record<string, string> = {
+	oauth_denied: "Google rechazó el inicio de sesión.",
+	no_code: "No se recibió el código de autorización.",
+	signin_failed: "No se pudo completar el inicio de sesión.",
+};
 
 export function LoginScreen() {
 	const { signInWithGoogle, isLoading } = useAuth();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		const oauthError = searchParams.get("error");
+		if (oauthError && OAUTH_ERRORS[oauthError]) {
+			setError(OAUTH_ERRORS[oauthError]);
+			setPending(false);
+			const next = new URLSearchParams(searchParams);
+			next.delete("error");
+			setSearchParams(next, { replace: true });
+		}
+	}, [searchParams, setSearchParams]);
 
 	const handleSignIn = async () => {
 		try {

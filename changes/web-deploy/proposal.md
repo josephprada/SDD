@@ -1,10 +1,11 @@
 # Propuesta: Change — Web Deploy (MVP Producción)
 
 **Versión**: 1.0.0
-**Estado**: Borrador (revisión)
+**Estado**: Completada
 **Change**: web-deploy
 **Creado**: 2026-07-03
-**Rama prevista**: `feat/web-deploy` → `testing` → `main`
+**Completada**: 2026-07-03
+**Rama**: `feat/web-deploy` → `testing` → `main`
 
 ---
 
