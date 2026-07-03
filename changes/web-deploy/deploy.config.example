@@ -1,0 +1,24 @@
+# Secrets and setup for production deploy
+# See changes/web-deploy/quickstart.md
+
+# Convex production
+VITE_CONVEX_URL_PROD=https://cheery-bass-870.convex.cloud
+CONVEX_PROD_DEPLOYMENT=cheery-bass-870
+
+# OAuth (same client as dev — see design.md P-04)
+VITE_GOOGLE_CLIENT_ID=88246063606-qpjst3vge6eh52n35apj0r9rahqt90jt.apps.googleusercontent.com
+
+# Google OAuth redirect URI for prod (add in Google Cloud Console):
+# https://cheery-bass-870.convex.site/api/auth/callback/google
+
+# Authorized JavaScript origin (add in Google Cloud Console):
+# https://wallet.lavalex.co
+
+# VPS
+VPS_HOST=69.6.234.237
+VPS_SSH_PORT=22022
+VPS_SSH_USER=deploy
+
+# GitHub Secrets to configure manually:
+# CONVEX_DEPLOY_KEY — from https://dashboard.convex.dev → jp-wallet → Production → Deploy Key
+# VPS_SSH_KEY — contents of deploy-keys/github-actions (private key, local only)

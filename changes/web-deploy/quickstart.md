@@ -5,6 +5,8 @@
 | Item | Valor |
 |------|-------|
 | URL app | `https://wallet.lavalex.co` |
+| Convex prod | `https://cheery-bass-870.convex.cloud` |
+| Convex dashboard | https://dashboard.convex.dev/t/joseph-desarrollador/jp-wallet/cheery-bass-870 |
 | VPS | `69.6.234.237:22022` |
 | Web root | `/var/www/jp-wallet` |
 | Backend | Convex Cloud **production** |

@@ -14,12 +14,12 @@
 
 **Purpose**: Cerrar decisiones abiertas y prerequisitos externos antes de tocar prod.
 
-- [ ] T001 Revisar y aprobar `proposal.md`, `spec.md`, `design.md` con el usuario
-- [ ] T002 Crear registro DNS `wallet.lavalex.co` → `69.6.234.237` (A record)
-- [ ] T003 Crear deployment **production** en Convex; anotar URL prod en `quickstart.md`
-- [ ] T004 Decidir OAuth: mismo Client ID dev/prod o cliente Google separado (documentar en `design.md`)
+- [X] T001 Revisar y aprobar `proposal.md`, `spec.md`, `design.md` con el usuario
+- [ ] T002 Crear registro DNS `wallet.lavalex.co` → `69.6.234.237` (A record) — **PENDIENTE Hostinger**
+- [X] T003 Crear deployment **production** en Convex; URL: `https://cheery-bass-870.convex.cloud`
+- [X] T004 OAuth: mismo Client ID dev/prod (documentado en `design.md`)
 - [ ] T005 Rotar contraseña root VPS y configurar clave SSH personal (post-auditoría)
-- [ ] T006 Generar par de claves ed25519 para GitHub Actions (`deploy` CI key)
+- [X] T006 Generar par de claves ed25519 para GitHub Actions (`deploy-keys/github-actions`)
 
 **Checkpoint**: DNS resuelve; deployment Convex prod existe; decisiones P-04 cerradas.
 
@@ -29,12 +29,12 @@
 
 **Purpose**: Backend prod listo antes del primer frontend prod.
 
-- [ ] T007 Configurar Convex prod env: `SITE_URL=https://wallet.lavalex.co`
-- [ ] T008 Configurar `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET` en Convex prod
-- [ ] T009 Ejecutar `bun run convex:setup-jwt` contra deployment prod (`JWT_PRIVATE_KEY`, `JWKS`)
-- [ ] T010 Añadir origins/redirect URIs de prod en Google Cloud Console
-- [ ] T011 Generar `CONVEX_DEPLOY_KEY` prod → guardar en GitHub Secrets
-- [ ] T012 Probar `bunx convex deploy --prod` manual desde máquina local (dry-run)
+- [X] T007 Configurar Convex prod env: `SITE_URL=https://wallet.lavalex.co`
+- [X] T008 Configurar `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET` en Convex prod
+- [X] T009 Ejecutar JWT setup en prod (`JWT_PRIVATE_KEY`, `JWKS`)
+- [ ] T010 Añadir origins/redirect URIs de prod en Google Cloud Console — **PENDIENTE usuario**
+- [ ] T011 Generar `CONVEX_DEPLOY_KEY` prod → GitHub Secrets — ver `GITHUB_SECRETS.md`
+- [X] T012 `bunx convex deploy -y` a prod exitoso
 
 **Checkpoint**: Funciones Convex en prod; OAuth Google configurado (aún sin frontend).
 
@@ -44,12 +44,12 @@
 
 **Purpose**: Infra Nginx lista sin afectar sitios existentes.
 
-- [ ] T013 Ejecutar `templates/vps/setup-deploy-user.sh` en VPS (usuario `deploy`)
-- [ ] T014 Crear `/var/www/jp-wallet` con permisos `nginx:nginx`
-- [ ] T015 Copiar `templates/nginx/wallet.lavalex.co.conf` → `/etc/nginx/conf.d/`
-- [ ] T016 Expandir certificado: `certbot --expand` con `wallet.lavalex.co`
-- [ ] T017 `nginx -t && systemctl reload nginx`
-- [ ] T018 Verificar `lavalex.co` y `jarvis.lavalex.co` sin regresión
+- [X] T013 Usuario `deploy` creado en VPS con clave CI
+- [X] T014 `/var/www/jp-wallet` creado con permisos nginx
+- [X] T015 `wallet.lavalex.co.conf` en `/etc/nginx/conf.d/`
+- [ ] T016 Expandir certificado SSL con `wallet.lavalex.co` — **bloqueado por DNS**
+- [X] T017 `nginx -t && reload` OK
+- [X] T018 `lavalex.co` responde 200 (sin regresión)
 
 **Checkpoint**: `https://wallet.lavalex.co` responde (404 o placeholder) con TLS válido.
 
@@ -59,11 +59,11 @@
 
 **Purpose**: Pipeline automático al push `main`.
 
-- [ ] T019 Copiar `templates/github/deploy-production.yml` → `.github/workflows/deploy-production.yml`
-- [ ] T020 Configurar GitHub Secrets: `CONVEX_DEPLOY_KEY`, `VITE_CONVEX_URL_PROD`, `VITE_GOOGLE_CLIENT_ID`, `VPS_*`
-- [ ] T021 Probar workflow en branch `feat/web-deploy` con `workflow_dispatch` o push de prueba
-- [ ] T022 Validar backup `dist.prev` y rollback manual documentado
-- [ ] T023 Merge `feat/web-deploy` → `testing` → `main` (primer deploy real)
+- [X] T019 `.github/workflows/deploy-production.yml` creado
+- [ ] T020 Configurar GitHub Secrets — ver `GITHUB_SECRETS.md`
+- [ ] T021 Probar workflow (`workflow_dispatch` o push a `main`)
+- [X] T022 Backup `dist.prev` en workflow; rollback en `quickstart.md`
+- [ ] T023 Merge `feat/web-deploy` → `testing` → `main` (primer deploy CI)
 
 **Checkpoint**: Push a `main` despliega frontend + Convex sin intervención manual.
 
@@ -73,10 +73,10 @@
 
 **Purpose**: Confirmar MVP usable y cerrar el change.
 
-- [ ] T024 Ejecutar smoke test de `quickstart.md` §Producción en `wallet.lavalex.co`
-- [ ] T025 Completar `checklists/pre-deploy.md` y archivar evidencia (capturas/logs)
-- [ ] T026 Actualizar `SPEC.md` §6 si se adopta Nginx como fuente de verdad (nota de desviación Caddy)
-- [ ] T027 Marcar `spec.md` Estado: Completada; nota de entrega en `tasks.md`
+- [ ] T024 Smoke test en `wallet.lavalex.co` — **bloqueado: DNS + OAuth Google**
+- [ ] T025 Completar `checklists/pre-deploy.md`
+- [ ] T026 Actualizar `SPEC.md` §6 (Nginx en prod)
+- [ ] T027 Cerrar change tras smoke OK
 
 **Checkpoint**: Usuario usa JP-WALLET en prod para finanzas personales reales.
 

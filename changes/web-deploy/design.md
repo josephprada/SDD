@@ -208,5 +208,5 @@ deploy
 | P-01 | Subdominio `wallet.lavalex.co` | ✅ Confirmado |
 | P-02 | Trigger deploy en `main` | ✅ Confirmado |
 | P-03 | Convex cloud prod | ✅ Confirmado |
-| P-04 | Mismo vs separado OAuth client dev/prod | ⏳ Abrir |
-| P-05 | Backup `dist.prev` en cada deploy | ✅ Recomendado |
+| P-04 | Mismo OAuth client dev/prod | ✅ Confirmado (mismo `AUTH_GOOGLE_ID`) |
+| P-05 | Backup `dist.prev` en cada deploy | ✅ En workflow |

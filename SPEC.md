@@ -368,15 +368,16 @@ interface UserPreferences {
 
 ## 6. Arquitectura de Despliegue
 
+> **Nota (2026-07-03):** En producción real (VPS Hostinger) se usa **Nginx + Certbot**, no Caddy. Ver `changes/web-deploy/`.
+
 ```
-VPS (Hostinger)
-├── Caddy (reverse proxy, auto-HTTPS)
-│   ├── wallet.tudominio.com → frontend (Nginx)
-│   └── api.tudominio.com → backend (Convex cloud)
-├── Docker Compose
-│   ├── frontend (Nginx sirviendo build estático de Vite)
-│   └── caddy (TLS automático)
-└── Convex cloud (backend serverless, no en VPS)
+VPS Hostinger (69.6.234.237)
+├── Nginx (reverse proxy, TLS Let's Encrypt)
+│   ├── lavalex.co / www        → /var/www/lavalex (sitio existente)
+│   ├── jarvis.lavalex.co       → OpenClaw :18789
+│   └── wallet.lavalex.co       → /var/www/jp-wallet (JP-WALLET)
+├── GitHub Actions              → build + rsync + nginx reload (push main)
+└── Convex Cloud prod           → https://cheery-bass-870.convex.cloud
 ```
 
 ---
