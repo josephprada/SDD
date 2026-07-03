@@ -56,8 +56,8 @@ jobs:
           script: |
             set -e
             if [ -d "${{ env.VPS_WEB_ROOT }}" ] && [ "$(ls -A ${{ env.VPS_WEB_ROOT }} 2>/dev/null)" ]; then
-              rm -rf ${{ env.VPS_WEB_ROOT }}.prev
-              cp -a ${{ env.VPS_WEB_ROOT }} ${{ env.VPS_WEB_ROOT }}.prev
+              sudo rm -rf ${{ env.VPS_WEB_ROOT }}.prev
+              sudo cp -a ${{ env.VPS_WEB_ROOT }} ${{ env.VPS_WEB_ROOT }}.prev
             fi
 
       - name: Sync static files to VPS

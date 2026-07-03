@@ -15,7 +15,7 @@
 **Purpose**: Cerrar decisiones abiertas y prerequisitos externos antes de tocar prod.
 
 - [X] T001 Revisar y aprobar `proposal.md`, `spec.md`, `design.md` con el usuario
-- [ ] T002 Crear registro DNS `wallet.lavalex.co` → `69.6.234.237` (A record) — **PENDIENTE Hostinger**
+- [X] T002 DNS `wallet.lavalex.co` → `69.6.234.237`
 - [X] T003 Crear deployment **production** en Convex; URL: `https://cheery-bass-870.convex.cloud`
 - [X] T004 OAuth: mismo Client ID dev/prod (documentado en `design.md`)
 - [ ] T005 Rotar contraseña root VPS y configurar clave SSH personal (post-auditoría)
@@ -32,7 +32,7 @@
 - [X] T007 Configurar Convex prod env: `SITE_URL=https://wallet.lavalex.co`
 - [X] T008 Configurar `AUTH_GOOGLE_ID` y `AUTH_GOOGLE_SECRET` en Convex prod
 - [X] T009 Ejecutar JWT setup en prod (`JWT_PRIVATE_KEY`, `JWKS`)
-- [ ] T010 Añadir origins/redirect URIs de prod en Google Cloud Console — **PENDIENTE usuario**
+- [X] T010 Origins/redirect URIs de prod en Google Cloud Console
 - [ ] T011 Generar `CONVEX_DEPLOY_KEY` prod → GitHub Secrets — ver `GITHUB_SECRETS.md`
 - [X] T012 `bunx convex deploy -y` a prod exitoso
 

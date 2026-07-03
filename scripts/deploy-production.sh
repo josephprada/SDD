@@ -36,7 +36,7 @@ env -u CONVEX_DEPLOYMENT \
 echo "==> Backup on VPS"
 ssh -p "$VPS_PORT" -i "$SSH_KEY" -o StrictHostKeyChecking=accept-new \
   "$VPS_USER@$VPS_HOST" \
-  "if [ -d '$WEB_ROOT' ] && [ \"\$(ls -A $WEB_ROOT 2>/dev/null)\" ]; then rm -rf ${WEB_ROOT}.prev && cp -a $WEB_ROOT ${WEB_ROOT}.prev; fi"
+  "if [ -d '$WEB_ROOT' ] && [ \"\$(ls -A $WEB_ROOT 2>/dev/null)\" ]; then sudo rm -rf ${WEB_ROOT}.prev && sudo cp -a $WEB_ROOT ${WEB_ROOT}.prev; fi"
 
 echo "==> Rsync dist"
 rsync -avz --no-owner --no-group --delete \
