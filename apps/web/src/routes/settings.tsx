@@ -1,18 +1,28 @@
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
+import { AppearanceSection } from "@app/components/settings/AppearanceSection";
+import { GroupingPicker } from "@app/components/settings/GroupingPicker";
+import { LanguagePicker } from "@app/components/settings/LanguagePicker";
+import { NotificationsToggle } from "@app/components/settings/NotificationsToggle";
+import { PreferenceRow } from "@app/components/settings/PreferenceRow";
+import { ProfileEditor } from "@app/components/settings/ProfileEditor";
 import { useAuth } from "@app/lib/auth/useAuth";
+import { usePreferencesStore } from "@app/stores/preferences";
+import {
+	GROUPING_LABELS,
+	THEME_MODE_LABELS,
+} from "@jp-ds/index";
 import { Button } from "@jp-ds";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-
-const ROWS = [
-	{ title: "Tema", sub: "Oscuro / Claro / Sistema" },
-	{ title: "Agrupación", sub: "Mes" },
-	{ title: "Idioma", sub: "Español" },
-	{ title: "Notificaciones", sub: "Activadas" },
-] as const;
 
 export function SettingsRoute() {
 	const { session, signOut } = useAuth();
 	const navigate = useNavigate();
+	const [groupingOpen, setGroupingOpen] = useState(false);
+	const [languageOpen, setLanguageOpen] = useState(false);
+
+	const mode = usePreferencesStore((s) => s.mode);
+	const defaultGrouping = usePreferencesStore((s) => s.defaultGrouping);
 
 	const handleSignOut = async () => {
 		await signOut();
@@ -35,9 +45,43 @@ export function SettingsRoute() {
 				</div>
 			</div>
 
+			<section className="settings-section animate-stagger-item">
+				<h2 className="settings-section__title">Perfil</h2>
+				<ProfileEditor />
+			</section>
+
+			<AppearanceSection />
+
+			<section className="settings-section animate-stagger-item">
+				<h2 className="settings-section__title">Preferencias</h2>
+				<div className="settings-card glass">
+					<PreferenceRow
+						title="Agrupación"
+						subtitle="Período por defecto del resumen"
+						value={GROUPING_LABELS[defaultGrouping]}
+						onClick={() => setGroupingOpen(true)}
+					/>
+					<PreferenceRow
+						title="Idioma"
+						subtitle="Interfaz de la aplicación"
+						value="Español"
+						onClick={() => setLanguageOpen(true)}
+					/>
+					<PreferenceRow
+						title="Modo"
+						subtitle="Tema visual actual"
+						value={THEME_MODE_LABELS[mode]}
+						as="div"
+					/>
+					<div className="settings-row glass">
+						<NotificationsToggle />
+					</div>
+				</div>
+			</section>
+
 			<Link
 				to="/categories"
-				className="settings-row glass interactive-lift animate-stagger-item"
+				className="settings-row glass interactive-lift animate-stagger-item preference-row"
 				style={{ display: "flex", textDecoration: "none", color: "inherit" }}
 			>
 				<div>
@@ -46,30 +90,10 @@ export function SettingsRoute() {
 						Gestionar gastos, ingresos y transferencias
 					</div>
 				</div>
-				<span aria-hidden style={{ color: "var(--color-text-secondary)" }}>
+				<span className="preference-row__chevron" aria-hidden>
 					›
 				</span>
 			</Link>
-			<div
-				className="animate-stagger-item"
-				style={{ marginTop: "var(--space-4)" }}
-			>
-				{ROWS.map((row, index) => (
-					<div
-						key={row.title}
-						className="settings-row glass interactive-lift animate-stagger-item"
-						style={{ animationDelay: `${(index + 1) * 60}ms` }}
-					>
-						<div>
-							<div className="settings-row__title">{row.title}</div>
-							<div className="settings-row__sub">{row.sub}</div>
-						</div>
-						<span aria-hidden style={{ color: "var(--color-text-secondary)" }}>
-							›
-						</span>
-					</div>
-				))}
-			</div>
 
 			{session ? (
 				<div
@@ -81,6 +105,9 @@ export function SettingsRoute() {
 					</Button>
 				</div>
 			) : null}
+
+			<GroupingPicker open={groupingOpen} onClose={() => setGroupingOpen(false)} />
+			<LanguagePicker open={languageOpen} onClose={() => setLanguageOpen(false)} />
 		</div>
 	);
 }

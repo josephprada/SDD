@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-accent="green-bolt" data-danger="red-classic" data-font="inter-default">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,400;1,500;1,600&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
       rel="stylesheet"
     />
     <script>
@@ -21,6 +21,30 @@
         }
         document.documentElement.dataset.theme = resolved;
         document.documentElement.dataset.themeMode = mode;
+
+        var accent = localStorage.getItem("jp-wallet.accentPreset");
+        var danger = localStorage.getItem("jp-wallet.dangerPreset");
+        var font = localStorage.getItem("jp-wallet.typographyPreset");
+        var validAccent = ["green-bolt", "cyan-neon", "amber-gold", "violet-pulse", "coral-heat"];
+        var validDanger = ["red-classic", "rose-soft", "orange-alert", "crimson-deep"];
+        var validFont = ["inter-default", "formal-serif", "elegant-italic", "handwriting"];
+        var legacyFont = {
+          "dm-sans": "formal-serif",
+          "source-sans": "elegant-italic",
+          "system-native": "handwriting"
+        };
+        if (font && legacyFont[font]) {
+          font = legacyFont[font];
+        }
+        if (accent && validAccent.indexOf(accent) !== -1) {
+          document.documentElement.dataset.accent = accent;
+        }
+        if (danger && validDanger.indexOf(danger) !== -1) {
+          document.documentElement.dataset.danger = danger;
+        }
+        if (font && validFont.indexOf(font) !== -1) {
+          document.documentElement.dataset.font = font;
+        }
       })();
     </script>
   </head>

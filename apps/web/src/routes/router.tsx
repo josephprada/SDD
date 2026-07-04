@@ -1,7 +1,6 @@
 import { LoadingScreen } from "@app/components/shell/LoadingScreen";
 import { OAUTH_NEXT_STORAGE_KEY } from "@app/lib/auth/googlePopupSignIn";
-import { useAuth } from "@app/lib/auth/useAuth";
-import { useThemeStore } from "@app/stores/theme";
+import { usePreferencesStore } from "@app/stores/preferences";
 import { useConvexAuth } from "convex/react";
 import { useEffect } from "react";
 import {
@@ -55,15 +54,10 @@ function GuestGate({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		if (!isLoading && isAuthenticated) {
-			const params = new URLSearchParams(location.search);
-			const next =
-				params.get("next") ??
-				sessionStorage.getItem(OAUTH_NEXT_STORAGE_KEY) ??
-				"/";
 			sessionStorage.removeItem(OAUTH_NEXT_STORAGE_KEY);
-			navigate(next, { replace: true });
+			navigate("/", { replace: true });
 		}
-	}, [isAuthenticated, isLoading, location.search, navigate]);
+	}, [isAuthenticated, isLoading, navigate]);
 
 	useEffect(() => {
 		if (!hasOAuthCode || isAuthenticated) {
@@ -79,29 +73,19 @@ function GuestGate({ children }: { children: React.ReactNode }) {
 	}, [hasOAuthCode, isAuthenticated, navigate]);
 
 	if (isLoading || isAuthenticated || hasOAuthCode) {
-		return <LoadingScreen />;
+		return (
+			<div className="login-brand login-screen aurora-bg aurora-bg--galaxy">
+				<LoadingScreen brand label="Iniciando sesión" />
+			</div>
+		);
 	}
 
 	return <>{children}</>;
 }
 
-function ThemeReconcile() {
-	const { session } = useAuth();
-	const reconcile = useThemeStore((s) => s.reconcileFromServer);
-
-	useEffect(() => {
-		if (session?.theme) {
-			reconcile(session.theme);
-		}
-	}, [session?.theme, reconcile]);
-
-	return null;
-}
-
 function ProtectedLayout() {
 	return (
 		<AuthGate>
-			<ThemeReconcile />
 			<RootRoute />
 		</AuthGate>
 	);
@@ -142,11 +126,11 @@ export const router = createBrowserRouter([
 ]);
 
 export function AppRouter() {
-	const initTheme = useThemeStore((s) => s.init);
+	const init = usePreferencesStore((s) => s.init);
 
 	useEffect(() => {
-		initTheme();
-	}, [initTheme]);
+		init();
+	}, [init]);
 
 	return <RouterProvider router={router} />;
 }

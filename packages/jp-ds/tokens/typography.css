@@ -1,5 +1,4 @@
 :root {
-  --font-body: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
 
   --text-xs: 0.75rem;
@@ -24,6 +23,9 @@
 
 body {
   font-family: var(--font-body);
+  font-style: var(--font-body-style, normal);
+  font-weight: var(--font-body-weight, var(--font-normal));
+  letter-spacing: var(--font-body-letter-spacing, normal);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   color: var(--color-text-primary);

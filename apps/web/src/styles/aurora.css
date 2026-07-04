@@ -29,7 +29,7 @@
 	border-radius: 50%;
 	pointer-events: none;
 	filter: blur(80px);
-	background: rgba(7, 251, 162, 0.1);
+	background: color-mix(in srgb, var(--color-accent) 10%, transparent);
 	z-index: 0;
 }
 
@@ -278,6 +278,10 @@
 	border: 1px solid var(--color-glass-border);
 }
 
+[data-theme="light"] .glass {
+	border-color: var(--color-glass-border);
+}
+
 .glass--glow {
 	box-shadow: var(--shadow-glow);
 }
@@ -295,6 +299,11 @@
 	width: 36px;
 	height: 36px;
 	filter: drop-shadow(0 0 12px var(--color-accent-glow));
+}
+
+[data-theme="light"] .brand-pill img,
+[data-theme="light"] .brand-logo {
+	filter: drop-shadow(0 1px 2px color-mix(in srgb, #047857 30%, transparent));
 }
 
 .brand-logo--sidebar {
@@ -454,7 +463,7 @@
 	z-index: 1000;
 	padding: var(--space-2) var(--space-4);
 	background: var(--color-accent);
-	color: #0a0e12;
+	color: var(--color-on-accent);
 	border-radius: var(--radius-md);
 	font-weight: var(--font-semibold);
 	text-decoration: none;

@@ -7,11 +7,11 @@ import { enrichTransaction } from "./transactions";
 
 export const overview = query({
 	args: {
-		monthStart: v.number(),
-		monthEnd: v.number(),
+		periodStart: v.number(),
+		periodEnd: v.number(),
 		recentLimit: v.optional(v.number()),
 	},
-	handler: async (ctx, { monthStart, monthEnd, recentLimit }) => {
+	handler: async (ctx, { periodStart, periodEnd, recentLimit }) => {
 		const userId = await requireUserId(ctx);
 
 		const accounts = await ctx.db
@@ -35,18 +35,18 @@ export const overview = query({
 			.withIndex("by_user_date", (q) => q.eq("userId", userId))
 			.collect();
 
-		const monthly = transactions.filter(
-			(t) => t.date >= monthStart && t.date <= monthEnd,
+		const periodTransactions = transactions.filter(
+			(t) => t.date >= periodStart && t.date <= periodEnd,
 		);
 
 		let monthlyIncome = 0;
 		let monthlyExpense = 0;
-		for (const t of monthly) {
+		for (const t of periodTransactions) {
 			if (t.type === "income") monthlyIncome += t.amount;
 			if (t.type === "expense") monthlyExpense += t.amount;
 		}
 
-		const sorted = [...monthly].sort(compareTransactions);
+		const sorted = [...periodTransactions].sort(compareTransactions);
 		const limit = Math.min(Math.max(recentLimit ?? 5, 1), 30);
 		const recentSlice = sorted.slice(0, limit);
 		const recentTransactions = await Promise.all(

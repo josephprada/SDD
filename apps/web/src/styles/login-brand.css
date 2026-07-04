@@ -1,0 +1,64 @@
+/**
+ * Login — colores de marca fijos (Green Bolt / dark).
+ * Ignora preferencias de tema, acento, tipografía y errores del usuario.
+ */
+
+.login-brand {
+	--color-accent: #07fba2;
+	--color-accent-deep: #159563;
+	--color-accent-bright: #07fba2;
+	--color-accent-muted: color-mix(in srgb, #07fba2 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #07fba2 25%, transparent);
+	--color-border-focus: #07fba2;
+	--color-success: #07fba2;
+	--color-glass-border: color-mix(in srgb, #07fba2 22%, transparent);
+	--color-on-accent: #0a0e12;
+
+	--color-danger: #ef4444;
+	--color-warning: #f59e0b;
+
+	--color-bg: #0a0e12;
+	--color-surface-1: #1a1f26;
+	--color-surface-2: #232a33;
+	--color-surface-glass: rgba(26, 31, 38, 0.6);
+	--color-border: #2f3742;
+
+	--color-text-primary: #fafafa;
+	--color-text-secondary: #a1a8b3;
+	--color-text-muted: #6b7280;
+
+	--font-body: "Inter", system-ui, -apple-system, sans-serif;
+	--font-body-style: normal;
+	--font-body-weight: 400;
+	--font-body-letter-spacing: normal;
+	--font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+
+	--shadow-glow: 0 0 40px var(--color-accent-glow);
+	--shadow-glow-strong: 0 8px 48px var(--color-accent-glow);
+
+	color: var(--color-text-primary);
+	font-family: var(--font-body);
+	font-style: normal;
+	font-weight: var(--font-normal);
+	letter-spacing: normal;
+	color-scheme: dark;
+}
+
+.login-brand .glass {
+	background: var(--color-surface-glass);
+	border-color: var(--color-glass-border);
+}
+
+.login-brand .wordmark {
+	color: var(--color-text-primary);
+}
+
+.login-brand .jp-spinner__ring {
+	border-top-color: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.login-brand .jp-spinner__ring {
+		border-right-color: var(--color-accent);
+	}
+}

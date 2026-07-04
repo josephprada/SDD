@@ -20,6 +20,7 @@
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #07fba2;
+  --color-on-accent: #0a0e12;
 }
 
 /* Dark-first default when no data-theme */
@@ -41,4 +42,5 @@ html:not([data-theme]) {
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #07fba2;
+  --color-on-accent: #0a0e12;
 }

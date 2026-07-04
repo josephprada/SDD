@@ -470,8 +470,9 @@ packages/jp-ds/
 3b. ✅ **Change 2b: web-deploy** (completado 2026-07-03)
    - Producción en `wallet.lavalex.co` (VPS Nginx + Convex Cloud prod)
    - CI/CD: GitHub Actions al push a `main` (workflow listo; primer run al merge)
-4. **Change 3: Configuración completa**
-   - Panel: tema, agrupación temporal (semana/mes/trimestre/semestre), gestión de categorías, idioma, notificaciones
+4. ✅ **Change 3: web-settings — Configuración completa** (completado 2026-07-04, en `testing` + `main`)
+   - Perfil (nombre + avatar), apariencia (modo, presets, reset), preferencias, dashboard por período
+   - Polish: modo claro, login brand-lock, logo reforzado, tipografías distintivas
 5. **Change 4: Presupuestos + Reportes + Panel de Resultados**
    - Límites por categoría con alertas
    - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros

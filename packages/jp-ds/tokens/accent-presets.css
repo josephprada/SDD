@@ -1,0 +1,109 @@
+/* Accent preset overrides — composes with [data-theme] light/dark */
+
+[data-accent="green-bolt"][data-theme="dark"] {
+	--color-accent: #07fba2;
+	--color-accent-deep: #159563;
+	--color-accent-bright: #07fba2;
+	--color-accent-muted: color-mix(in srgb, #07fba2 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #07fba2 25%, transparent);
+	--color-border-focus: #07fba2;
+	--color-success: #07fba2;
+	--color-glass-border: color-mix(in srgb, #07fba2 20%, transparent);
+}
+
+[data-accent="green-bolt"][data-theme="light"] {
+	--color-accent: #059669;
+	--color-accent-deep: #047857;
+	--color-accent-bright: #059669;
+	--color-border-focus: #059669;
+	--color-success: #059669;
+	--color-glass-border: color-mix(in srgb, #059669 22%, #a8b0bb);
+}
+
+[data-accent="cyan-neon"][data-theme="dark"] {
+	--color-accent: #22d3ee;
+	--color-accent-deep: #0891b2;
+	--color-accent-bright: #22d3ee;
+	--color-accent-muted: color-mix(in srgb, #22d3ee 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #22d3ee 25%, transparent);
+	--color-border-focus: #22d3ee;
+	--color-success: #22d3ee;
+	--color-glass-border: color-mix(in srgb, #22d3ee 20%, transparent);
+}
+
+[data-accent="cyan-neon"][data-theme="light"] {
+	--color-accent: #0e7490;
+	--color-accent-deep: #155e75;
+	--color-accent-bright: #22d3ee;
+	--color-accent-muted: color-mix(in srgb, #0e7490 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #22d3ee 20%, transparent);
+	--color-border-focus: #0e7490;
+	--color-success: #0e7490;
+	--color-glass-border: color-mix(in srgb, #0e7490 22%, #a8b0bb);
+}
+
+[data-accent="amber-gold"][data-theme="dark"] {
+	--color-accent: #fbbf24;
+	--color-accent-deep: #d97706;
+	--color-accent-bright: #fbbf24;
+	--color-accent-muted: color-mix(in srgb, #fbbf24 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #fbbf24 25%, transparent);
+	--color-border-focus: #fbbf24;
+	--color-success: #fbbf24;
+	--color-glass-border: color-mix(in srgb, #fbbf24 20%, transparent);
+}
+
+[data-accent="amber-gold"][data-theme="light"] {
+	--color-accent: #b45309;
+	--color-accent-deep: #92400e;
+	--color-accent-bright: #fbbf24;
+	--color-accent-muted: color-mix(in srgb, #b45309 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #fbbf24 20%, transparent);
+	--color-border-focus: #b45309;
+	--color-success: #b45309;
+	--color-glass-border: color-mix(in srgb, #b45309 22%, #a8b0bb);
+}
+
+[data-accent="violet-pulse"][data-theme="dark"] {
+	--color-accent: #a78bfa;
+	--color-accent-deep: #7c3aed;
+	--color-accent-bright: #a78bfa;
+	--color-accent-muted: color-mix(in srgb, #a78bfa 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #a78bfa 25%, transparent);
+	--color-border-focus: #a78bfa;
+	--color-success: #a78bfa;
+	--color-glass-border: color-mix(in srgb, #a78bfa 20%, transparent);
+}
+
+[data-accent="violet-pulse"][data-theme="light"] {
+	--color-accent: #6d28d9;
+	--color-accent-deep: #5b21b6;
+	--color-accent-bright: #a78bfa;
+	--color-accent-muted: color-mix(in srgb, #6d28d9 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #a78bfa 20%, transparent);
+	--color-border-focus: #6d28d9;
+	--color-success: #6d28d9;
+	--color-glass-border: color-mix(in srgb, #6d28d9 22%, #a8b0bb);
+}
+
+[data-accent="coral-heat"][data-theme="dark"] {
+	--color-accent: #fb7185;
+	--color-accent-deep: #e11d48;
+	--color-accent-bright: #fb7185;
+	--color-accent-muted: color-mix(in srgb, #fb7185 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #fb7185 25%, transparent);
+	--color-border-focus: #fb7185;
+	--color-success: #fb7185;
+	--color-glass-border: color-mix(in srgb, #fb7185 20%, transparent);
+}
+
+[data-accent="coral-heat"][data-theme="light"] {
+	--color-accent: #be123c;
+	--color-accent-deep: #9f1239;
+	--color-accent-bright: #fb7185;
+	--color-accent-muted: color-mix(in srgb, #be123c 12%, transparent);
+	--color-accent-glow: color-mix(in srgb, #fb7185 20%, transparent);
+	--color-border-focus: #be123c;
+	--color-success: #be123c;
+	--color-glass-border: color-mix(in srgb, #be123c 22%, #a8b0bb);
+}

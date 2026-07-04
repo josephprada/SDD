@@ -34,6 +34,7 @@ export function useAuth() {
 					email: user.email,
 					name: user.name,
 					picture: user.picture,
+					hasCustomAvatar: user.hasCustomAvatar,
 					theme: user.theme,
 				}
 			: null,

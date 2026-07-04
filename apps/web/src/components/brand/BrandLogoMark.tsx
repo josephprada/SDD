@@ -1,3 +1,5 @@
+import { useThemeStore } from "@app/stores/theme";
+
 type BrandLogoMarkProps = {
 	size?: number;
 	height?: number;
@@ -9,8 +11,11 @@ export function BrandLogoMark({
 	height,
 	className = "",
 }: BrandLogoMarkProps) {
+	const resolved = useThemeStore((s) => s.resolved);
 	const markHeight = height ?? size;
-	const iconSize = Math.round(Math.min(size, markHeight) - 8);
+	const inset = size <= 32 ? 4 : size <= 42 ? 6 : 8;
+	const iconSize = Math.round(Math.min(size, markHeight) - inset);
+	const src = resolved === "light" ? "/icon-mark-light.svg" : "/icon.svg";
 
 	return (
 		<span
@@ -18,12 +23,7 @@ export function BrandLogoMark({
 			style={{ width: size, height: markHeight }}
 			aria-hidden
 		>
-			<img
-				src="/icon.svg"
-				alt=""
-				width={iconSize}
-				height={iconSize}
-			/>
+			<img src={src} alt="" width={iconSize} height={iconSize} />
 		</span>
 	);
 }

@@ -1,4 +1,5 @@
 import { useThemeStore } from "@app/stores/theme";
+import { cycleTheme } from "@app/lib/theme/applyTheme";
 import { IconButton } from "@jp-ds/index";
 
 function SunIcon() {
@@ -58,7 +59,7 @@ const LABELS = { light: "Claro", dark: "Oscuro", system: "Sistema" } as const;
 
 export function ThemeToggle() {
 	const mode = useThemeStore((s) => s.mode);
-	const cycle = useThemeStore((s) => s.cycle);
+	const setTheme = useThemeStore((s) => s.setTheme);
 
 	const Icon =
 		mode === "light" ? SunIcon : mode === "dark" ? MoonIcon : MonitorIcon;
@@ -66,7 +67,7 @@ export function ThemeToggle() {
 	return (
 		<IconButton
 			aria-label={`Tema: ${LABELS[mode]}. Pulsa para cambiar.`}
-			onClick={cycle}
+			onClick={() => setTheme(cycleTheme(mode))}
 			className="theme-toggle"
 			style={{
 				background: "var(--color-surface-glass)",

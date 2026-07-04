@@ -1,5 +1,6 @@
 import { AuroraOrbs } from "@app/components/shell/AuroraOrbs";
 import { useAuth } from "@app/lib/auth/useAuth";
+import { OAUTH_NEXT_STORAGE_KEY } from "@app/lib/auth/googlePopupSignIn";
 import { Button, Spinner } from "@jp-ds/index";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -15,6 +16,12 @@ export function LoginScreen() {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [pending, setPending] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!searchParams.get("next")) {
+			sessionStorage.removeItem(OAUTH_NEXT_STORAGE_KEY);
+		}
+	}, [searchParams]);
 
 	useEffect(() => {
 		const oauthError = searchParams.get("error");
@@ -45,7 +52,7 @@ export function LoginScreen() {
 	};
 
 	return (
-		<div className="login-screen aurora-bg aurora-bg--galaxy">
+		<div className="login-brand login-screen aurora-bg aurora-bg--galaxy">
 			<AuroraOrbs />
 
 			<div className="login-screen__body">

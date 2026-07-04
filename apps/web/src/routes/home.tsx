@@ -1,17 +1,23 @@
 import { DashboardBalanceCard } from "@app/components/dashboard/DashboardBalanceCard";
 import { MetricCard } from "@app/components/dashboard/MetricCard";
 import { MonthOverview } from "@app/components/dashboard/MonthOverview";
-import { MonthSwitcher } from "@app/components/dashboard/MonthSwitcher";
+import { PeriodSwitcher } from "@app/components/dashboard/PeriodSwitcher";
 import { RecentTransactionsList } from "@app/components/dashboard/RecentTransactionsList";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { useAuth } from "@app/lib/auth/useAuth";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { ACCOUNT_TYPE_LABELS, CoreIcon } from "@app/lib/core/icons";
 import { formatCOP } from "@app/lib/format/currency";
-import { addMonths, monthRange } from "@app/lib/format/date";
 import { useRecentListLimit } from "@app/lib/dashboard/useRecentListLimit";
+import {
+	addPeriod,
+	dashboardSubtitle,
+	periodNetLabel,
+	periodRange,
+} from "@app/lib/period";
 import { MEDIA_DESKTOP } from "@app/lib/core/breakpoints";
 import { useMediaQuery } from "@app/lib/core/useMediaQuery";
+import { usePreferencesStore } from "@app/stores/preferences";
 import { api } from "@convex/_generated/api";
 import { Avatar } from "@jp-ds";
 import { useQuery } from "convex/react";
@@ -21,15 +27,16 @@ import { Link, useNavigate } from "react-router";
 export function HomeRoute() {
 	const navigate = useNavigate();
 	const { session } = useAuth();
-	const [month, setMonth] = useState(() => new Date());
-	const range = monthRange(month);
+	const defaultGrouping = usePreferencesStore((s) => s.defaultGrouping);
+	const [anchor, setAnchor] = useState(() => new Date());
+	const range = periodRange(defaultGrouping, anchor);
 	const recentSectionRef = useRef<HTMLElement>(null);
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const recentLimit = useRecentListLimit(recentSectionRef, isDesktop);
 
 	const overview = useQuery(api.dashboard.overview, {
-		monthStart: range.start,
-		monthEnd: range.end,
+		periodStart: range.start,
+		periodEnd: range.end,
 		recentLimit,
 	});
 
@@ -78,14 +85,15 @@ export function HomeRoute() {
 					<div>
 						<h1 className="page-title">Inicio</h1>
 						<p className="page-subtitle">
-							Resumen financiero del mes en curso
+							{dashboardSubtitle(defaultGrouping)}
 						</p>
 					</div>
 				</div>
-				<MonthSwitcher
-					month={month}
-					onPrev={() => setMonth((m) => addMonths(m, -1))}
-					onNext={() => setMonth((m) => addMonths(m, 1))}
+				<PeriodSwitcher
+					grouping={defaultGrouping}
+					anchor={anchor}
+					onPrev={() => setAnchor((a) => addPeriod(defaultGrouping, a, -1))}
+					onNext={() => setAnchor((a) => addPeriod(defaultGrouping, a, 1))}
 				/>
 			</div>
 
@@ -97,9 +105,10 @@ export function HomeRoute() {
 				<MonthOverview
 					income={overview.monthlyIncome}
 					expense={overview.monthlyExpense}
-					month={month}
-					onPrev={() => setMonth((m) => addMonths(m, -1))}
-					onNext={() => setMonth((m) => addMonths(m, 1))}
+					grouping={defaultGrouping}
+					anchor={anchor}
+					onPrev={() => setAnchor((a) => addPeriod(defaultGrouping, a, -1))}
+					onNext={() => setAnchor((a) => addPeriod(defaultGrouping, a, 1))}
 					showSwitcher
 				/>
 			</div>
@@ -116,7 +125,11 @@ export function HomeRoute() {
 					value={overview.monthlyExpense}
 					tone="expense"
 				/>
-				<MetricCard label="Neto del mes" value={net} signed />
+				<MetricCard
+					label={periodNetLabel(defaultGrouping)}
+					value={net}
+					signed
+				/>
 			</div>
 
 			<div className="dashboard-grid">
@@ -159,11 +172,11 @@ export function HomeRoute() {
 						<MonthOverview
 							income={overview.monthlyIncome}
 							expense={overview.monthlyExpense}
+							grouping={defaultGrouping}
 						/>
 					</div>
 				</aside>
 			</div>
-
 		</div>
 	);
 }

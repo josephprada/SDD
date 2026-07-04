@@ -11,6 +11,11 @@
 	box-shadow: none;
 }
 
+[data-theme="light"] .shell .glass {
+	border-color: #8b95a1;
+	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+}
+
 .shell .interactive-lift {
 	transition: transform 0.15s ease, border-color 0.15s ease;
 }
@@ -33,8 +38,10 @@
 .tx-amount,
 .account-compact__balance {
 	font-family: var(--font-mono);
+	font-style: var(--font-mono-style, normal);
+	font-weight: var(--font-mono-weight, 600);
 	font-variant-numeric: tabular-nums;
-	letter-spacing: -0.01em;
+	letter-spacing: var(--font-mono-letter-spacing, -0.01em);
 }
 
 .amount--negative,
@@ -44,6 +51,10 @@
 
 .tx-amount--income {
 	color: var(--color-accent-bright);
+}
+
+[data-theme="light"] .tx-amount--income {
+	color: var(--color-accent-deep);
 }
 
 .tx-amount--transfer {
@@ -341,6 +352,22 @@
 
 .brand-logo-mark img {
 	display: block;
+	image-rendering: auto;
+	-webkit-backface-visibility: hidden;
+	backface-visibility: hidden;
+}
+
+[data-theme="light"] .brand-logo-mark {
+	background: color-mix(in srgb, #047857 10%, var(--color-surface-1));
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, #047857 24%, transparent),
+		0 0 12px color-mix(in srgb, #047857 12%, transparent);
+}
+
+[data-theme="light"] .brand-logo-mark--greeting {
+	box-shadow:
+		0 0 0 1px color-mix(in srgb, #047857 24%, transparent),
+		0 0 10px color-mix(in srgb, #047857 14%, transparent);
 }
 
 @media (min-width: 1024px) {
@@ -416,6 +443,10 @@
 	color: var(--color-accent);
 }
 
+[data-theme="light"] .metric-card__value--income {
+	color: var(--color-accent-deep);
+}
+
 .metric-card__value--expense {
 	color: var(--color-danger);
 }
@@ -450,6 +481,11 @@
 .month-overview__label {
 	font-size: var(--text-sm);
 	color: var(--color-text-secondary);
+}
+
+[data-theme="light"] .month-overview__label {
+	color: var(--color-text-primary);
+	opacity: 0.72;
 }
 
 .month-overview__track {
@@ -791,7 +827,7 @@
 
 .quick-actions__btn--primary {
 	background: var(--color-accent);
-	color: var(--color-bg);
+	color: var(--color-on-accent);
 	border-color: var(--color-accent);
 }
 
@@ -932,7 +968,7 @@
 .chip--active {
 	background: var(--color-accent);
 	border-color: var(--color-accent);
-	color: #0a0e12;
+	color: var(--color-on-accent);
 	font-weight: var(--font-semibold);
 }
 
@@ -1600,8 +1636,11 @@
 	align-items: center;
 	gap: var(--space-1);
 	font-family: var(--font-mono);
+	font-style: var(--font-mono-style, normal);
+	font-weight: var(--font-mono-weight, var(--font-bold));
+	font-variant-numeric: tabular-nums;
+	letter-spacing: var(--font-mono-letter-spacing, -0.01em);
 	font-size: var(--text-3xl);
-	font-weight: var(--font-bold);
 	color: var(--color-text-primary);
 }
 
@@ -1919,7 +1958,7 @@
 
 .segmented__item--active {
 	background: var(--color-accent);
-	color: #0a0e12;
+	color: var(--color-on-accent);
 	font-weight: var(--font-semibold);
 }
 
@@ -1934,8 +1973,12 @@
 	height: var(--touch-min);
 	border-radius: 50%;
 	border: none;
-	background: var(--color-accent);
-	color: #0a0e12;
+	background: linear-gradient(
+		180deg,
+		var(--color-accent) 0%,
+		var(--color-accent-deep) 100%
+	);
+	color: var(--color-on-accent);
 	box-shadow: 0 8px 24px
 		color-mix(in srgb, var(--color-accent) 45%, transparent);
 	cursor: pointer;
@@ -1969,6 +2012,10 @@
 	border: 1px solid var(--color-border);
 }
 
+[data-theme="light"] .bottom-nav {
+	border-color: #8b95a1;
+}
+
 .nav-fab-slot {
 	flex: 0 0 56px;
 	display: flex;
@@ -1986,8 +2033,12 @@
 	height: 48px;
 	border-radius: var(--radius-pill);
 	border: none;
-	background: var(--color-accent);
-	color: #0a0e12;
+	background: linear-gradient(
+		180deg,
+		var(--color-accent) 0%,
+		var(--color-accent-deep) 100%
+	);
+	color: var(--color-on-accent);
 	cursor: pointer;
 	display: grid;
 	place-items: center;

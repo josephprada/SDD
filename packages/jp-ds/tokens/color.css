@@ -10,9 +10,9 @@
   --color-surface-1: #ffffff;
   --color-surface-2: #eef1f4;
   --color-surface-glass: rgba(255, 255, 255, 0.72);
-  --color-glass-border: color-mix(in srgb, #059669 20%, transparent);
+  --color-glass-border: #b0b8c4;
 
-  --color-border: #d1d5db;
+  --color-border: #9ca3af;
   --color-border-focus: #059669;
 
   --color-text-primary: #0f1419;
@@ -22,4 +22,5 @@
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
   --color-success: #059669;
+  --color-on-accent: #ffffff;
 }

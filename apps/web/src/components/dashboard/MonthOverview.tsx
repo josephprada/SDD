@@ -1,10 +1,13 @@
 import { formatCOP } from "@app/lib/format/currency";
-import { MonthSwitcher } from "./MonthSwitcher";
+import { periodNetLabel, periodSummaryTitle } from "@app/lib/period";
+import type { GroupingId } from "@jp-ds/index";
+import { PeriodSwitcher } from "./PeriodSwitcher";
 
 type MonthOverviewProps = {
 	income: number;
 	expense: number;
-	month?: Date;
+	grouping?: GroupingId;
+	anchor?: Date;
 	onPrev?: () => void;
 	onNext?: () => void;
 	showSwitcher?: boolean;
@@ -13,7 +16,8 @@ type MonthOverviewProps = {
 export function MonthOverview({
 	income,
 	expense,
-	month,
+	grouping = "month",
+	anchor,
 	onPrev,
 	onNext,
 	showSwitcher = false,
@@ -24,12 +28,16 @@ export function MonthOverview({
 	const expensePct = Math.round((expense / max) * 100);
 
 	return (
-		<section className="month-overview glass" aria-label="Resumen del mes">
+		<section
+			className="month-overview glass"
+			aria-label={periodSummaryTitle(grouping)}
+		>
 			<div className="month-overview__head">
-				<h2 className="section-title">Este mes</h2>
-				{showSwitcher && month && onPrev && onNext ? (
-					<MonthSwitcher
-						month={month}
+				<h2 className="section-title">{periodSummaryTitle(grouping)}</h2>
+				{showSwitcher && anchor && onPrev && onNext ? (
+					<PeriodSwitcher
+						grouping={grouping}
+						anchor={anchor}
 						onPrev={onPrev}
 						onNext={onNext}
 						compact
@@ -68,7 +76,7 @@ export function MonthOverview({
 			</div>
 
 			<div className="month-overview__net">
-				<span className="month-overview__label">Neto del mes</span>
+				<span className="month-overview__label">{periodNetLabel(grouping)}</span>
 				<span
 					className={`tx-amount${net < 0 ? " tx-amount--expense" : " tx-amount--income"}`}
 				>

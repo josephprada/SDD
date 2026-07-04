@@ -1,0 +1,15 @@
+[data-danger="red-classic"] {
+	--color-danger: #ef4444;
+}
+
+[data-danger="rose-soft"] {
+	--color-danger: #f43f5e;
+}
+
+[data-danger="orange-alert"] {
+	--color-danger: #f97316;
+}
+
+[data-danger="crimson-deep"] {
+	--color-danger: #dc2626;
+}

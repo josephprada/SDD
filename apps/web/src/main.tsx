@@ -3,11 +3,13 @@ import { ConvexReactClient } from "convex/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppRouter } from "./routes/router";
-import { ThemeSyncBridge } from "./stores/theme";
+import { PreferencesSyncBridge } from "./components/PreferencesSyncBridge";
 import "@jp-ds/index";
 import "./styles/aurora.css";
 import "./styles/animations.css";
 import "./styles/core.css";
+import "./styles/settings.css";
+import "./styles/login-brand.css";
 import "./index.css";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL as string | undefined;
@@ -23,7 +25,7 @@ const convex = new ConvexReactClient(convexUrl);
 function App() {
 	return (
 		<ConvexAuthProvider client={convex}>
-			<ThemeSyncBridge />
+			<PreferencesSyncBridge />
 			<AppRouter />
 		</ConvexAuthProvider>
 	);

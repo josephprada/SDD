@@ -1,12 +1,14 @@
 import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-
-const themeValidator = v.union(
-	v.literal("light"),
-	v.literal("dark"),
-	v.literal("system"),
-);
+import {
+	accentPresetValidator,
+	dangerPresetValidator,
+	groupingValidator,
+	languageValidator,
+	themeValidator,
+	typographyPresetValidator,
+} from "./lib/preferences";
 
 const accountTypeValidator = v.union(
 	v.literal("cash"),
@@ -38,6 +40,9 @@ export default defineSchema({
 	userProfiles: defineTable({
 		userId: v.id("users"),
 		googleSub: v.string(),
+		displayName: v.optional(v.string()),
+		avatarStorageId: v.optional(v.id("_storage")),
+		profileUpdatedAt: v.optional(v.number()),
 		createdAt: v.number(),
 	})
 		.index("by_user", ["userId"])
@@ -46,6 +51,12 @@ export default defineSchema({
 	userPreferences: defineTable({
 		userId: v.id("users"),
 		theme: themeValidator,
+		accentPreset: v.optional(accentPresetValidator),
+		dangerPreset: v.optional(dangerPresetValidator),
+		typographyPreset: v.optional(typographyPresetValidator),
+		defaultGrouping: v.optional(groupingValidator),
+		language: v.optional(languageValidator),
+		notificationsEnabled: v.optional(v.boolean()),
 		updatedAt: v.number(),
 	}).index("by_user", ["userId"]),
 
@@ -54,16 +65,16 @@ export default defineSchema({
 		name: v.string(),
 		icon: v.string(),
 		color: v.string(),
-    type: categoryTypeValidator,
-    archived: v.optional(v.boolean()),
-    isSystem: v.optional(v.boolean()),
-    createdAt: v.number(),
-    updatedAt: v.optional(v.number()),
-    archivedAt: v.optional(v.number()),
-  })
-    .index("by_user", ["userId"])
-    .index("by_user_type", ["userId", "type"])
-    .index("by_user_type_archived", ["userId", "type", "archived"]),
+		type: categoryTypeValidator,
+		archived: v.optional(v.boolean()),
+		isSystem: v.optional(v.boolean()),
+		createdAt: v.number(),
+		updatedAt: v.optional(v.number()),
+		archivedAt: v.optional(v.number()),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_type", ["userId", "type"])
+		.index("by_user_type_archived", ["userId", "type", "archived"]),
 
 	accounts: defineTable({
 		userId: v.id("users"),

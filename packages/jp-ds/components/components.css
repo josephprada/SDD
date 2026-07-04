@@ -27,7 +27,7 @@
 }
 
 .jp-btn--primary {
-  color: #0a0e12;
+  color: var(--color-on-accent);
   background: linear-gradient(180deg, var(--color-accent) 0%, var(--color-accent-deep) 100%);
   box-shadow: var(--shadow-glow-strong);
 }

@@ -1,0 +1,70 @@
+/* Typography presets — must override :root defaults via html[data-font] */
+
+html[data-font="inter-default"],
+html:not([data-font]) {
+	--font-body: "Inter", system-ui, -apple-system, sans-serif;
+	--font-body-style: normal;
+	--font-body-weight: var(--font-normal);
+	--font-body-letter-spacing: normal;
+	--font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+	--font-mono-style: normal;
+	--font-mono-weight: 600;
+	--font-mono-letter-spacing: -0.01em;
+}
+
+html[data-font="formal-serif"] {
+	--font-body: "Playfair Display", Georgia, "Times New Roman", serif;
+	--font-body-style: normal;
+	--font-body-weight: 500;
+	--font-body-letter-spacing: 0.015em;
+	--font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", monospace;
+	--font-mono-style: normal;
+	--font-mono-weight: 500;
+	--font-mono-letter-spacing: 0;
+}
+
+html[data-font="elegant-italic"] {
+	--font-body: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+	--font-body-style: italic;
+	--font-body-weight: 500;
+	--font-body-letter-spacing: 0.025em;
+	--font-mono: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+	--font-mono-style: italic;
+	--font-mono-weight: 600;
+	--font-mono-letter-spacing: 0.02em;
+}
+
+html[data-font="handwriting"] {
+	--font-body: "Caveat", "Segoe Script", "Comic Sans MS", cursive;
+	--font-body-style: normal;
+	--font-body-weight: 500;
+	--font-body-letter-spacing: 0.04em;
+	--font-mono: "Caveat", "Segoe Script", "Comic Sans MS", cursive;
+	--font-mono-style: normal;
+	--font-mono-weight: 600;
+	--font-mono-letter-spacing: 0.03em;
+}
+
+html[data-font="handwriting"] body {
+	font-size: calc(var(--text-base) * 1.125);
+}
+
+html[data-font="handwriting"] .amount,
+html[data-font="handwriting"] .account-card__balance,
+html[data-font="handwriting"] .balance-card__value,
+html[data-font="handwriting"] .metric-card__value,
+html[data-font="handwriting"] .tx-amount,
+html[data-font="handwriting"] .account-compact__balance,
+html[data-font="handwriting"] .typography-preset__sample-amount {
+	font-size: calc(var(--text-base) * 1.2);
+}
+
+html[data-font="elegant-italic"] .amount,
+html[data-font="elegant-italic"] .account-card__balance,
+html[data-font="elegant-italic"] .balance-card__value,
+html[data-font="elegant-italic"] .metric-card__value,
+html[data-font="elegant-italic"] .tx-amount,
+html[data-font="elegant-italic"] .account-compact__balance,
+html[data-font="elegant-italic"] .typography-preset__sample-amount {
+	font-size: calc(var(--text-base) * 1.08);
+}

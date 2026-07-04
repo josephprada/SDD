@@ -17,6 +17,7 @@ import type * as http from "../http.js";
 import type * as lib_accounts from "../lib/accounts.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_balance from "../lib/balance.js";
+import type * as lib_preferences from "../lib/preferences.js";
 import type * as lib_transactions from "../lib/transactions.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   "lib/accounts": typeof lib_accounts;
   "lib/auth": typeof lib_auth;
   "lib/balance": typeof lib_balance;
+  "lib/preferences": typeof lib_preferences;
   "lib/transactions": typeof lib_transactions;
   "lib/validators": typeof lib_validators;
   migrations: typeof migrations;
