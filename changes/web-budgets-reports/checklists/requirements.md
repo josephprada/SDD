@@ -1,36 +1,32 @@
-# Specification Quality Checklist: Web Budgets & Reports
+# Specification Quality Checklist: Web Budgets & Reports (v2)
 
 **Purpose**: Validar completitud y calidad de la especificación antes de planificar
 **Created**: 2026-07-04
+**Updated**: 2026-07-04 (alcance ampliado)
 **Feature**: [spec.md](../spec.md)
 
 ## Content Quality
 
-- [x] Sin detalles de implementación (lenguajes, frameworks, APIs) en requisitos y criterios
-- [x] Enfocado en valor de usuario y necesidades de negocio
-- [x] Escrito para stakeholders no técnicos
-- [x] Todas las secciones obligatorias completas
+- [x] Sin detalles de implementación en requisitos y criterios de éxito
+- [x] Enfocado en valor de usuario
+- [x] Secciones obligatorias completas
+- [x] Distinción presupuesto vs. gasto fijo documentada
 
 ## Requirement Completeness
 
-- [x] No quedan marcadores [NEEDS CLARIFICATION]
-- [x] Requisitos testables y sin ambigüedad
-- [x] Criterios de éxito medibles
-- [x] Criterios de éxito agnósticos de tecnología
-- [x] Todos los escenarios de aceptación definidos
-- [x] Casos borde identificados
-- [x] Alcance claramente acotado (dentro/fuera)
-- [x] Dependencias y supuestos identificados
+- [x] Sin marcadores [NEEDS CLARIFICATION] pendientes
+- [x] Requisitos testables
+- [x] Casos borde (día 31, idempotencia, sin push)
+- [x] Alcance ampliado acotado (fuera: auto-create, SMS, app nativa)
 
 ## Feature Readiness
 
-- [x] Todos los requisitos funcionales tienen criterios de aceptación claros
-- [x] Los user stories cubren los flujos principales
-- [x] La feature cumple los outcomes medibles de Success Criteria
-- [x] No se filtran detalles de implementación en la especificación
+- [x] User stories cubren presupuestos, gastos fijos, email, push, reportes
+- [x] Decisiones de canal documentadas (email vs push vs in-app)
+- [x] Infra nueva identificada en proposal (email provider, VAPID, crons)
 
 ## Notes
 
-- Decisiones de alcance confirmadas con el usuario (2026-07-04): un solo change `web-budgets-reports` (Presupuestos + Reportes juntos); exportación **PDF y CSV**.
-- Decisiones diferidas a `design.md`: librería de gráficos y librería/estrategia de generación PDF; navegación de meses en `/budgets`.
-- Alertas limitadas a in-app; `notificationsEnabled` (web-settings) como interruptor. Sin Web Push.
+- **v2 (2026-07-04)**: Usuario amplió scope — gastos fijos, reportes email al cierre, recordatorios configurables, email + Web Push.
+- Riesgo principal: change grande; `tasks.md` deberá fasear (MVP presupuestos+reportes → gastos fijos → email → push).
+- Android: PWA recomendada para push; email no depende de permisos del navegador.

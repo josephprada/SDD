@@ -1,192 +1,206 @@
-# Feature Specification: Web Budgets & Reports (Presupuestos + Reportes + Panel de Resultados)
+# Feature Specification: Web Budgets & Reports (v2 — alcance ampliado)
 
 **Feature Branch**: `feat/web-budgets-reports`
 
 **Created**: 2026-07-04
 
-**Status**: Draft
+**Status**: Draft (v2 — gastos fijos + email + Web Push)
 
 **Change**: web-budgets-reports (Change 4)
 
-**Input**: Roadmap `SPEC.md` §4.5 (Presupuestos y Alertas) y §4.6 (Panel de Resultados y Gráficos).
+**Input**: Roadmap `SPEC.md` §4.5–4.6 + gastos fijos, reportes por email al cierre de período, recordatorios configurables, notificaciones email + Web Push.
 
 ---
 
 ## Resumen
 
-JP-WALLET permite hoy registrar transacciones y ver un dashboard del período actual, pero el usuario no puede fijar límites de gasto ni analizar sus finanzas con gráficos. Este change añade dos capacidades complementarias:
+Este change entrega control financiero proactivo en cuatro pilares:
 
-- **Presupuestos**: límites mensuales por categoría de gasto, con progreso visual y alertas al acercarse o superar el límite.
-- **Reportes / Panel de Resultados**: gráficos de ingresos vs. gastos, desglose por categoría y tendencias, con filtros y exportación a CSV y PDF.
+| Pilar | Descripción |
+|-------|-------------|
+| **Presupuestos** | Límite mensual por categoría; progreso y alertas al 50/80/100 % |
+| **Gastos fijos** | Compromisos recurrentes (cuota, gym, mercado) con fecha y recordatorios configurables |
+| **Reportes** | Panel con gráficos, filtros, export manual y **envío automático por email** al cierre de período |
+| **Notificaciones** | Email + Web Push (+ in-app); no dependen del login con Google para entregarse |
 
-**Dentro:** presupuestos mensuales por categoría de gasto, progreso, alertas in-app por umbral (50/80/100 %), panel de reportes con 3 gráficos, filtros por período/categoría/cuenta, exportación CSV y PDF, navegación.
+**Dentro:** presupuestos, gastos fijos mensuales, recordatorios con offsets configurables, reportes automáticos por email, Web Push, export CSV/PDF manual, navegación.
 
-**Fuera:** presupuestos de ingreso, por cuenta o por rango arbitrario; roll-over; Web Push; exportación JSON; reportes programados/email; benchmarks entre usuarios.
+**Fuera:** auto-creación de transacciones recurrentes, frecuencias no mensuales, SMS/WhatsApp, app nativa Play Store, roll-over de presupuesto.
+
+---
+
+## Conceptos clave
+
+### Presupuesto vs. gasto fijo
+
+- **Presupuesto**: "No quiero gastar más de X en esta categoría este mes." Mide gasto acumulado vs. techo.
+- **Gasto fijo**: "Cada día 10 pago X por la cuota." Tiene fecha de vencimiento y recordatorios.
+
+Un gasto fijo puede usar la misma categoría que un presupuesto; son entidades distintas.
+
+### Notificaciones en Android (login con Google)
+
+- **Login con Google** = identidad (email, nombre). No habilita notificaciones automáticamente.
+- **Email**: llega a Gmail/correo del móvil sin abrir la app. Requiere `reportEmailEnabled` / recordatorios activos.
+- **Web Push**: notificación en la bandeja del sistema. Requiere:
+  1. Permiso de notificaciones del **navegador** (Chrome en Android).
+  2. Notificaciones de Chrome **activas** en Ajustes del teléfono.
+  3. Recomendado: **instalar JP-WALLET como PWA** ("Añadir a pantalla de inicio") para entrega fiable en Android.
+- **In-app**: solo con la pestaña/app abierta.
 
 ---
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Crear y monitorear un presupuesto por categoría (Priority: P1)
+### User Story 1 - Presupuesto por categoría (Priority: P1)
 
-Como usuario, quiero fijar un límite mensual de gasto para una categoría (p. ej. "Comida") y ver cuánto he gastado contra ese límite, para controlar mis finanzas.
-
-**Why this priority**: Es el corazón de la capacidad de presupuestos y aporta valor inmediato de forma autónoma, aun sin reportes ni alertas.
-
-**Independent Test**: Crear un presupuesto para una categoría con transacciones existentes en el mes y verificar que la barra de progreso muestra gastado, restante y porcentaje correctos.
+Como usuario, quiero fijar un límite mensual por categoría y ver mi progreso, para no pasarme del techo.
 
 **Acceptance Scenarios**:
 
-1. **Given** categoría de gasto "Comida" y transacciones del mes por $300.000, **When** creo un presupuesto de $500.000 para "Comida" del mes en curso, **Then** `/budgets` muestra "Comida" con gastado $300.000, restante $200.000 y 60 %.
-2. **Given** un presupuesto existente para "Comida" este mes, **When** intento crear otro para "Comida" el mismo mes, **Then** el sistema lo impide e indica que ya existe.
-3. **Given** un presupuesto creado, **When** edito su monto o lo elimino, **Then** el cambio se refleja inmediatamente en la lista y el progreso.
+1. **Given** gastos de $300.000 en "Comida", **When** creo presupuesto $500.000, **Then** veo 60 %, restante $200.000.
+2. **Given** presupuesto existente para "Comida" este mes, **When** intento duplicar, **Then** se rechaza.
+3. **Given** presupuesto al 85 % y notificaciones activas, **When** registro un gasto que cruza 80 %, **Then** alerta in-app y (si canales activos) email y/o push.
 
 ---
 
-### User Story 2 - Analizar finanzas en el Panel de Resultados (Priority: P1)
+### User Story 2 - Gestionar gastos fijos del mes (Priority: P1)
 
-Como usuario, quiero ver gráficos de mis ingresos vs. gastos, el desglose por categoría y la tendencia en el tiempo, para entender mis hábitos financieros.
+Como usuario, quiero registrar mis pagos recurrentes (cuota día 10, gym día 1, mercado semanal simplificado a mensual), para no olvidarlos.
 
-**Why this priority**: Segunda mitad del valor del change; independiente de presupuestos, entrega análisis por sí solo.
+**Why this priority**: Necesidad explícita del usuario; independiente de presupuestos.
 
-**Independent Test**: Con transacciones del período, abrir `/reports` y verificar que los tres gráficos reflejan los totales reales y responden a los filtros.
+**Independent Test**: Crear gasto fijo "Cuota" $200.000 día 10; verificar que aparece en la lista del mes con fecha y monto.
 
 **Acceptance Scenarios**:
 
-1. **Given** transacciones del mes, **When** abro `/reports`, **Then** veo un gráfico de ingresos vs. gastos, uno de gastos por categoría y uno de tendencia, con datos reales.
-2. **Given** el panel abierto, **When** cambio el filtro de período a "Trimestre", **Then** los tres gráficos se recalculan para el trimestre en curso en < 1 s.
-3. **Given** el panel abierto, **When** filtro por una cuenta o categoría específica, **Then** los gráficos muestran solo los datos de ese filtro.
+1. **Given** ningún gasto fijo, **When** creo "Cuota préstamo" $200.000 categoría "Deudas" día 10, **Then** aparece en la vista de gastos fijos con próxima fecha.
+2. **Given** un gasto fijo, **When** lo edito o desactivo, **Then** los cambios persisten y los recordatorios futuros respetan el estado.
+3. **Given** gasto fijo activo, **When** lo marco como pagado, **Then** puedo registrar la transacción asociada rápidamente (o queda marcado para el mes).
 
 ---
 
-### User Story 3 - Recibir alertas al acercarse al límite (Priority: P2)
+### User Story 3 - Recordatorios configurables (Priority: P1)
 
-Como usuario con presupuestos activos, quiero recibir una alerta cuando un gasto me acerca o supera el límite, para reaccionar a tiempo.
-
-**Why this priority**: Aumenta el valor de los presupuestos pero depende de la US1; degradable sin bloquear el MVP.
-
-**Independent Test**: Con un presupuesto al 70 %, registrar un gasto que lo lleve sobre 80 % y verificar la alerta in-app; repetir con `notificationsEnabled` apagado y verificar que no aparece.
+Como usuario, quiero que me avisen 2 días antes y el mismo día del pago, y poder configurar cuántos avisos y con qué antelación.
 
 **Acceptance Scenarios**:
 
-1. **Given** presupuesto "Comida" al 70 % y `notificationsEnabled` activo, **When** registro un gasto que lo lleva a 85 %, **Then** aparece una alerta in-app indicando que superé el 80 %.
-2. **Given** el mismo presupuesto, **When** el gasto lo lleva a 100 %+, **Then** el estado visual pasa a `danger` y se muestra alerta de límite superado.
-3. **Given** `notificationsEnabled` apagado, **When** cruzo un umbral, **Then** no se muestra alerta (el estado visual del presupuesto sí se actualiza).
+1. **Given** gasto fijo día 10 con offsets `[2, 0]`, **When** llega el día 8, **Then** recibo recordatorio (email y/o push según prefs).
+2. **Given** el mismo gasto, **When** llega el día 10, **Then** recibo segundo recordatorio.
+3. **Given** offsets `[7, 2, 0]`, **When** configuro el gasto fijo, **Then** se envían hasta 3 recordatorios en esas fechas (sin duplicar el mismo offset/día).
+4. **Given** `notificationsEnabled` desactivado globalmente, **When** llega fecha de recordatorio, **Then** no se envían email ni push (in-app puede mostrar badge al abrir la app).
 
 ---
 
-### User Story 4 - Exportar el reporte a CSV y PDF (Priority: P2)
+### User Story 4 - Panel de Resultados y export manual (Priority: P1)
 
-Como usuario, quiero exportar el panel de resultados a CSV y PDF, para guardar o compartir mi análisis.
-
-**Why this priority**: Complementa los reportes; valioso pero no bloquea la visualización.
-
-**Independent Test**: Con un reporte visible, exportar a CSV y verificar los datos agregados; exportar a PDF y verificar que incluye resumen y gráficos legibles.
+Como usuario, quiero gráficos y exportar CSV/PDF bajo demanda.
 
 **Acceptance Scenarios**:
 
-1. **Given** un reporte con filtros aplicados, **When** exporto a CSV, **Then** obtengo un archivo con las filas agregadas (categoría/período, montos) coherentes con lo visible.
-2. **Given** el mismo reporte, **When** exporto a PDF, **Then** obtengo un documento legible con el resumen y los gráficos del panel.
-3. **Given** un período sin datos, **When** exporto, **Then** obtengo un archivo válido con encabezados y sin filas (o aviso de "sin datos"), sin error.
+1. **Given** transacciones del mes, **When** abro `/reports`, **Then** veo ingresos vs. gastos, por categoría y tendencia.
+2. **Given** filtros aplicados, **When** exporto CSV o PDF, **Then** los datos coinciden con el panel.
 
 ---
 
-### User Story 5 - Navegar a Presupuestos y Reportes (Priority: P3)
+### User Story 5 - Reporte automático por email al cierre de período (Priority: P2)
 
-Como usuario, quiero acceder fácilmente a Presupuestos y Reportes desde la navegación, en móvil y escritorio.
-
-**Why this priority**: Habilita el descubrimiento; pequeño pero necesario para exponer las nuevas vistas.
-
-**Independent Test**: Verificar que existen accesos a `/budgets` y `/reports` en `NavMobile` y `NavDesktop` y que navegan correctamente.
+Como usuario, quiero recibir mi reporte por correo cuando termine cada mes (o semana/trimestre/semestre según mi agrupación), sin tener que entrar a la app.
 
 **Acceptance Scenarios**:
 
-1. **Given** la app en móvil, **When** abro el menú "Más", **Then** veo accesos a Presupuestos y Reportes.
-2. **Given** la app en escritorio, **When** miro la navegación lateral, **Then** veo Presupuestos y Reportes y puedo navegar a ellos.
+1. **Given** `defaultGrouping: "month"` y `reportEmailEnabled: true`, **When** termina el mes, **Then** recibo email al correo de Google con resumen y PDF adjunto.
+2. **Given** `reportEmailEnabled: false`, **When** termina el período, **Then** no se envía email.
+3. **Given** un período ya reportado, **When** el cron corre de nuevo, **Then** no se reenvía (idempotencia).
+
+---
+
+### User Story 6 - Web Push en el móvil (Priority: P2)
+
+Como usuario en Android, quiero ver recordatorios y alertas en la bandeja de notificaciones aunque no tenga la app abierta.
+
+**Acceptance Scenarios**:
+
+1. **Given** notificaciones activas, **When** concedo permiso push y (recomendado) instalo PWA, **Then** la suscripción se guarda en el servidor.
+2. **Given** suscripción activa, **When** llega recordatorio de gasto fijo, **Then** aparece notificación en la bandeja del sistema.
+3. **Given** permiso denegado, **When** llega recordatorio, **Then** email sigue funcionando si está activo; la UI explica cómo activar push.
+
+---
+
+### User Story 7 - Navegación (Priority: P3)
+
+Accesos a Presupuestos, Gastos fijos y Reportes en móvil y escritorio.
 
 ---
 
 ### Edge Cases
 
-- **Categoría archivada con presupuesto**: el presupuesto histórico permanece legible; no se pueden crear nuevos presupuestos para categorías archivadas.
-- **Presupuesto sin transacciones**: progreso 0 %, estado `ok`, restante = límite.
-- **Gasto que excede el límite**: porcentaje > 100 %; barra "llena" con estado `danger`; restante negativo mostrado como sobregiro.
-- **Monto de presupuesto ≤ 0**: rechazado con validación.
-- **Período sin datos en reportes**: gráficos muestran estado vacío claro (no error).
-- **Muchas categorías en el desglose**: agrupar el excedente en "Otros" para legibilidad.
-- **Transacción de transferencia**: excluida de gasto/ingreso en presupuestos y reportes.
-- **Transacción editada de mes**: recalcular el progreso del mes origen y destino.
-- **Cambio de zona horaria / borde de mes**: usar la misma convención de `periodRange` para consistencia con el dashboard.
+- Día 31 en febrero/abril: usar **último día del mes**.
+- Gasto fijo desactivado: no enviar recordatorios.
+- Usuario sin email en perfil: no enviar email; log de error silencioso.
+- Push sin suscripción: solo email.
+- Presupuesto y gasto fijo en misma categoría: ambos funcionan independientemente.
+- Zona horaria: crons y fechas en timezone del usuario (`es-CO` por defecto).
+- Período sin transacciones: email con reporte vacío legible, no error.
 
 ## Requirements *(mandatory)*
 
-### Functional Requirements
+### Presupuestos
 
-**Presupuestos**
+- **FR-001** a **FR-007**: (sin cambio respecto v1) CRUD, unicidad, progreso, umbrales.
+- **FR-008**: Alertas de presupuesto MUST enviarse por email y/o push además de in-app, según `notificationsEnabled` y canales del usuario.
 
-- **FR-001**: El sistema MUST permitir crear un presupuesto con categoría de gasto, monto límite (COP > 0) y mes (`periodKey`).
-- **FR-002**: El sistema MUST impedir más de un presupuesto para la misma categoría en el mismo mes.
-- **FR-003**: El usuario MUST poder editar el monto y eliminar un presupuesto existente.
-- **FR-004**: El sistema MUST calcular el gasto de una categoría/mes sumando las transacciones de tipo gasto dentro del rango del período, coherente con el dashboard.
-- **FR-005**: El sistema MUST mostrar por presupuesto: gastado, restante y porcentaje, con estado de umbral `ok`/`info`/`warning`/`danger` (50/80/100 %).
-- **FR-006**: El sistema MUST listar los presupuestos del período en `/budgets` con un resumen presupuestado vs. gastado.
-- **FR-007**: El sistema MUST restringir la selección de categoría a categorías de gasto no archivadas al crear un presupuesto.
+### Gastos fijos
 
-**Alertas**
+- **FR-009**: CRUD de gasto fijo: nombre, monto (>0), categoría gasto, día del mes (1–31), activo/inactivo.
+- **FR-010**: Recordatorios MUST configurarse con lista de offsets en días (`reminderOffsets`, ej. `[2, 0]`).
+- **FR-011**: Por gasto fijo, toggles `emailReminders` y `pushReminders`.
+- **FR-012**: Vista de gastos fijos con próxima fecha de pago y estado del mes.
 
-- **FR-008**: El sistema MUST mostrar una alerta in-app cuando una transacción de gasto haga que un presupuesto cruce hacia arriba un umbral (80 % o 100 %), solo si `notificationsEnabled` está activo.
-- **FR-009**: El sistema MUST actualizar el estado visual del presupuesto al cruzar umbrales independientemente de `notificationsEnabled`.
-- **FR-010**: El sistema MUST NOT enviar notificaciones fuera de la app (sin Web Push) en este change.
+### Notificaciones
 
-**Reportes**
+- **FR-013**: `notificationsEnabled` global MUST suprimir email y push; in-app puede mostrarse al abrir la app.
+- **FR-014**: Sistema MUST persistir suscripciones Web Push por dispositivo.
+- **FR-015**: Sistema MUST solicitar permiso push solo tras acción explícita del usuario (no al login).
+- **FR-016**: Sistema MUST usar `notificationLog` para no duplicar envíos.
+- **FR-017**: UI MUST explicar requisitos PWA/permisos en Android.
 
-- **FR-011**: El sistema MUST mostrar en `/reports` un gráfico de ingresos vs. gastos, uno de gastos por categoría y uno de tendencia temporal, con datos reales del usuario.
-- **FR-012**: El usuario MUST poder filtrar los reportes por período (semana/mes/trimestre/semestre), por categoría y por cuenta.
-- **FR-013**: El sistema MUST recalcular los gráficos al cambiar cualquier filtro.
-- **FR-014**: El sistema MUST excluir transferencias del cómputo de ingresos y gastos.
-- **FR-015**: El sistema MUST agrupar categorías excedentes en "Otros" cuando el desglose sea muy largo, para mantener legibilidad.
+### Reportes
 
-**Exportación**
+- **FR-018** a **FR-022**: Panel, filtros, gráficos, export manual (como v1).
+- **FR-023**: Al cierre de período según `defaultGrouping`, MUST enviar reporte por email si `reportEmailEnabled`.
+- **FR-024**: Email MUST ir al correo de la cuenta Google autenticada.
+- **FR-025**: Toggle `reportEmailEnabled` en Ajustes.
 
-- **FR-016**: El usuario MUST poder exportar el reporte activo a CSV con los datos agregados visibles.
-- **FR-017**: El usuario MUST poder exportar el reporte activo a PDF con resumen y gráficos legibles.
-- **FR-018**: El sistema MUST manejar la exportación de un reporte sin datos sin producir errores.
+### Transversal
 
-**Transversal**
+- **FR-026**: Mobile-first 375 px; tokens JP-DS; a11y en gráficos.
+- **FR-027**: Datos aislados por usuario autenticado.
 
-- **FR-019**: El sistema MUST exponer accesos a Presupuestos y Reportes en la navegación móvil y de escritorio.
-- **FR-020**: El sistema MUST usar tokens de color JP-DS en todos los gráficos y barras (sin hex hardcodeados) y respetar tema claro/oscuro.
-- **FR-021**: El sistema MUST proveer una alternativa textual/accesible a los gráficos y respetar `prefers-reduced-motion`.
-- **FR-022**: El sistema MUST ser mobile-first (usable desde 375 px) sin regresiones entre 320 y 1440 px.
-- **FR-023**: El sistema MUST restringir todas las operaciones a los datos del usuario autenticado.
+### Key Entities
 
-### Key Entities *(include if feature involves data)*
-
-- **Budget (Presupuesto)**: límite de gasto de un usuario para una categoría en un mes. Atributos: usuario, categoría (gasto), monto límite, período (mes), notas opcionales, timestamps. Único por usuario+categoría+mes. Relación: pertenece a un usuario y referencia una categoría.
-- **Budget Progress (derivado)**: cálculo no persistido de gastado, restante, porcentaje y estado de umbral, obtenido de `transactions` del período.
-- **Report Dataset (derivado)**: agregaciones de solo lectura sobre `transactions`/`categories`/`accounts` (ingresos vs. gastos, por categoría, serie temporal); no es una tabla.
+- **Budget**: límite por categoría/mes (tabla `budgets`).
+- **FixedExpense**: compromiso recurrente mensual con offsets y canales (tabla `fixedExpenses`).
+- **PushSubscription**: endpoint y claves por dispositivo.
+- **NotificationLog**: registro de envíos para idempotencia.
+- **Report Dataset**: agregación derivada (sin tabla).
 
 ## Success Criteria *(mandatory)*
 
-### Measurable Outcomes
-
-- **SC-001**: El usuario crea un presupuesto y ve su progreso correcto en menos de 30 segundos, sin ayuda.
-- **SC-002**: El progreso mostrado (gastado/restante/%) coincide exactamente con la suma de transacciones del período en el 100 % de los casos.
-- **SC-003**: Nunca existen dos presupuestos para la misma categoría y mes (0 duplicados).
-- **SC-004**: Al cruzar un umbral con notificaciones activas, la alerta aparece en menos de 1 segundo tras guardar la transacción.
-- **SC-005**: Los tres gráficos del panel se cargan con datos reales en menos de 2 segundos para un historial típico.
-- **SC-006**: Cambiar un filtro actualiza los gráficos en menos de 1 segundo.
-- **SC-007**: El CSV exportado reimporta/abre correctamente y sus totales coinciden con el panel.
-- **SC-008**: El PDF exportado es legible e incluye resumen y los gráficos del panel.
-- **SC-009**: Todas las vistas son operables desde 375 px sin scroll horizontal ni solapamientos, verificadas en 320–1440 px.
-- **SC-010**: Los gráficos cumplen contraste AA y ofrecen alternativa textual.
+- **SC-001**: Presupuesto creado y progreso correcto en < 30 s.
+- **SC-002**: Gasto fijo con recordatorio `[2, 0]` dispara email el día correcto (±0 días).
+- **SC-003**: Push llega a Android con PWA + permiso en < 1 min del cron.
+- **SC-004**: Reporte de mes enviado una sola vez al cierre.
+- **SC-005**: Gráficos cargan en < 2 s; filtros en < 1 s.
+- **SC-006**: 0 duplicados de presupuesto categoría+mes.
+- **SC-007**: Usuario sin permiso push sigue recibiendo email.
 
 ## Assumptions
 
-- El período base de un presupuesto es **mensual**; el usuario opera sobre el mes en curso por defecto (con posibilidad de navegar meses en iteración de diseño).
-- Se reutiliza `lib/period/` y la convención de rangos del dashboard para toda agregación temporal.
-- Las alertas son **in-app** (toast/badge); `notificationsEnabled` (ya persistido en `web-settings`) las gobierna.
-- La exportación PDF es un **snapshot del panel** generado en cliente; CSV siempre disponible como respaldo.
-- La elección de librería de gráficos y de generación PDF se decide en `design.md`, priorizando peso, accesibilidad y theming por CSS vars.
-- El backend es Convex; las agregaciones se sirven vía queries de solo lectura reutilizando índices existentes (`by_user_date`, `by_user_category`).
-- Solo categorías de tipo **gasto** admiten presupuesto; las transferencias se excluyen de todos los cálculos.
+- Frecuencia de gastos fijos: **mensual** en v1 (`SPEC.md` §5.3 ampliable después).
+- Email vía proveedor transaccional (Resend o similar); dominio `lavalex.co` verificado.
+- Web Push con VAPID; Chrome Android + PWA como target principal móvil.
+- Crons Convex en UTC con conversión a timezone usuario.
+- PDF de email generado server-side o HTML estático; export manual sigue en cliente.
+- El email de envío es el de Google OAuth (read-only en perfil).
