@@ -173,6 +173,7 @@ Prod y dev permanecen **aislados**.
 | 404 en rutas `/accounts` | Nginx sin `try_files` | Revisar `wallet.lavalex.co.conf` |
 | Certificado inválido en wallet | SAN faltante | `certbot --expand` |
 | Deploy CI falla SSH | Clave/usuario deploy | Revisar `VPS_SSH_*` secrets |
+| Deploy CI falla sync (SCP) | Archivos `nginx:nginx` sin limpiar | Workflow limpia con `sudo rm -rf` + `rsync --delete` antes de `chown` |
 | Login móvil spinner infinito | Popup OAuth en touch | Redirect a `/login?code=` vía `signIn({ redirectTo })` |
 | COOP bloquea popup desktop | Header / polling `popup.closed` | `same-origin-allow-popups` en Nginx + fix popup |
 

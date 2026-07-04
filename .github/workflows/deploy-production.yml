@@ -46,6 +46,11 @@ jobs:
       - name: Verify build output
         run: test -f "${{ env.WEB_DIST }}/index.html"
 
+      - name: Prepare deploy SSH key
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+
       - name: Backup current release on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -60,17 +65,26 @@ jobs:
               sudo cp -a ${{ env.VPS_WEB_ROOT }} ${{ env.VPS_WEB_ROOT }}.prev
             fi
 
-      - name: Sync static files to VPS
-        uses: appleboy/scp-action@v0.1.7
+      - name: Clean web root on VPS
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
           port: ${{ secrets.VPS_SSH_PORT }}
           username: ${{ secrets.VPS_SSH_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          source: "${{ env.WEB_DIST }}/*"
-          target: "${{ env.VPS_WEB_ROOT }}"
-          strip_components: 3
-          overwrite: true
+          script: |
+            set -e
+            sudo rm -rf ${{ env.VPS_WEB_ROOT }}/*
+
+      - name: Sync static files to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_SSH_PORT }}
+          VPS_USER: ${{ secrets.VPS_SSH_USER }}
+        run: |
+          rsync -avz --no-owner --no-group --delete \
+            -e "ssh -p ${VPS_PORT} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
+            "${{ env.WEB_DIST }}/" "${VPS_USER}@${VPS_HOST}:${{ env.VPS_WEB_ROOT }}/"
 
       - name: Fix permissions and reload Nginx
         uses: appleboy/ssh-action@v1.2.0
