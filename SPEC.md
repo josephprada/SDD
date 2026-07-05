@@ -218,7 +218,13 @@
 | Capacidad | Descripción |
 |-----------|-------------|
 | Registrar crédito | Nombre, entidad, monto original, tasa de interés, plazo, fecha inicio |
-| Calendario de pagos | Genera tabla de amortización (cuotas mensuales) |
+| Calendario de pagos | Generado (cuota fija, capital constante) o **importado del extracto bancario** |
+| Tasa de interés | EA, NAMV o MV — según cómo la cotice la entidad |
+| Abonos a capital | Pagos extraordinarios que recalculan cuotas futuras (reducir plazo o cuota) |
+| Destinos / rubros | Trazabilidad del uso del capital desembolsado (en qué se invierte el préstamo) |
+| Fondo aislado (escrow) | Cuenta meta vinculada al crédito; excluida del balance personal |
+| Gasto desde fondo | Asistente meta → ahorros → gasto → devolución; movimientos filtrados |
+| Seguros y otros cobros | Línea opcional por cuota (SEGT, IVA seguro, etc.) |
 | Historial de pagos | Registra cada pago, linkea a `transactions` cuando se paga |
 | Saldo pendiente | Balance en tiempo real por crédito |
 | Alertas de vencimiento | Notificación X días antes del pago |
@@ -256,7 +262,7 @@
 
 ### 5.2 Schema Convex
 
-Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `savingsGoals`, `savingsContributions`, `attachments`, `userPreferences`
+Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `creditCapitalAbonos`, `creditDestinations`, `savingsGoals`, `savingsContributions`, `attachments`, `userPreferences`
 
 ### 5.3 Transacciones Recurrentes
 
@@ -318,30 +324,65 @@ interface TaxImage {
 interface Credit {
   id: string;
   userId: string;
-  name: string; // ej: "Crédito Hipotecario Bancolombia"
+  name: string; // ej: "Crédito remodelación vivienda VIS"
   lender: string;
   principal: number;
-  interestRate: number; // anual, ej: 12.5
+  rateType: "EA" | "NAMV" | "MV";
+  interestRate: number; // valor en % según rateType
   termMonths: number;
   startDate: timestamp;
   paymentDay: number; // día del mes (1-31)
+  scheduleMode: "cuota_fija" | "capital_constant" | "manual"; // cómo se genera la tabla
+  fixedInstallment?: number; // cuota conocida (modo cuota_fija)
+  defaultRecalcOnAbono: "shorten_term" | "lower_installment"; // efecto del abono extraordinario
+  targetPayoffDate?: timestamp; // meta aspiracional (ej: pagar en 5 años)
+  insuranceMonthly?: number; // seguro/comisión fija mensual opcional
+  disbursementAccountId?: string; // → Account (cuenta meta / escrow del desembolso)
+  operatingAccountId?: string; // → Account (nómina/ahorros pasarela al gastar)
   outstandingBalance: number;
   status: "active" | "paid_off" | "defaulted";
   notes?: string;
   createdAt: timestamp;
 }
 
+interface CreditCapitalAbono {
+  id: string;
+  creditId: string;
+  amount: number;
+  paidAt: timestamp;
+  recalcEffect: "shorten_term" | "lower_installment";
+  transactionId?: string;
+  notes?: string;
+  createdAt: timestamp;
+}
+
 interface CreditPayment {
   id: string;
-  creditId: string; // → Credit
+  creditId: string;
   installmentNumber: number;
   dueDate: timestamp;
   paidDate?: timestamp;
-  amount: number;
   principal: number;
   interest: number;
-  status: "pending" | "paid" | "overdue";
-  transactionId?: string; // → Transaction
+  insuranceAmount?: number; // SEGT, IVA seguro, etc.
+  otherFees?: number;
+  totalDue: number; // VR CUOTA = capital + interés + seguros + otros
+  status: "pending" | "paid" | "overdue" | "cancelled"; // cancelled tras abono que recalcula
+  transactionId?: string;
+  isProjected: boolean; // false si el usuario editó la fila manualmente
+}
+
+interface CreditDestination {
+  id: string;
+  creditId: string;
+  name: string; // ej: "Construcción escaleras"
+  amount: number;
+  spentAt?: timestamp;
+  status: "planned" | "in_progress" | "completed";
+  transactionIds?: string[]; // → Transaction
+  notes?: string;
+  createdAt: timestamp;
+  updatedAt: timestamp;
 }
 ```
 
@@ -520,9 +561,11 @@ packages/jp-ds/
    - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros
    - Export CSV/PDF; notificaciones push + in-app
 6. **Change 5: web-credits — Créditos, Préstamos y Ahorros/Metas** ← *siguiente*
-   - Calendario de amortización y tracking de cuotas
-   - Metas de ahorro con aportes y progreso visual
-   - Alertas de vencimiento; link a transacciones al pagar
+   - Amortización flexible (cuota fija, capital constante, tabla manual/extracto)
+   - **Abonos a capital** con recálculo (acortar plazo o bajar cuota)
+   - **Destinos/rubros** del desembolso (trazabilidad del uso del capital)
+   - **Fondo aislado**: cuenta escrow vinculada, dashboard sin mezclar nómina
+   - Simulador de pago anticipado; metas de ahorro con aportes
 7. **Change 6: web-tax-dian — Declaración de Renta (DIAN)** ← *último del roadmap actual*
    - Items por sección DIAN
    - Adjuntos (imágenes y PDFs) por rubro

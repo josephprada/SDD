@@ -72,7 +72,7 @@ Producción: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
 | Diseño técnico | `changes/web-budgets-reports/design.md` |
 | Quickstart QA | `changes/web-budgets-reports/quickstart.md` |
 
-**Siguiente change planificado:** **Change 5 — `web-credits`** (Créditos, Préstamos y Ahorros/Metas).  
+**Siguiente change planificado:** **Change 5 — `web-credits`** (Créditos, Préstamos, Ahorros/Metas, fondo escrow).  
 **Change 6 — `web-tax-dian`** (Declaración de Renta DIAN) queda al final: debe integrar créditos, metas, cuentas y transacciones.
 
 ---

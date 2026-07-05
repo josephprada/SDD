@@ -4,206 +4,303 @@
 
 **Created**: 2026-07-05
 
-**Status**: Draft
+**Status**: Draft (v1.4 — + fondo aislado / cuenta escrow)
 
 **Change**: web-credits (Change 5)
 
-**Input**: Roadmap `SPEC.md` §4.10–4.11 — créditos y préstamos con amortización, alertas de vencimiento, metas de ahorro con aportes y progreso visual.
+**Input**: Créditos colombianos versátiles, abonos a capital extraordinarios, metas de ahorro. Caso real: Banco Agrario VIS $40M a 10 años; ahorro **$500.000/mes** → abono anual **$6.000.000** → meta pagar en ~5 años.
 
 ---
 
 ## Resumen
 
-Este change entrega gestión de **pasivos** (créditos) y **objetivos de acumulación** (metas de ahorro) como prerequisito de la Declaración de Renta (Change 6).
-
 | Pilar | Descripción |
 |-------|-------------|
-| **Créditos** | Deudas con tabla de amortización, cuotas y saldo pendiente |
-| **Pagos de cuota** | Marcar pagado, estados pendiente/vencido, link a transacción |
-| **Alertas** | Recordatorios de vencimiento in-app + push |
-| **Metas de ahorro** | Objetivo, aportes, progreso y fecha límite opcional |
+| **Créditos flexibles** | Cuota fija, capital constante o tabla manual (extracto bancario) |
+| **Abonos a capital** | Pagos extra que recalculan el futuro (acortar plazo o bajar cuota) |
+| **Simulación** | Proyectar abonos anuales hacia fecha meta de pago |
+| **Fondo aislado** | Cuenta meta vinculada; no mezcla nómina ni dashboard personal |
+| **Destinos / rubros** | En qué se invierte el capital desembolsado ($40M → escaleras $1,5M) |
+| **Cuotas y alertas** | Seguimiento, seguros opcionales, recordatorios |
+| **Metas de ahorro** | Objetivos, aportes, progreso |
 
-**Dentro:** CRUD créditos (francés), calendario de cuotas, CRUD metas, aportes, navegación `/credits` y `/savings`, integración básica con transacciones.
+**Dentro:** modos de amortización, abonos, simulador, rubros, **cuenta escrow + asistente de gasto**, crédito manual VIS, metas, `/credits`, `/savings`.
 
-**Fuera:** amortización alemana/revolving, prepagos, auto-débito, metas compartidas, email de recordatorios, DIAN.
+**Fuera:** UVR indexada, revolving, sync bancario, refinanciación como nueva operación, DIAN.
 
 ---
 
 ## Conceptos clave
 
-### Crédito vs. meta de ahorro vs. presupuesto
+### Cuota vs. abono vs. destino del desembolso
 
-- **Crédito**: deuda con interés y cuotas periódicas; el saldo **disminuye** al pagar.
-- **Meta de ahorro**: objetivo de reunir un monto; el progreso **aumenta** con aportes.
-- **Presupuesto** (Change 4): límite de gasto en categoría; no es deuda ni ahorro acumulado.
+- **Cuota ordinaria**: lo que **pagas al banco** cada mes (devolución de deuda + intereses).
+- **Abono a capital**: pago **extra** al banco; efecto `shorten_term` (acortar plazo) o `lower_installment` (bajar cuota).
+- **Destino / rubro**: en qué **gastaste o planeas gastar** el dinero que te prestaron — no es un pago al banco, es trazabilidad del uso del desembolso de $40M.
 
-### Fuente de verdad del progreso de ahorro
+Ejemplo: de $40.000.000 desembolsados, $1.500.000 fueron a **construcción de escaleras**; quedan $38.500.000 por asignar o ejecutar en otros rubros.
 
-- El monto acumulado de una meta = **suma de aportes registrados** (`savingsContributions`).
-- Una cuenta vinculada es **referencia visual** del saldo en banco/efectivo; no sustituye los aportes.
+### Modos de tabla (`scheduleMode`)
 
-### Amortización v1
+| Modo | Comportamiento | Ejemplo |
+|------|----------------|---------|
+| `cuota_fija` | VR cuota (capital+interés) constante; interés sobre saldo | Libre inversión |
+| `capital_constant` | Abono a capital mensual fijo; VR cuota decrece | Algunos créditos vivienda |
+| `manual` | Filas según extracto bancario; editable | Banco Agrario VIS (cuota total variable por seguros/tabla) |
 
-- Solo **cuota fija mensual (sistema francés)**.
-- Al crear el crédito se generan todas las cuotas (`creditPayments`) con capital, interés y fecha de vencimiento.
+### Caso real — extracto Banco Agrario (referencia QA)
+
+Crédito **Remodelación Vivienda VIS**, $40.000.000, cuota 1 (17/07/2026):
+
+- Capital: $163.938 · Interés: $433.237 · Seguros: ~$6.407 · **Total: $625.958**
+- Saldo posterior: $39.836.062
+- Plazo contratado: **120 meses (10 años)** · Meta usuario: **~60 meses (5 años)**
+- Plan de pago anticipado: ahorro **$500.000/mes** → abono anual **$6.000.000** a capital (`shorten_term`)
+
+La cuota total **no es idéntica** cada mes → modo `manual` o `capital_constant` + seguros opcionales.
+
+### Plan ahorro → abono (caso usuario)
+
+| Mes | Acción |
+|-----|--------|
+| Cada mes | Aporte $500.000 a meta «Abono crédito VIS» (o registro manual) |
+| Cada 12 meses | Abono a capital $6.000.000 sobre el crédito; recálculo de plazo |
+| Objetivo | Fecha de pago libre ~5 años en lugar de 10 |
+
+### Rubros de inversión (caso usuario)
+
+| Rubro | Monto | Notas |
+|-------|-------|-------|
+| Construcción escaleras | $1.500.000 | Primer destino registrado |
+| Sin asignar | $38.500.000 | Resto del desembolso $40M |
+
+### Fondo aislado — espejo BBVA (caso usuario)
+
+| Cuenta | Rol en app |
+|--------|------------|
+| BBVA Ahorros / Nómina | `operatingAccountId` — operación diaria; **sí** en balance personal |
+| BBVA Meta Crédito VIS | `disbursementAccountId` — escrow $40M; **no** en balance personal por defecto |
+
+Flujo al gastar de obra: Meta → Ahorros → Gasto (rubro) → (opcional) Ahorros → Meta.  
+Meta de ahorro $500k/mes para abono anual: sale de **nómina**, no del escrow de $40M.
 
 ---
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Registrar un crédito (Priority: P1)
+### User Story 1 - Registrar crédito según su tipo (Priority: P1)
 
-Como usuario, quiero registrar mi crédito hipotecario con tasa y plazo, para ver el calendario de pagos y cuánto debo.
+Como usuario, quiero registrar mi crédito como lo muestra mi banco (VIS, libre inversión, etc.), no forzado a una sola fórmula.
 
-**Independent Test**: Crear crédito $100.000.000, 12 % EA, 240 meses; verificar 240 cuotas con monto fijo y saldo inicial correcto.
+**Independent Test A**: Modo `cuota_fija`, $20M, 18% NAMV, 36 meses → cuota constante generada.
+
+**Independent Test B**: Modo `manual`, cargar filas del extracto Banco Agrario → primera cuota total $625.958, saldo $40M.
 
 **Acceptance Scenarios**:
 
-1. **Given** ningún crédito, **When** creo "Hipoteca" con monto, tasa, plazo y día de pago, **Then** aparece en `/credits` con saldo pendiente = monto original.
-2. **Given** crédito creado, **When** abro el detalle, **Then** veo tabla de amortización con número de cuota, fecha, capital, interés y total.
-3. **Given** datos inválidos (monto ≤ 0, plazo 0), **When** intento guardar, **Then** se rechaza con mensaje claro.
+1. **Given** modo `cuota_fija`, **When** ingreso monto + tasa + plazo, **Then** tabla con cuota fija y desglose capital/interés.
+2. **Given** modo `manual`, **When** ingreso filas del extracto (o importo CSV), **Then** tabla refleja valores del banco sin recalcular filas pasadas.
+3. **Given** modo `capital_constant`, **When** genero tabla, **Then** capital mensual es uniforme y VR cuota decrece mes a mes.
+4. **Given** `insuranceMonthly` o seguro por fila, **When** veo detalle, **Then** VR cuota = capital + interés + seguros (+ otros).
+5. **Given** crédito VIS $40M / 120 meses, **When** guardo `targetPayoffDate` a ~5 años, **Then** la UI muestra la meta de pago anticipado.
 
 ---
 
-### User Story 2 - Pagar una cuota (Priority: P1)
+### User Story 2 - Abono a capital extraordinario (Priority: P1)
 
-Como usuario, quiero marcar una cuota como pagada y opcionalmente vincularla a un gasto, para llevar control real de mis pagos.
+Como usuario con préstamo a 10 años, quiero ahorrar $500.000 cada mes y cada año abonar $6.000.000 a capital para pagar en ~5 años.
+
+**Independent Test**: Crédito $40M / 120 meses; simular abono $6.000.000/año × 5 años con `shorten_term` → `paid_off` proyectado ≤ 72 meses desde inicio.
 
 **Acceptance Scenarios**:
 
-1. **Given** cuota pendiente, **When** la marco como pagada con fecha, **Then** estado `paid`, saldo pendiente del crédito disminuye.
-2. **Given** cuota pagada, **When** elijo vincular transacción, **Then** `transactionId` queda asociado y puedo abrir el movimiento.
-3. **Given** todas las cuotas pagadas, **When** consulto el crédito, **Then** estado `paid_off` y saldo pendiente 0.
+1. **Given** crédito activo saldo $38M, **When** registro abono $6.000.000 con efecto `shorten_term`, **Then** saldo baja $6M y cuotas futuras recalculadas.
+2. **Given** meta «Abono crédito» $500.000/mes, **When** tras 12 aportes ($6M acumulados), **Then** UI sugiere o facilita registrar abono anual al crédito vinculado.
+3. **Given** cuotas ya pagadas, **When** aplico abono, **Then** filas `paid` no cambian.
+4. **Given** abono con `lower_installment`, **When** recalcula, **Then** mismo número de cuotas restantes pero VR cuota menor.
+5. **Given** pestaña Abonos, **When** abro historial, **Then** veo abonos anuales de $6M con fecha y efecto.
 
 ---
 
-### User Story 3 - Alertas de vencimiento de cuota (Priority: P2)
+### User Story 3 - Destinos del desembolso / rubros (Priority: P1)
 
-Como usuario, quiero recibir aviso antes del día de pago de mi cuota, para no incurrir en mora.
+Como usuario, quiero registrar en qué se va cada peso del crédito desembolsado, para llevar control real de la inversión (no solo cuánto debo al banco).
+
+**Independent Test**: Crédito $40M; rubro «Escaleras» $1,5M → asignado $1,5M, sin asignar $38,5M, 3,75% del capital en gráfico.
 
 **Acceptance Scenarios**:
 
-1. **Given** crédito activo con offsets `[3, 0]` y notificaciones activas, **When** faltan 3 días para la cuota, **Then** alerta in-app y/o push (sin duplicar vía `notificationLog`).
-2. **Given** `notificationsEnabled` desactivado, **When** llega fecha de recordatorio, **Then** no se envía push.
-3. **Given** cuota ya pagada, **When** llega fecha de recordatorio, **Then** no se envía alerta.
+1. **Given** crédito $40M sin rubros, **When** creo destino «Construcción escaleras» $1.500.000, **Then** resumen muestra asignado $1,5M y sin asignar $38,5M.
+2. **Given** rubro existente, **When** registro gasto vinculado (transacción), **Then** el rubro refleja el vínculo y puede pasar a `completed`.
+3. **Given** suma de rubros > principal, **When** intento guardar, **Then** advertencia o rechazo según regla (warn en v1, no bloquear si usuario confirma overflow menor).
+4. **Given** pestaña Destinos, **When** abro detalle del crédito, **Then** veo lista, montos, estados y gráfico de distribución.
+5. **Given** rubro con factura, **When** adjunto imagen/PDF, **Then** queda asociado al destino (reutilizar attachments).
 
 ---
 
-### User Story 4 - Crear meta de ahorro (Priority: P1)
+### User Story 4 - Fondo aislado y gasto desde el crédito (Priority: P1)
 
-Como usuario, quiero definir una meta ("Vacaciones $5M para dic 2026"), para visualizar mi avance.
+Como usuario, quiero que los $40M desembolsados vivan en una cuenta meta aparte y no se mezclen con mi nómina, pero poder registrar el flujo meta→ahorros→gasto→meta cuando necesite pagar obra.
 
-**Independent Test**: Crear meta $5.000.000; registrar aporte $1.000.000; ver 20 % de progreso.
+**Independent Test**: Crédito vinculado a cuenta meta $40M; dashboard personal excluye meta; asistente registra retiro $1,5M → gasto Escaleras → devolución sobrante; movimientos solo visibles en pestaña «Movimientos del fondo».
 
 **Acceptance Scenarios**:
 
-1. **Given** ninguna meta, **When** creo meta con nombre y monto objetivo, **Then** aparece en `/savings` con 0 % de progreso.
-2. **Given** meta con fecha límite, **When** la visualizo, **Then** veo días restantes o indicador de vencida si pasó la fecha sin completar.
-3. **Given** meta con cuenta vinculada, **When** abro detalle, **Then** veo progreso por aportes y saldo de cuenta como referencia.
+1. **Given** crédito $40M, **When** vinculo `disbursementAccountId` a «BBVA Meta VIS», **Then** tarjeta «Fondo crédito» muestra saldo meta y no suma al balance personal del home.
+2. **Given** `operatingAccountId` = «BBVA Ahorros», **When** uso asistente «Gastar desde fondo» $1.500.000 rubro Escaleras, **Then** se crean transferencia meta→ahorros, gasto vinculado al rubro, y opcional devolución sobrante — todos con `creditId`.
+3. **Given** lista `/transactions` por defecto, **When** no activo filtro crédito, **Then** no veo movimientos del fondo escrow.
+4. **Given** detalle del crédito pestaña Movimientos del fondo, **When** abro, **Then** veo transferencias y gastos del crédito ordenados.
+5. **Given** desembolso inicial, **When** configuro crédito, **Then** no se registra como ingreso de nómina — solo saldo en cuenta escrow vinculada.
 
 ---
 
-### User Story 5 - Registrar aportes (Priority: P1)
+### User Story 5 - Simular plan de pago anticipado (Priority: P1)
 
-Como usuario, quiero registrar cada vez que ahorro hacia mi meta, para ver el progreso actualizado.
+Como usuario, quiero simular «si abono $X cada diciembre, ¿cuándo termino?» sin registrar el abono aún.
 
 **Acceptance Scenarios**:
 
-1. **Given** meta activa $10.000.000, **When** registro aporte $2.500.000, **Then** progreso 25 % y restante $7.500.000.
-2. **Given** aportes que suman ≥ objetivo, **When** guardo el último aporte, **Then** meta pasa a `completed`.
-3. **Given** historial de aportes, **When** abro detalle, **Then** veo lista ordenada por fecha con montos.
+1. **Given** crédito $40M a 120 meses, **When** simulo abono anual $6.000.000 con `shorten_term`, **Then** veo fecha estimada de pago ≤ 6 años desde desembolso.
+2. **Given** `targetPayoffDate` en 5 años, **When** abro simulador, **Then** veo que ~$6.000.000/año es coherente con la meta (±10%).
+3. **Given** simulación, **When** confirmo aplicar, **Then** puedo convertir en abono real (opcional).
 
 ---
 
-### User Story 6 - Navegación (Priority: P2)
-
-Como usuario, quiero acceder a Créditos y Ahorros desde el menú principal en móvil y escritorio.
+### User Story 6 - Pagar cuota ordinaria (Priority: P1)
 
 **Acceptance Scenarios**:
 
-1. **Given** sesión autenticada en móvil, **When** abro menú «Más», **Then** veo entradas Créditos y Ahorros.
-2. **Given** sesión en desktop, **When** miro sidebar, **Then** veo ítems Créditos y Ahorros con rutas `/credits` y `/savings`.
+1. **Given** cuota pendiente, **When** marco pagada, **Then** estado `paid` y saldo coherente.
+2. **Given** cuota con seguros, **When** registro pago, **Then** puedo vincular transacción por `totalDue`.
+3. **Given** todas las cuotas pagadas, **When** consulto crédito, **Then** `paid_off`.
+
+---
+
+### User Story 7 - Alertas de vencimiento (Priority: P2)
+
+Sin cambio v1.1 — offsets, `notificationsEnabled`, `notificationLog`.
+
+---
+
+### User Story 8 - Metas de ahorro (Priority: P1)
+
+Sin cambio v1.1 — CRUD, aportes, `/savings`.
+
+---
+
+### User Story 9 - Navegación (Priority: P2)
+
+`/credits`, `/savings` en shell móvil y desktop.
 
 ---
 
 ### Edge Cases
 
-- Día de pago 31 en febrero: usar **último día del mes**.
-- Cuota vencida sin pago: estado `overdue` al día siguiente de `dueDate`.
-- Crédito con tasa 0 %: cuotas iguales a principal/plazo.
-- Meta pausada: no muestra alertas; no acepta aportes hasta reactivar (o acepta con confirmación — **asumido: no acepta aportes en pausa**).
-- Eliminar meta con aportes: soft-delete o archivar ( **asumido: archivar, no borrar historial** ).
-- Aporte mayor al restante: permitir sobrepasar con aviso; meta completa al ≥ 100 %.
-- Múltiples créditos con mismo día de pago: recordatorios independientes por crédito/cuota.
+- Abono mayor al saldo: rechazar o permitir solo hasta saldo pendiente.
+- Abono en mes con cuota ya pagada: abono reduce saldo independiente de cuota del mes.
+- Modo `manual`: recálculo tras abono propone filas nuevas; usuario puede ajustar antes de confirmar.
+- Seguros variables mes a mes (VIS): editar `insuranceAmount` por fila en modo manual.
+- Múltiples abonos en el mismo año: cada uno recalcula secuencialmente.
+- Día 31 / febrero: último día del mes.
+- Rubros duplicados: permitir mismo nombre con advertencia; montos se suman en asignado.
+- Rubro sin transacción: válido (pago en efectivo fuera de app); monto manual basta.
+- Eliminar rubro: soft-delete o archivar; no altera cuotas ni abonos.
+- Desembolso mal registrado como ingreso en nómina: wizard de setup debe evitarlo; documentar corrección manual.
+- Cuenta meta sin vincular: crédito funciona; fondo aislado es opcional pero recomendado.
 
 ---
 
 ## Requirements *(mandatory)*
 
-### Créditos
+### Créditos — configuración
 
-- **FR-001**: Sistema MUST permitir CRUD de crédito con nombre, prestamista, principal (>0), tasa anual (≥0), plazo en meses (>0), fecha inicio, día de pago (1–31).
-- **FR-002**: Al crear crédito, sistema MUST generar `creditPayments` para todo el plazo (amortización francesa).
-- **FR-003**: Sistema MUST calcular y mostrar `outstandingBalance` coherente con cuotas pendientes.
-- **FR-004**: Usuario MUST poder marcar cuota como `paid` con `paidDate`.
-- **FR-005**: Cuota pagada MAY vincularse a `transactionId` existente o flujo rápido de gasto.
-- **FR-006**: Crédito MUST soportar estados `active`, `paid_off`, `defaulted`.
-- **FR-007**: Vista `/credits` MUST listar créditos activos con saldo y próxima cuota.
+- **FR-001**: CRUD con `scheduleMode` (`cuota_fija` \| `capital_constant` \| `manual`), `rateType`, tasa, plazo, día de pago.
+- **FR-002**: `creditPayments` MUST incluir `principal`, `interest`, `insuranceAmount?`, `otherFees?`, `totalDue`.
+- **FR-003**: Modo `cuota_fija` MUST generar interés sobre saldo insoluto; conversión EA/NAMV/MV según proposal.
+- **FR-004**: Modo `manual` MUST permitir crear/editar filas sin sobrescribir cuotas `paid`.
+- **FR-005**: `targetPayoffDate` opcional; `disbursementAccountId` y `operatingAccountId` opcionales.
+- **FR-005b**: Cuenta escrow MUST marcarse `isCreditEscrow` o inferirse por `disbursementAccountId`.
+- **FR-005c**: Dashboard balance personal MUST excluir cuentas escrow por defecto.
 
-### Alertas de crédito
+### Abonos a capital
 
-- **FR-008**: Recordatorios MUST usar offsets configurables por crédito (default `[3, 0]`).
-- **FR-009**: Alertas MUST respetar `notificationsEnabled` y reutilizar `notificationLog`.
-- **FR-010**: No MUST enviarse alerta para cuotas ya pagadas.
+- **FR-006**: MUST registrar `creditCapitalAbonos` (monto, fecha, `recalcEffect`, nota, transacción opcional).
+- **FR-007**: Tras abono, MUST recalcular solo cuotas `pending`; cuotas `paid` inmutables.
+- **FR-008**: `shorten_term` MUST reducir plazo proyectado o número de cuotas futuras.
+- **FR-009**: `lower_installment` MUST reducir VR de cuotas futuras manteniendo plazo restante.
+- **FR-010**: Vista detalle MUST tener sección/pestaña **Abonos** con historial.
+
+### Destinos del crédito (rubros)
+
+- **FR-013**: MUST registrar `creditDestinations` con nombre, monto (>0), fecha opcional, estado, notas.
+- **FR-014**: MUST mostrar `totalAllocated`, `unallocated` (= principal − asignado) en detalle del crédito.
+- **FR-015**: Pestaña/sección **Destinos** junto a Cuotas y Abonos.
+- **FR-016**: Rubro MAY vincular una o más transacciones de gasto (`transactionIds`).
+- **FR-017**: MUST advertir si suma de rubros > principal desembolsado.
+- **FR-018**: Visualización de distribución (barra o torta) del capital por rubro.
+
+### Fondo aislado e integración transacciones
+
+- **FR-019**: MUST vincular `disbursementAccountId` (cuenta meta) al crédito.
+- **FR-020**: MAY vincular `operatingAccountId` (nómina/ahorros pasarela).
+- **FR-021**: Transacciones del fondo MUST soportar `creditId`, `creditDestinationId?`, `isCreditFundMovement`.
+- **FR-022**: Asistente «Gastar desde fondo» MUST orquestar meta→ahorros→gasto→(opcional) devolución meta.
+- **FR-023**: Pestaña **Movimientos del fondo** en detalle del crédito.
+- **FR-024**: `/transactions` MUST ocultar movimientos con `creditId` por defecto; toggle para mostrarlos.
+- **FR-025**: Desembolso MUST NOT registrarse como `income` en cuenta nómina al configurar crédito vinculado.
+
+### Simulación
+
+- **FR-026**: MUST simular abonos periódicos y mostrar fecha estimada de `paid_off`.
+- **FR-027**: Caso referencia **$6M/año** para $40M / meta 5 años.
+- **FR-028**: Meta MAY vincular `linkedCreditId`; ahorro $500k/mes desde nómina, no desde escrow.
+
+### Operación y alertas
+
+- **FR-029** a **FR-033**: Pago cuota, estados, listado, recordatorios.
 
 ### Metas de ahorro
 
-- **FR-011**: Sistema MUST permitir CRUD de meta con nombre, `targetAmount` (>0), `deadline` opcional, icono/color opcionales.
-- **FR-012**: Meta MAY vincular `accountId` opcional solo como referencia de saldo.
-- **FR-013**: Usuario MUST registrar aportes (`amount` > 0, fecha) asociados a una meta.
-- **FR-014**: Progreso MUST calcularse como `currentAmount / targetAmount` desde suma de aportes.
-- **FR-015**: Meta MUST soportar estados `active`, `completed`, `paused`.
-- **FR-016**: Al alcanzar ≥ 100 % del objetivo, meta MUST pasar a `completed`.
-- **FR-017**: Vista `/savings` MUST listar metas con barra de progreso y monto restante.
+- **FR-034** a **FR-040**: Sin cambio v1.1.
 
 ### Transversal
 
-- **FR-018**: Mobile-first desde 375 px; tokens JP-DS; COP con formato `$ 1.234.567`.
-- **FR-019**: Datos MUST estar aislados por usuario autenticado.
-- **FR-020**: Navegación MUST incluir `/credits` y `/savings` en shell autenticado.
+- **FR-041**: Mobile-first, JP-DS, aislamiento, nav `/credits` + `/savings`.
 
 ### Key Entities
 
-- **Credit**: deuda con parámetros de amortización (`credits`).
-- **CreditPayment**: cuota individual con fechas y montos (`creditPayments`).
-- **SavingsGoal**: meta de acumulación (`savingsGoals`).
-- **SavingsContribution**: aporte puntual hacia una meta (`savingsContributions`).
+- **Credit**, **CreditPayment**, **CreditCapitalAbono**, **CreditDestination**, **SavingsGoal**, **SavingsContribution**.
 
 ---
 
 ## Success Criteria *(mandatory)*
 
-- **SC-001**: Crédito con amortización francesa generado en < 5 s para plazo ≤ 360 meses.
-- **SC-002**: Marcar cuota pagada actualiza saldo en < 2 s percibidos.
-- **SC-003**: Meta con 3 aportes muestra progreso exacto al peso.
-- **SC-004**: Recordatorio de cuota sin duplicados en mismo día/cuota/canal.
-- **SC-005**: Usuario completa crear meta + primer aporte en < 60 s.
-- **SC-006**: 0 fugas de datos entre usuarios en queries de créditos y metas.
+- **SC-001**: Crédito VIS $40M — primera cuota coherente con extracto (total ~$625.958 ±$500).
+- **SC-002**: Simulación abono **$6.000.000/año** proyecta `paid_off` en **≤ 72 meses** (vs 120 originales).
+- **SC-003**: Meta ahorro $500.000/mes × 12 = $6.000.000 acumulados; UI coherente con abono anual.
+- **SC-004**: Rubros «Escaleras» $1,5M → sin asignar $38,5M correcto en resumen.
+- **SC-005**: Dashboard personal excluye escrow; tarjeta «Fondo crédito VIS» muestra saldo meta.
+- **SC-006**: Asistente fondo registra flujo $1,5M Escaleras sin aparecer en `/transactions` por defecto.
+- **SC-007**: Cuotas pagadas intactas tras 3 abonos consecutivos.
+- **SC-008**: Meta de ahorro + navegación sin regresión.
+- **SC-009**: 0 fugas de datos entre usuarios.
 
 ---
 
 ## Assumptions
 
-- Moneda COP; tasas expresadas en **nominal anual** (convención colombiana habitual en UI).
-- Amortización francesa única en v1; redondeo a peso entero en cuotas (última cuota absorbe diferencia).
-- Recordatorios: push + in-app; email diferido a change posterior.
-- Zona horaria `America/Bogota` para fechas de vencimiento y crons.
-- `defaulted` es cambio manual del usuario en v1 (sin integración buró).
-- Dashboard widgets de resumen son P2; no bloquean MVP.
+- Abono default: **`shorten_term`**; plan referencia: **$500.000/mes** de ahorro → **$6.000.000/año** de abono.
+- Meta de ahorro (`linkedCreditId`) financia **abonos al banco** desde nómina; escrow financia **obra/rubros**.
+- Cuenta escrow excluida del balance personal evita que $40M parezcan «ahorro extra».
+- Destinos trackean **uso del desembolso**, no pagos al banco (distinto de cuotas y abonos).
+- Rubros pueden existir sin transacción en app (gasto manual registrado solo en rubro).
+- Simulador v1: abonos **anuales** o **puntuales**; frecuencias quincenales diferidas.
+- Seguros: monto fijo mensual (`insuranceMonthly`) o por fila; no modelamos pólizas detalladas.
+- Recálculo usa tasa y modo vigentes del crédito; no replica al 100% algoritmos propietarios del banco — modo `manual` para ajuste fino.
+- Zona horaria `America/Bogota`.
 
 ---
 
 ## Dependencies
 
-- Changes 1–4 completados (auth, transacciones, settings, notificaciones).
-- Change 6 (DIAN) consumirá saldos de créditos y metas completadas.
+- Changes 1–4; Change 6 (DIAN) consumirá saldos y abonos.
