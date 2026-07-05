@@ -473,16 +473,22 @@ packages/jp-ds/
 4. ✅ **Change 3: web-settings — Configuración completa** (completado 2026-07-04, en `testing` + `main`)
    - Perfil (nombre + avatar), apariencia (modo, presets, reset), preferencias, dashboard por período
    - Polish: modo claro, login brand-lock, logo reforzado, tipografías distintivas
-5. **Change 4: Presupuestos + Reportes + Panel de Resultados**
+5. ✅ **Change 4: web-budgets-reports — Presupuestos + Reportes + Panel de Resultados** (completado 2026-07-05, en `testing` + prod)
    - Límites por categoría con alertas
+   - Gastos fijos con recordatorios
    - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros
-6. **Change 5: Declaración de Renta (DIAN)**
-   - Items por sección DIAN
-   - Adjuntos (imágenes y PDFs) por rubro
-   - Exportación para presentación
-7. **Change 6: Créditos y Préstamos**
+   - Export CSV/PDF; notificaciones push + in-app
+6. **Change 5: web-credits — Créditos y Préstamos** ← *siguiente*
    - Calendario de amortización
    - Tracking de pagos y saldo
+   - Alertas de vencimiento; link a transacciones al pagar
+7. **Change 6: web-tax-dian — Declaración de Renta (DIAN)** ← *último del roadmap actual*
+   - Items por sección DIAN
+   - Adjuntos (imágenes y PDFs) por rubro
+   - Auto-poblar desde transacciones, cuentas y **créditos/préstamos**
+   - Exportación para presentación
+
+> **Orden (2026-07-05):** DIAN va al final porque la declaración debe consolidar todo el dominio financiero, incluidos créditos y préstamos (Change 5).
 
 ---
 
