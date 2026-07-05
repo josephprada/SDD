@@ -287,4 +287,4 @@ Usuario ingresa o ajusta filas según extracto. `isProjected: false` en filas ed
 
 ## Próximo paso
 
-`/speckit-plan` → `design.md` + `tasks.md` + `research.md` (fórmulas y caso Banco Agrario).
+`/speckit-implement` — ejecutar `tasks.md` fases A→H.
