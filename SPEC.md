@@ -224,7 +224,18 @@
 | Alertas de vencimiento | Notificación X días antes del pago |
 | Múltiples créditos | Varios créditos simultáneos (hipotecario, vehículo, personal) |
 
-### 4.11 Configuración y Personalización
+### 4.11 Ahorros y Metas
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| Crear meta | Nombre, monto objetivo, fecha límite opcional, icono/color |
+| Aportes | Registro manual de cada ahorro hacia la meta |
+| Progreso visual | Porcentaje, restante, barra de avance |
+| Cuenta vinculada | Referencia opcional al saldo de una cuenta existente |
+| Estados | Activa, completada, pausada |
+| Múltiples metas | Varias metas simultáneas (emergencia, vacaciones, etc.) |
+
+### 4.12 Configuración y Personalización
 
 | Capacidad | Descripción |
 |-----------|-------------|
@@ -245,7 +256,7 @@
 
 ### 5.2 Schema Convex
 
-Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `attachments`, `userPreferences`
+Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `savingsGoals`, `savingsContributions`, `attachments`, `userPreferences`
 
 ### 5.3 Transacciones Recurrentes
 
@@ -334,7 +345,37 @@ interface CreditPayment {
 }
 ```
 
-### 5.6 Adjuntos
+### 5.6 Ahorros y Metas
+
+```typescript
+interface SavingsGoal {
+  id: string;
+  userId: string;
+  name: string; // ej: "Fondo de emergencia"
+  targetAmount: number;
+  currentAmount: number; // suma de aportes (derivado o persistido)
+  deadline?: timestamp;
+  accountId?: string; // → Account (referencia opcional)
+  icon?: string;
+  color?: string;
+  status: "active" | "completed" | "paused";
+  notes?: string;
+  createdAt: timestamp;
+  updatedAt: timestamp;
+}
+
+interface SavingsContribution {
+  id: string;
+  goalId: string; // → SavingsGoal
+  amount: number;
+  contributedAt: timestamp;
+  transactionId?: string; // → Transaction (opcional)
+  notes?: string;
+  createdAt: timestamp;
+}
+```
+
+### 5.7 Adjuntos
 
 ```typescript
 interface Attachment {
@@ -478,9 +519,9 @@ packages/jp-ds/
    - Gastos fijos con recordatorios
    - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros
    - Export CSV/PDF; notificaciones push + in-app
-6. **Change 5: web-credits — Créditos y Préstamos** ← *siguiente*
-   - Calendario de amortización
-   - Tracking de pagos y saldo
+6. **Change 5: web-credits — Créditos, Préstamos y Ahorros/Metas** ← *siguiente*
+   - Calendario de amortización y tracking de cuotas
+   - Metas de ahorro con aportes y progreso visual
    - Alertas de vencimiento; link a transacciones al pagar
 7. **Change 6: web-tax-dian — Declaración de Renta (DIAN)** ← *último del roadmap actual*
    - Items por sección DIAN
