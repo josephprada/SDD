@@ -61,18 +61,18 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Último change cerrado: web-settings ✅ (2026-07-04)
+## Último change cerrado: web-budgets-reports ✅ (2026-07-05)
 
 Producción tras merge a `main`: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
 
 | Artefacto | Ruta |
 |-----------|------|
-| Spec | `changes/web-settings/spec.md` |
-| Propuesta | `changes/web-settings/proposal.md` |
-| Diseño técnico | `changes/web-settings/design.md` |
-| Quickstart QA | `changes/web-settings/quickstart.md` |
+| Spec | `changes/web-budgets-reports/spec.md` |
+| Propuesta | `changes/web-budgets-reports/proposal.md` |
+| Diseño técnico | `changes/web-budgets-reports/design.md` |
+| Quickstart QA | `changes/web-budgets-reports/quickstart.md` |
 
-**Siguiente change planificado** (ver `SPEC.md` roadmap): **Change 4 — Presupuestos + Reportes + Panel de Resultados**.
+**Siguiente change planificado** (ver `SPEC.md` roadmap): pendiente definir Change 5.
 
 ---
 

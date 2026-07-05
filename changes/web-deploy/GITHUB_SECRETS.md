@@ -9,6 +9,7 @@ Crear environment **`production`** (opcional pero recomendado) y añadir:
 | `CONVEX_DEPLOY_KEY` | Dashboard Convex → jp-wallet → **Production** → Settings → **Generate Deploy Key** |
 | `VITE_CONVEX_URL_PROD` | `https://cheery-bass-870.convex.cloud` |
 | `VITE_GOOGLE_CLIENT_ID` | Mismo que `VITE_GOOGLE_CLIENT_ID` en `.env.local` |
+| `VITE_VAPID_PUBLIC_KEY` | Misma clave pública que `VAPID_PUBLIC_KEY` en Convex prod (Web Push) |
 | `VPS_HOST` | `69.6.234.237` |
 | `VPS_SSH_PORT` | `22022` |
 | `VPS_SSH_USER` | `deploy` |
