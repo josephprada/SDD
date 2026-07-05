@@ -1,5 +1,6 @@
 import { usePreferencesStore } from "@app/stores/preferences";
 
+/** Hidden while `EMAIL_NOTIFICATIONS_ACTIVE` is false in convex/lib/notifications.ts */
 export function ReportEmailToggle() {
 	const enabled = usePreferencesStore((s) => s.reportEmailEnabled);
 	const setReportEmailEnabled = usePreferencesStore((s) => s.setReportEmailEnabled);

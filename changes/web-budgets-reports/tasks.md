@@ -205,11 +205,15 @@
 
 ### Pendiente deploy notificaciones
 
-- [ ] T078 Configurar env Convex: `RESEND_API_KEY`, `EMAIL_FROM`, VAPID×3
-- [ ] T079 `.env.local`: `VITE_VAPID_PUBLIC_KEY`
-- [ ] T080 QA cron manual `notifications.processDaily` + email/push end-to-end
+- [x] T078 Configurar env Convex: VAPID×3 + Resend (`RESEND_API_KEY`, `EMAIL_FROM`) — email canal pausado (`EMAIL_NOTIFICATIONS_ACTIVE=false`)
+- [x] T079 `.env.local`: `VITE_VAPID_PUBLIC_KEY`
+- [x] T080 QA push + cron `notifications.processDaily`; email desactivado en UI hasta reactivar dominio
 
-**Checkpoint**: quickstart §Email + §Web Push con env vars reales.
+**Checkpoint**: quickstart §Web Push con env vars reales. Email: reactivar flag + toggles cuando se decida el enfoque.
+
+---
+
+**Change 4 cerrado** ✅ (2026-07-05) — merge a `testing`. Presupuestos, gastos fijos, reportes, export CSV/PDF, push + in-app.
 
 ---
 

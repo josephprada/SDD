@@ -92,7 +92,7 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
 	defaultGrouping: DEFAULT_GROUPING,
 	language: DEFAULT_LANGUAGE,
 	notificationsEnabled: DEFAULT_NOTIFICATIONS_ENABLED,
-	reportEmailEnabled: true,
+	reportEmailEnabled: false,
 	pushEnabled: false,
 	initialized: false,
 

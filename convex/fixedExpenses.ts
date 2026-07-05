@@ -203,7 +203,7 @@ export const create = mutation({
 			categoryId: args.categoryId,
 			dayOfMonth,
 			reminderOffsets,
-			emailReminders: args.emailReminders ?? true,
+			emailReminders: args.emailReminders ?? false,
 			pushReminders: args.pushReminders ?? true,
 			active: true,
 			notes: args.notes?.trim().slice(0, 200) || undefined,

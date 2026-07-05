@@ -68,9 +68,6 @@ export function FixedExpenseForm({
 	const [reminderOffsets, setReminderOffsets] = useState<number[]>(
 		initial?.reminderOffsets ?? [2, 0],
 	);
-	const [emailReminders, setEmailReminders] = useState(
-		initial?.emailReminders ?? true,
-	);
 	const [pushReminders, setPushReminders] = useState(
 		initial?.pushReminders ?? true,
 	);
@@ -111,7 +108,7 @@ export function FixedExpenseForm({
 			categoryId,
 			dayOfMonth: day,
 			reminderOffsets,
-			emailReminders,
+			emailReminders: false,
 			pushReminders,
 			notes: notes.trim() || undefined,
 			markAsPaid,
@@ -144,11 +141,6 @@ export function FixedExpenseForm({
 					onChange={setReminderOffsets}
 				/>
 				<div className="fixed-expense-form__checks">
-					<Checkbox
-						label="Recordatorio por email"
-						checked={emailReminders}
-						onChange={setEmailReminders}
-					/>
 					<Checkbox
 						label="Recordatorio push"
 						checked={pushReminders}

@@ -396,7 +396,7 @@ export const checkThresholdAfterTransaction = internalMutation({
 			userId,
 			type: "budget_threshold",
 			referenceId: budget._id as string,
-			channels: ["in_app", "email", "push"],
+			channels: ["in_app", "push"],
 			payload: {
 				title: `Presupuesto ${label}`,
 				body: `Has alcanzado el ${pct}% del límite (${status === "danger" ? "superado" : "alerta"})`,

@@ -67,7 +67,7 @@ export const DEFAULT_USER_PREFERENCES = {
 	defaultGrouping: "month" as const,
 	language: "es" as const,
 	notificationsEnabled: true,
-	reportEmailEnabled: true,
+	reportEmailEnabled: false,
 	pushEnabled: false,
 };
 

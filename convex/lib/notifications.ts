@@ -8,6 +8,9 @@ export type NotificationType =
 
 export type NotificationChannel = "email" | "push" | "in_app";
 
+/** Paused until email notifications are re-enabled (Resend + domain). */
+export const EMAIL_NOTIFICATIONS_ACTIVE = false;
+
 export function buildDedupeKey(
 	userId: Id<"users">,
 	type: NotificationType,
@@ -28,6 +31,7 @@ export function shouldSendEmail(
 	prefs: ResolvedUserPreferences,
 	type: NotificationType,
 ): boolean {
+	if (!EMAIL_NOTIFICATIONS_ACTIVE) return false;
 	if (!shouldSendExternal(prefs)) return false;
 	if (type === "period_report") return prefs.reportEmailEnabled;
 	return true;

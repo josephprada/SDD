@@ -4,7 +4,6 @@ import { GroupingPicker } from "@app/components/settings/GroupingPicker";
 import { LanguagePicker } from "@app/components/settings/LanguagePicker";
 import { NotificationsToggle } from "@app/components/settings/NotificationsToggle";
 import { PushPermissionBanner } from "@app/components/notifications/PushPermissionBanner";
-import { ReportEmailToggle } from "@app/components/settings/ReportEmailToggle";
 import { PreferenceRow } from "@app/components/settings/PreferenceRow";
 import { ProfileEditor } from "@app/components/settings/ProfileEditor";
 import { useAuth } from "@app/lib/auth/useAuth";
@@ -77,9 +76,6 @@ export function SettingsRoute() {
 					/>
 					<div className="settings-row glass">
 						<NotificationsToggle />
-					</div>
-					<div className="settings-row glass">
-						<ReportEmailToggle />
 					</div>
 					<PushPermissionBanner />
 				</div>
