@@ -1,4 +1,8 @@
 import { DashboardBalanceCard } from "@app/components/dashboard/DashboardBalanceCard";
+import { DashboardBudgetAlerts } from "@app/components/dashboard/DashboardBudgetAlerts";
+import { DashboardFixedExpenses } from "@app/components/dashboard/DashboardFixedExpenses";
+import type { UpcomingFixedExpenseItem } from "@app/components/dashboard/DashboardFixedExpenses";
+import { MarkFixedExpensePaidModal } from "@app/components/budgets/MarkFixedExpensePaidModal";
 import { MetricCard } from "@app/components/dashboard/MetricCard";
 import { MonthOverview } from "@app/components/dashboard/MonthOverview";
 import { PeriodSwitcher } from "@app/components/dashboard/PeriodSwitcher";
@@ -8,13 +12,18 @@ import { useAuth } from "@app/lib/auth/useAuth";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { ACCOUNT_TYPE_LABELS, CoreIcon } from "@app/lib/core/icons";
 import { formatCOP } from "@app/lib/format/currency";
+import { formatMonthYear } from "@app/lib/format/date";
 import { useRecentListLimit } from "@app/lib/dashboard/useRecentListLimit";
+import { useFixedExpensePayment } from "@app/lib/budgets/useFixedExpensePayment";
+import { useReconcileFixedExpensePayments } from "@app/lib/budgets/useReconcileFixedExpensePayments";
 import {
 	addPeriod,
 	dashboardSubtitle,
+	periodKeyFromDate,
 	periodNetLabel,
 	periodRange,
 } from "@app/lib/period";
+import type { BudgetItem } from "@app/lib/budgets/types";
 import { MEDIA_DESKTOP } from "@app/lib/core/breakpoints";
 import { useMediaQuery } from "@app/lib/core/useMediaQuery";
 import { usePreferencesStore } from "@app/stores/preferences";
@@ -26,23 +35,32 @@ import { Link, useNavigate } from "react-router";
 
 export function HomeRoute() {
 	const navigate = useNavigate();
+	useReconcileFixedExpensePayments();
 	const { session } = useAuth();
 	const defaultGrouping = usePreferencesStore((s) => s.defaultGrouping);
 	const [anchor, setAnchor] = useState(() => new Date());
 	const range = periodRange(defaultGrouping, anchor);
-	const recentSectionRef = useRef<HTMLElement>(null);
+	const dashboardMainRef = useRef<HTMLDivElement>(null);
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
-	const recentLimit = useRecentListLimit(recentSectionRef, isDesktop);
+	const recentLimit = useRecentListLimit(dashboardMainRef, isDesktop);
+	const fixedPayment = useFixedExpensePayment();
 
 	const overview = useQuery(api.dashboard.overview, {
 		periodStart: range.start,
 		periodEnd: range.end,
 		recentLimit,
 	});
+	const periodKey = periodKeyFromDate(anchor);
+	const atRiskBudgets = useQuery(api.budgets.listAtRisk, { periodKey, limit: 3 });
+	const upcomingFixed = useQuery(api.fixedExpenses.listUpcomingForPeriod, {
+		periodStart: range.start,
+		periodEnd: range.end,
+		limit: 3,
+	});
 
 	const firstName = session?.name?.split(" ")[0] ?? "";
 
-	if (overview === undefined) {
+	if (overview === undefined || upcomingFixed === undefined) {
 		return null;
 	}
 
@@ -62,6 +80,7 @@ export function HomeRoute() {
 	}
 
 	const net = overview.monthlyIncome - overview.monthlyExpense;
+	const pendingFixedExpenses = upcomingFixed.pendingTotal;
 
 	return (
 		<div className="dashboard-page animate-stagger">
@@ -105,6 +124,7 @@ export function HomeRoute() {
 				<MonthOverview
 					income={overview.monthlyIncome}
 					expense={overview.monthlyExpense}
+					pendingFixedExpenses={pendingFixedExpenses}
 					grouping={defaultGrouping}
 					anchor={anchor}
 					onPrev={() => setAnchor((a) => addPeriod(defaultGrouping, a, -1))}
@@ -129,18 +149,42 @@ export function HomeRoute() {
 					label={periodNetLabel(defaultGrouping)}
 					value={net}
 					signed
+					projectedValue={
+						pendingFixedExpenses > 0 ? net - pendingFixedExpenses : undefined
+					}
 				/>
 			</div>
 
 			<div className="dashboard-grid">
-				<div className="dashboard-main">
+				<div className="dashboard-main" ref={dashboardMainRef}>
 					<RecentTransactionsList
-						ref={recentSectionRef}
 						transactions={overview.recentTransactions}
 					/>
 				</div>
 
 				<aside className="dashboard-aside">
+					{upcomingFixed.items.length > 0 ? (
+						<DashboardFixedExpenses
+							items={upcomingFixed.items as UpcomingFixedExpenseItem[]}
+							onMarkPaid={(item) =>
+								fixedPayment.openPayment({
+									id: item._id,
+									name: item.name,
+									amount: item.amount,
+									categoryName: item.categoryName,
+									dueDate: item.dueDate,
+								})
+							}
+						/>
+					) : null}
+
+					{atRiskBudgets && atRiskBudgets.length > 0 ? (
+						<DashboardBudgetAlerts
+							items={atRiskBudgets as BudgetItem[]}
+							periodLabel={formatMonthYear(anchor)}
+						/>
+					) : null}
+
 					<section
 						className="accounts-compact accounts-compact--scroll glass"
 						aria-label="Cuentas activas"
@@ -167,16 +211,18 @@ export function HomeRoute() {
 							))}
 						</div>
 					</section>
-
-					<div className="show-desktop">
-						<MonthOverview
-							income={overview.monthlyIncome}
-							expense={overview.monthlyExpense}
-							grouping={defaultGrouping}
-						/>
-					</div>
 				</aside>
 			</div>
+
+			<MarkFixedExpensePaidModal
+				open={fixedPayment.paymentOpen}
+				target={fixedPayment.target}
+				accounts={fixedPayment.accounts}
+				loading={fixedPayment.loading}
+				error={fixedPayment.error}
+				onClose={fixedPayment.closePayment}
+				onConfirm={fixedPayment.confirmPayment}
+			/>
 		</div>
 	);
 }

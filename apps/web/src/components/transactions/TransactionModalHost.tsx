@@ -1,4 +1,5 @@
 import { TransactionForm } from "@app/components/transactions/TransactionForm";
+import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
 import { Modal } from "@app/components/ui/Modal";
 import { toDateInputValue } from "@app/lib/format/date";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
@@ -24,7 +25,9 @@ export function TransactionModalHost() {
 
 	const createTx = useMutation(api.transactions.create);
 	const updateTx = useMutation(api.transactions.update);
+	const removeTx = useMutation(api.transactions.remove);
 	const [loading, setLoading] = useState(false);
+	const [confirmDelete, setConfirmDelete] = useState(false);
 
 	const paramMode = searchParams.get("mode");
 	const paramType = searchParams.get("type");
@@ -50,9 +53,22 @@ export function TransactionModalHost() {
 
 	const handleClose = () => {
 		close();
+		setConfirmDelete(false);
 		handledParamsRef.current = null;
 		if (paramMode || searchParams.has("id")) {
 			setSearchParams({}, { replace: true });
+		}
+	};
+
+	const handleDelete = async () => {
+		if (!editingTx) return;
+		setLoading(true);
+		try {
+			await removeTx({ transactionId: editingTx._id });
+			setConfirmDelete(false);
+			handleClose();
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -65,8 +81,9 @@ export function TransactionModalHost() {
 				: "Nuevo movimiento";
 
 	return (
-		<Modal open={isOpen} title={modalTitle} onClose={handleClose}>
-			{mode === "transfer" ? (
+		<>
+			<Modal open={isOpen} title={modalTitle} onClose={handleClose}>
+				{mode === "transfer" ? (
 				<TransactionForm
 					accounts={accounts}
 					categories={categories}
@@ -111,6 +128,7 @@ export function TransactionModalHost() {
 						}
 					}}
 					onCancel={handleClose}
+					onDelete={() => setConfirmDelete(true)}
 				/>
 				) : null
 			) : mode === "create" ? (
@@ -130,7 +148,17 @@ export function TransactionModalHost() {
 					}}
 					onCancel={handleClose}
 				/>
-			) : null}
-		</Modal>
+				) : null}
+			</Modal>
+			<ConfirmDialog
+				open={confirmDelete}
+				title="Eliminar movimiento"
+				description="Esta acción no se puede deshacer. Si el movimiento proviene de un gasto fijo, volverá a quedar pendiente de pago."
+				confirmLabel="Eliminar"
+				variant="danger"
+				onConfirm={handleDelete}
+				onCancel={() => setConfirmDelete(false)}
+			/>
+		</>
 	);
 }

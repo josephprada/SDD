@@ -5,4 +5,5 @@ export {
 	periodNetLabel,
 	periodRange,
 	periodSummaryTitle,
+	periodKeyFromDate,
 } from "./periodRange";

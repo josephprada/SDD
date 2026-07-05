@@ -11,7 +11,7 @@ export function NotificationsToggle() {
 			<div>
 				<div className="settings-row__title">Notificaciones</div>
 				<div className="settings-row__sub">
-					Preferencia guardada — entrega push próximamente
+					Alertas de presupuesto, recordatorios y reportes por email/push
 				</div>
 			</div>
 			<button

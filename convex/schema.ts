@@ -57,6 +57,8 @@ export default defineSchema({
 		defaultGrouping: v.optional(groupingValidator),
 		language: v.optional(languageValidator),
 		notificationsEnabled: v.optional(v.boolean()),
+		reportEmailEnabled: v.optional(v.boolean()),
+		pushEnabled: v.optional(v.boolean()),
 		updatedAt: v.number(),
 	}).index("by_user", ["userId"]),
 
@@ -100,6 +102,7 @@ export default defineSchema({
 		toAccountId: v.optional(v.id("accounts")),
 		categoryId: v.id("categories"),
 		notes: v.optional(v.string()),
+		sourceFixedExpenseId: v.optional(v.id("fixedExpenses")),
 		sortOrder: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -121,4 +124,66 @@ export default defineSchema({
 	})
 		.index("by_user", ["userId"])
 		.index("by_entity", ["entityType", "entityId"]),
+
+	budgets: defineTable({
+		userId: v.id("users"),
+		categoryIds: v.array(v.id("categories")),
+		amount: v.number(),
+		periodKey: v.string(),
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_period", ["userId", "periodKey"]),
+
+	fixedExpenses: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		amount: v.number(),
+		categoryId: v.id("categories"),
+		dayOfMonth: v.number(),
+		reminderOffsets: v.array(v.number()),
+		emailReminders: v.boolean(),
+		pushReminders: v.boolean(),
+		active: v.boolean(),
+		lastPaidPeriodKey: v.optional(v.string()),
+		lastPaidTransactionId: v.optional(v.id("transactions")),
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_active", ["userId", "active"])
+		.index("by_paid_transaction", ["lastPaidTransactionId"]),
+
+	pushSubscriptions: defineTable({
+		userId: v.id("users"),
+		endpoint: v.string(),
+		p256dh: v.string(),
+		auth: v.string(),
+		userAgent: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_endpoint", ["endpoint"]),
+
+	notificationLog: defineTable({
+		userId: v.id("users"),
+		dedupeKey: v.string(),
+		type: v.union(
+			v.literal("fixed_expense_reminder"),
+			v.literal("budget_threshold"),
+			v.literal("period_report"),
+		),
+		referenceId: v.string(),
+		channel: v.union(
+			v.literal("email"),
+			v.literal("push"),
+			v.literal("in_app"),
+		),
+		sentAt: v.number(),
+	})
+		.index("by_dedupeKey", ["dedupeKey"])
+		.index("by_user_sent", ["userId", "sentAt"]),
 });

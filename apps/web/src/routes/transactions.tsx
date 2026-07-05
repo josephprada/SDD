@@ -3,6 +3,7 @@ import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { MonthSwitcher } from "@app/components/dashboard/MonthSwitcher";
 import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
 import { addMonths, monthRange } from "@app/lib/format/date";
+import { useReconcileFixedExpensePayments } from "@app/lib/budgets/useReconcileFixedExpensePayments";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -21,6 +22,7 @@ const typeTabs: { value: TypeTab; label: string }[] = [
 ];
 
 export function TransactionsRoute() {
+	useReconcileFixedExpensePayments();
 	const [searchParams] = useSearchParams();
 	const paramId = searchParams.get("id") as Id<"transactions"> | null;
 	const openCreate = useTransactionModalStore((state) => state.openCreate);

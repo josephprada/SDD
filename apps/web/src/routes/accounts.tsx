@@ -69,6 +69,7 @@ export function AccountsRoute() {
 		if (!archiving) return;
 		await archiveAccount({ accountId: archiving._id });
 		setArchiving(null);
+		if (editing?._id === archiving._id) closeModal();
 	};
 
 	const handleReorder = async (draggedId: string, targetId: string) => {
@@ -174,6 +175,7 @@ export function AccountsRoute() {
 						initial={{ name: editing.name, type: editing.type }}
 						onSubmit={handleUpdate}
 						onCancel={closeModal}
+						onDelete={() => setArchiving(editing)}
 					/>
 				) : (
 					<AccountForm

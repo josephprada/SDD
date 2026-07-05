@@ -67,6 +67,8 @@ export const DEFAULT_USER_PREFERENCES = {
 	defaultGrouping: "month" as const,
 	language: "es" as const,
 	notificationsEnabled: true,
+	reportEmailEnabled: true,
+	pushEnabled: false,
 };
 
 export type ResolvedUserPreferences = {
@@ -82,6 +84,8 @@ export type ResolvedUserPreferences = {
 	defaultGrouping: "week" | "month" | "quarter" | "semester";
 	language: "es" | "en";
 	notificationsEnabled: boolean;
+	reportEmailEnabled: boolean;
+	pushEnabled: boolean;
 	updatedAt: number;
 };
 
@@ -93,6 +97,8 @@ type PartialPreferencesDoc = {
 	defaultGrouping?: ResolvedUserPreferences["defaultGrouping"];
 	language?: ResolvedUserPreferences["language"];
 	notificationsEnabled?: boolean;
+	reportEmailEnabled?: boolean;
+	pushEnabled?: boolean;
 	updatedAt?: number;
 };
 
@@ -111,6 +117,9 @@ export function resolveUserPreferences(
 		notificationsEnabled:
 			doc?.notificationsEnabled ??
 			DEFAULT_USER_PREFERENCES.notificationsEnabled,
+		reportEmailEnabled:
+			doc?.reportEmailEnabled ?? DEFAULT_USER_PREFERENCES.reportEmailEnabled,
+		pushEnabled: doc?.pushEnabled ?? DEFAULT_USER_PREFERENCES.pushEnabled,
 		updatedAt,
 	};
 }

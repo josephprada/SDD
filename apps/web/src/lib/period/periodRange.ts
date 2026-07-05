@@ -181,6 +181,12 @@ export function periodNetLabel(grouping: GroupingId): string {
 	}
 }
 
+export function periodKeyFromDate(date: Date): string {
+	const y = date.getFullYear();
+	const m = String(date.getMonth() + 1).padStart(2, "0");
+	return `${y}-${m}`;
+}
+
 export function dashboardSubtitle(grouping: GroupingId): string {
 	switch (grouping) {
 		case "week":

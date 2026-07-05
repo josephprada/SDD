@@ -203,4 +203,4 @@ JP-WALLET es una **app web** (no app de Play Store). El login con Google solo id
 
 ## Próximo paso
 
-Actualizar `spec.md` (v2) → `/speckit-plan` → `design.md` (email provider, VAPID, crons, PWA) → `tasks.md`.
+`/speckit-implement` — ejecutar `tasks.md` (65 tareas, fases A→E).

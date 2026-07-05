@@ -4,11 +4,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppRouter } from "./routes/router";
 import { PreferencesSyncBridge } from "./components/PreferencesSyncBridge";
+import { NotificationListener } from "./components/notifications/NotificationListener";
 import "@jp-ds/index";
 import "./styles/aurora.css";
 import "./styles/animations.css";
 import "./styles/core.css";
 import "./styles/settings.css";
+import "./styles/budgets-reports.css";
 import "./styles/login-brand.css";
 import "./index.css";
 
@@ -26,6 +28,7 @@ function App() {
 	return (
 		<ConvexAuthProvider client={convex}>
 			<PreferencesSyncBridge />
+			<NotificationListener />
 			<AppRouter />
 		</ConvexAuthProvider>
 	);

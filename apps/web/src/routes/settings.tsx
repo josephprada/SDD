@@ -3,6 +3,8 @@ import { AppearanceSection } from "@app/components/settings/AppearanceSection";
 import { GroupingPicker } from "@app/components/settings/GroupingPicker";
 import { LanguagePicker } from "@app/components/settings/LanguagePicker";
 import { NotificationsToggle } from "@app/components/settings/NotificationsToggle";
+import { PushPermissionBanner } from "@app/components/notifications/PushPermissionBanner";
+import { ReportEmailToggle } from "@app/components/settings/ReportEmailToggle";
 import { PreferenceRow } from "@app/components/settings/PreferenceRow";
 import { ProfileEditor } from "@app/components/settings/ProfileEditor";
 import { useAuth } from "@app/lib/auth/useAuth";
@@ -13,7 +15,7 @@ import {
 } from "@jp-ds/index";
 import { Button } from "@jp-ds";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 export function SettingsRoute() {
 	const { session, signOut } = useAuth();
@@ -76,24 +78,12 @@ export function SettingsRoute() {
 					<div className="settings-row glass">
 						<NotificationsToggle />
 					</div>
+					<div className="settings-row glass">
+						<ReportEmailToggle />
+					</div>
+					<PushPermissionBanner />
 				</div>
 			</section>
-
-			<Link
-				to="/categories"
-				className="settings-row glass interactive-lift animate-stagger-item preference-row"
-				style={{ display: "flex", textDecoration: "none", color: "inherit" }}
-			>
-				<div>
-					<div className="settings-row__title">Categorías</div>
-					<div className="settings-row__sub">
-						Gestionar gastos, ingresos y transferencias
-					</div>
-				</div>
-				<span className="preference-row__chevron" aria-hidden>
-					›
-				</span>
-			</Link>
 
 			{session ? (
 				<div

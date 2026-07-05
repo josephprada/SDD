@@ -22,5 +22,6 @@
       "@convex/*": ["../../convex/*"]
     }
   },
-  "include": ["src", "../../convex/_generated"]
+  "include": ["src", "../../convex/_generated", "../../convex/env.d.ts"],
+  "exclude": ["src/sw.ts"]
 }

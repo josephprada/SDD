@@ -41,6 +41,8 @@ export type {
 export { Avatar } from "../components/Avatar";
 export { Button } from "../components/Button";
 export type { ButtonProps, ButtonVariant } from "../components/Button";
+export { Checkbox } from "../components/Checkbox";
+export type { CheckboxProps } from "../components/Checkbox";
 export { IconButton } from "../components/IconButton";
 export { Input } from "../components/Input";
 export { Spinner } from "../components/Spinner";

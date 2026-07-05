@@ -3,14 +3,23 @@ import {
 	useAttachmentCount,
 } from "@app/components/attachments/AttachmentList";
 import { AttachmentUploader } from "@app/components/attachments/AttachmentUploader";
+import { BudgetThresholdAlert } from "@app/components/budgets/BudgetThresholdAlert";
 import { CategoryChoice } from "@app/components/ui/CategoryChoice";
 import { FieldError } from "@app/components/ui/FieldError";
+import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import type { TransactionType } from "@app/lib/core/types";
-import { formatCOPInput, parseCOPInput } from "@app/lib/format/currency";
+import {
+	formatCOPInput,
+	formatCOPInputFromRaw,
+	parseCOPInput,
+} from "@app/lib/format/currency";
 import { fromDateInputValue, toDateInputValue } from "@app/lib/format/date";
+import { periodKeyFromDate } from "@app/lib/period";
 import type { Doc, Id } from "@convex/_generated/dataModel";
-import { Button, Input } from "@jp-ds";
-import { useEffect, useRef, useState } from "react";
+import { api } from "@convex/_generated/api";
+import { Input } from "@jp-ds";
+import { useQuery } from "convex/react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type TransactionFormProps = {
 	accounts: Doc<"accounts">[];
@@ -36,6 +45,7 @@ type TransactionFormProps = {
 		notes?: string;
 	}) => void;
 	onCancel: () => void;
+	onDelete?: () => void;
 };
 
 const typeOptions: { value: TransactionType; label: string }[] = [
@@ -58,6 +68,7 @@ export function TransactionForm({
 	loading = false,
 	onSubmit,
 	onCancel,
+	onDelete,
 }: TransactionFormProps) {
 	const activeAccounts = accounts.filter((a) => !a.archived);
 	const [type, setType] = useState<TransactionType>(initial?.type ?? "expense");
@@ -86,6 +97,24 @@ export function TransactionForm({
 		(c) => !c.archived && c.type === type,
 	);
 
+	const draftAmount = parseCOPInput(amount) ?? 0;
+	const periodKey = useMemo(
+		() => periodKeyFromDate(new Date(fromDateInputValue(date))),
+		[date],
+	);
+
+	const budgetPreview = useQuery(
+		api.budgets.previewForTransaction,
+		type === "expense" && categoryId
+			? {
+					categoryId,
+					periodKey,
+					draftAmount: draftAmount > 0 ? draftAmount : undefined,
+					excludeTransactionId: transactionId,
+				}
+			: "skip",
+	);
+
 	useEffect(() => {
 		const valid = filteredCategories.some((c) => c._id === categoryId);
 		if (!valid) {
@@ -108,8 +137,7 @@ export function TransactionForm({
 	}, []);
 
 	const handleAmountChange = (raw: string) => {
-		const n = parseCOPInput(raw);
-		setAmount(n !== null ? formatCOPInput(n) : "");
+		setAmount(formatCOPInputFromRaw(raw));
 	};
 
 	const handleSubmit = (e: React.FormEvent) => {
@@ -163,10 +191,16 @@ export function TransactionForm({
 					<span className="tx-form__currency">$</span>
 					<input
 						ref={amountInputRef}
+						type="text"
 						inputMode="numeric"
+						autoComplete="off"
 						placeholder="0"
 						value={amount}
 						onChange={(e) => handleAmountChange(e.target.value)}
+						onPaste={(e) => {
+							e.preventDefault();
+							handleAmountChange(e.clipboardData.getData("text"));
+						}}
 						aria-label={amountLabels[type]}
 					/>
 				</div>
@@ -195,6 +229,10 @@ export function TransactionForm({
 					onChange={setCategoryId}
 				/>
 			</fieldset>
+
+			{budgetPreview ? (
+				<BudgetThresholdAlert preview={budgetPreview} draftAmount={draftAmount} />
+			) : null}
 
 			<label className="jp-input-label" htmlFor="tx-account">
 				{type === "transfer" ? "Cuenta origen" : "Cuenta"}
@@ -263,14 +301,12 @@ export function TransactionForm({
 				<FieldError message={error} />
 			</div>
 
-			<div className="form-panel__actions modal__footer">
-				<Button type="button" variant="secondary" onClick={onCancel}>
-					Cancelar
-				</Button>
-				<Button type="submit" disabled={loading}>
-					{loading ? "Guardando…" : "Guardar movimiento"}
-				</Button>
-			</div>
+			<FormModalFooter
+				onCancel={onCancel}
+				onDelete={onDelete}
+				loading={loading}
+				submitLabel="Guardar movimiento"
+			/>
 		</form>
 	);
 }

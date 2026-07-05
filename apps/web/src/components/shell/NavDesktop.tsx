@@ -65,6 +65,24 @@ export function NavDesktop() {
 					Categorías
 				</NavLink>
 				<NavLink
+					to="/budgets"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="badge-dollar-sign" size={18} />
+					Presupuestos
+				</NavLink>
+				<NavLink
+					to="/reports"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="chart-line" size={18} />
+					Reportes
+				</NavLink>
+				<NavLink
 					to="/settings"
 					className={({ isActive }) =>
 						`sidebar-link${isActive ? " sidebar-link--active" : ""}`

@@ -1,8 +1,14 @@
 import { FieldError } from "@app/components/ui/FieldError";
+import { FormModalFooter } from "@app/components/ui/FormModalFooter";
+import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { ACCOUNT_TYPE_LABELS } from "@app/lib/core/icons";
 import type { AccountFormValues, AccountType } from "@app/lib/core/types";
-import { parseCOPInput } from "@app/lib/format/currency";
-import { Button, Input } from "@jp-ds";
+import {
+	formatCOPInput,
+	formatCOPInputFromRaw,
+	parseCOPInput,
+} from "@app/lib/format/currency";
+import { Input } from "@jp-ds";
 import { useId, useState } from "react";
 
 type AccountFormProps = {
@@ -15,12 +21,14 @@ type AccountFormProps = {
 		initialBalance?: number;
 	}) => void;
 	onCancel: () => void;
+	onDelete?: () => void;
+	deleteLabel?: string;
 };
 
 const defaultValues: AccountFormValues = {
 	name: "",
 	type: "cash",
-	initialBalance: "0",
+	initialBalance: formatCOPInput(0),
 };
 
 export function AccountForm({
@@ -29,11 +37,17 @@ export function AccountForm({
 	loading = false,
 	onSubmit,
 	onCancel,
+	onDelete,
+	deleteLabel = "Archivar",
 }: AccountFormProps) {
-	const [values, setValues] = useState<AccountFormValues>({
+	const [values, setValues] = useState<AccountFormValues>(() => ({
 		...defaultValues,
 		...initial,
-	});
+		initialBalance:
+			initial?.initialBalance !== undefined
+				? formatCOPInputFromRaw(initial.initialBalance)
+				: defaultValues.initialBalance,
+	}));
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const nameErrorId = useId();
 
@@ -99,12 +113,11 @@ export function AccountForm({
 
 			{!isEdit ? (
 				<>
-					<Input
+					<CurrencyInput
 						label="Saldo inicial"
-						inputMode="numeric"
 						value={values.initialBalance}
-						onChange={(e) =>
-							setValues((v) => ({ ...v, initialBalance: e.target.value }))
+						onChange={(initialBalance) =>
+							setValues((v) => ({ ...v, initialBalance }))
 						}
 						aria-invalid={Boolean(errors.initialBalance)}
 					/>
@@ -112,14 +125,13 @@ export function AccountForm({
 				</>
 			) : null}
 
-			<div className="form-panel__actions">
-				<Button type="button" variant="secondary" onClick={onCancel}>
-					Cancelar
-				</Button>
-				<Button type="submit" disabled={loading}>
-					{loading ? "Guardando…" : isEdit ? "Guardar" : "Crear cuenta"}
-				</Button>
-			</div>
+			<FormModalFooter
+				onCancel={onCancel}
+				onDelete={isEdit ? onDelete : undefined}
+				deleteLabel={deleteLabel}
+				loading={loading}
+				submitLabel={isEdit ? "Guardar" : "Crear cuenta"}
+			/>
 		</form>
 	);
 }

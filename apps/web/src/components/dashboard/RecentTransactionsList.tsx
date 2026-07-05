@@ -2,25 +2,19 @@ import type { TransactionItem } from "@app/components/transactions/TransactionLi
 import { TransactionRow } from "@app/components/transactions/TransactionRow";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { CoreIcon } from "@app/lib/core/icons";
-import { forwardRef } from "react";
 import { Link, useNavigate } from "react-router";
 
 type RecentTransactionsListProps = {
 	transactions: TransactionItem[];
 };
 
-export const RecentTransactionsList = forwardRef<
-	HTMLElement,
-	RecentTransactionsListProps
->(function RecentTransactionsList({ transactions }, ref) {
+export function RecentTransactionsList({
+	transactions,
+}: RecentTransactionsListProps) {
 	const navigate = useNavigate();
 
 	return (
-		<section
-			ref={ref}
-			className="recent-tx glass"
-			aria-label="Movimientos recientes"
-		>
+		<section className="recent-tx glass" aria-label="Movimientos recientes">
 			<div className="section-header">
 				<h2 className="section-title">Últimos movimientos</h2>
 				<Link to="/transactions" className="link-accent show-desktop">
@@ -48,4 +42,4 @@ export const RecentTransactionsList = forwardRef<
 			)}
 		</section>
 	);
-});
+}

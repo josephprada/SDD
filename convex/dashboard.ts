@@ -59,6 +59,7 @@ export const overview = query({
 			monthlyExpense,
 			activeAccounts,
 			recentTransactions,
+			recentTotal: sorted.length,
 		};
 	},
 });

@@ -8,35 +8,65 @@ type CategoryItem = {
 	color: string;
 };
 
-type CategoryChoiceProps = {
+type CategoryChoiceBaseProps = {
 	categories: CategoryItem[];
-	value: Id<"categories"> | "";
-	onChange: (id: Id<"categories">) => void;
 	error?: string;
 };
 
-export function CategoryChoice({
-	categories,
-	value,
-	onChange,
-	error,
-}: CategoryChoiceProps) {
+type CategoryChoiceSingleProps = CategoryChoiceBaseProps & {
+	multiple?: false;
+	value: Id<"categories"> | "";
+	onChange: (id: Id<"categories">) => void;
+};
+
+type CategoryChoiceMultiProps = CategoryChoiceBaseProps & {
+	multiple: true;
+	value: Id<"categories">[];
+	onChange: (ids: Id<"categories">[]) => void;
+};
+
+export type CategoryChoiceProps =
+	| CategoryChoiceSingleProps
+	| CategoryChoiceMultiProps;
+
+export function CategoryChoice(props: CategoryChoiceProps) {
+	const { categories, error } = props;
 	const items = [...categories].sort((a, b) =>
 		a.name.localeCompare(b.name, "es"),
 	);
 
+	const isSelected = (id: Id<"categories">) => {
+		if (props.multiple) {
+			return props.value.includes(id);
+		}
+		return props.value === id;
+	};
+
+	const handleToggle = (id: Id<"categories">) => {
+		if (props.multiple) {
+			const next = props.value.includes(id)
+				? props.value.filter((value) => value !== id)
+				: [...props.value, id];
+			props.onChange(next);
+			return;
+		}
+		props.onChange(id);
+	};
+
+	const ariaLabel = props.multiple ? "Categorías" : "Categoría";
+
 	return (
 		<div>
-			<div className="category-choice" aria-label="Categoría">
+			<div className="category-choice" aria-label={ariaLabel}>
 				{items.map((cat) => {
-					const isActive = value === cat._id;
+					const active = isSelected(cat._id);
 					return (
 						<button
 							key={cat._id}
 							type="button"
-							aria-pressed={isActive}
-							className={`category-choice__item${isActive ? " category-choice__item--active" : ""}`}
-							onClick={() => onChange(cat._id)}
+							aria-pressed={active}
+							className={`category-choice__item${active ? " category-choice__item--active" : ""}`}
+							onClick={() => handleToggle(cat._id)}
 						>
 							<span
 								className="category-choice__icon"

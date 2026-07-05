@@ -1,4 +1,4 @@
-import type { Doc } from "./_generated/dataModel";
+import type { Doc, Id } from "./_generated/dataModel";
 import { internalMutation, mutation } from "./_generated/server";
 import {
 	DEFAULT_USER_PREFERENCES,
@@ -104,6 +104,12 @@ export const backfillUserPreferences = mutation({
     if (doc.notificationsEnabled === undefined) {
       patch.notificationsEnabled = resolved.notificationsEnabled;
     }
+    if (doc.reportEmailEnabled === undefined) {
+      patch.reportEmailEnabled = resolved.reportEmailEnabled;
+    }
+    if (doc.pushEnabled === undefined) {
+      patch.pushEnabled = resolved.pushEnabled;
+    }
 
     if (Object.keys(patch).length === 0) {
       return { updated: false };
@@ -113,6 +119,34 @@ export const backfillUserPreferences = mutation({
     await ctx.db.patch(doc._id, patch);
     return { updated: true };
   },
+});
+
+/** Migrate legacy budgets with single categoryId to categoryIds array. */
+export const backfillBudgetCategoryIds = internalMutation({
+	args: {},
+	handler: async (ctx) => {
+		const budgets = await ctx.db.query("budgets").collect();
+		let updated = 0;
+
+		for (const budget of budgets) {
+			const legacy = budget as Doc<"budgets"> & { categoryId?: Id<"categories"> };
+			if (
+				(!budget.categoryIds || budget.categoryIds.length === 0) &&
+				legacy.categoryId
+			) {
+				// `categoryId: undefined` unsets the legacy field; requires the
+				// transitional schema (optional categoryId/categoryIds) to push.
+				const patch = {
+					categoryIds: [legacy.categoryId],
+					categoryId: undefined,
+				} as unknown as Partial<Doc<"budgets">>;
+				await ctx.db.patch(budget._id, patch);
+				updated += 1;
+			}
+		}
+
+		return { updated };
+	},
 });
 
 export const backfillAllUserPreferences = internalMutation({
@@ -141,6 +175,12 @@ export const backfillAllUserPreferences = internalMutation({
       if (doc.language === undefined) patch.language = DEFAULT_USER_PREFERENCES.language;
       if (doc.notificationsEnabled === undefined) {
         patch.notificationsEnabled = DEFAULT_USER_PREFERENCES.notificationsEnabled;
+      }
+      if (doc.reportEmailEnabled === undefined) {
+        patch.reportEmailEnabled = DEFAULT_USER_PREFERENCES.reportEmailEnabled;
+      }
+      if (doc.pushEnabled === undefined) {
+        patch.pushEnabled = DEFAULT_USER_PREFERENCES.pushEnabled;
       }
 
       if (Object.keys(patch).length > 0) {

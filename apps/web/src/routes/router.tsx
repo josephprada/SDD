@@ -18,6 +18,8 @@ import { NotFoundRoute } from "./notFound";
 import { OAuthCallbackRoute } from "./oauthCallback";
 import { RootRoute } from "./root";
 import { SettingsRoute } from "./settings";
+import { BudgetsRoute } from "./budgets";
+import { ReportsRoute } from "./reports";
 import { TransactionsRoute } from "./transactions";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -112,6 +114,8 @@ export const router = createBrowserRouter([
 			{ path: "accounts", element: <AccountsRoute /> },
 			{ path: "transactions", element: <TransactionsRoute /> },
 			{ path: "categories", element: <CategoriesRoute /> },
+			{ path: "budgets", element: <BudgetsRoute /> },
+			{ path: "reports", element: <ReportsRoute /> },
 			{ path: "settings", element: <SettingsRoute /> },
 		],
 	},

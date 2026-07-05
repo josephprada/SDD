@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import { mutation, query } from "./_generated/server";
@@ -14,6 +15,7 @@ import {
 	invertDeltas,
 } from "./lib/balance";
 import { compareTransactions } from "./lib/transactions";
+import { clearFixedExpensePaymentForDeletedTransaction } from "./lib/fixedExpensePayments";
 import {
 	transactionTypeValidator,
 	validatePositiveCopAmount,
@@ -263,7 +265,7 @@ export const create = mutation({
 
 		await applyBalanceDeltas(ctx, deltas, userId);
 
-		return await ctx.db.insert("transactions", {
+		const transactionId = await ctx.db.insert("transactions", {
 			userId,
 			type: args.type,
 			amount,
@@ -276,6 +278,20 @@ export const create = mutation({
 			createdAt: now,
 			updatedAt: now,
 		});
+
+		if (args.type === "expense") {
+			await ctx.scheduler.runAfter(
+				0,
+				internal.budgets.checkThresholdAfterTransaction,
+				{
+					userId,
+					categoryId: args.categoryId,
+					date: args.date,
+				},
+			);
+		}
+
+		return transactionId;
 	},
 });
 
@@ -320,6 +336,18 @@ export const update = mutation({
 			notes: args.notes?.trim() || undefined,
 			updatedAt: Date.now(),
 		});
+
+		if (args.type === "expense") {
+			await ctx.scheduler.runAfter(
+				0,
+				internal.budgets.checkThresholdAfterTransaction,
+				{
+					userId,
+					categoryId: args.categoryId,
+					date: args.date,
+				},
+			);
+		}
 
 		return null;
 	},
@@ -394,6 +422,13 @@ export const remove = mutation({
 			toAccountId: transaction.toAccountId,
 		});
 		await applyBalanceDeltas(ctx, invertDeltas(deltas), userId);
+
+		await clearFixedExpensePaymentForDeletedTransaction(
+			ctx,
+			userId,
+			transaction,
+		);
+
 		await ctx.db.delete(transactionId);
 
 		return null;

@@ -494,7 +494,13 @@
 @media (min-width: 1024px) {
 	.shell {
 		flex-direction: row;
+		height: 100dvh;
 	}
+
+	.shell-content {
+		min-height: 0;
+	}
+
 	.shell__main {
 		padding: var(--container-padding-desktop);
 		padding-bottom: var(--container-padding-desktop);

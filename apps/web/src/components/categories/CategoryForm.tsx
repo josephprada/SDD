@@ -1,4 +1,5 @@
 import { FieldError } from "@app/components/ui/FieldError";
+import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import {
 	CATEGORY_ICON_GROUPS,
 	CATEGORY_ICONS,
@@ -8,7 +9,7 @@ import {
 const DEFAULT_ICON = CATEGORY_ICONS[0];
 import type { CategoryFormValues, CategoryType } from "@app/lib/core/types";
 import { CATEGORY_COLORS } from "@app/lib/core/types";
-import { Button, Input } from "@jp-ds";
+import { Input } from "@jp-ds";
 import { useState } from "react";
 
 type CategoryFormProps = {
@@ -109,20 +110,12 @@ export function CategoryForm({
 				</div>
 			</div>
 
-			<div className="form-panel__actions">
-				{isEdit && onArchive ? (
-					<Button type="button" variant="secondary" onClick={onArchive}>
-						Archivar
-					</Button>
-				) : (
-					<Button type="button" variant="secondary" onClick={onCancel}>
-						Cancelar
-					</Button>
-				)}
-				<Button type="submit" disabled={loading}>
-					{loading ? "Guardando…" : "Guardar"}
-				</Button>
-			</div>
+			<FormModalFooter
+				onCancel={onCancel}
+				onDelete={isEdit && onArchive ? onArchive : undefined}
+				deleteLabel="Archivar"
+				loading={loading}
+			/>
 		</form>
 	);
 }

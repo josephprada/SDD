@@ -93,3 +93,40 @@ export function validateAvatarSize(size: number): void {
 		throw new Error("Image exceeds 2 MB limit");
 	}
 }
+
+export const MAX_BUDGET_NOTES_LENGTH = 200;
+export const MAX_FIXED_EXPENSE_NAME_LENGTH = 80;
+export const MAX_REMINDER_OFFSETS = 5;
+
+const PERIOD_KEY_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+export function validatePeriodKey(periodKey: string): string {
+	if (!PERIOD_KEY_RE.test(periodKey)) {
+		throw new Error("Invalid period key");
+	}
+	return periodKey;
+}
+
+export function validateDayOfMonth(day: number): number {
+	if (!Number.isInteger(day) || day < 1 || day > 31) {
+		throw new Error("Day of month must be between 1 and 31");
+	}
+	return day;
+}
+
+export function validateReminderOffsets(offsets: number[]): number[] {
+	if (offsets.length === 0 || offsets.length > MAX_REMINDER_OFFSETS) {
+		throw new Error("Reminder offsets must have 1 to 5 entries");
+	}
+	const unique = new Set<number>();
+	for (const offset of offsets) {
+		if (!Number.isInteger(offset) || offset < 0 || offset > 30) {
+			throw new Error("Each reminder offset must be 0–30 days");
+		}
+		if (unique.has(offset)) {
+			throw new Error("Duplicate reminder offsets");
+		}
+		unique.add(offset);
+	}
+	return [...offsets].sort((a, b) => b - a);
+}

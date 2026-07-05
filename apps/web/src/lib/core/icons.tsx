@@ -5,6 +5,7 @@ import {
 	ArrowRightLeft,
 	BadgeDollarSign,
 	Calendar,
+	ChartLine,
 	ChevronDown,
 	ChevronLeft,
 	ChevronRight,
@@ -46,6 +47,7 @@ export type CoreIconName =
 	| "pencil"
 	| "paperclip"
 	| "calendar"
+	| "chart-line"
 	| "chevron-left"
 	| "chevron-right"
 	| "chevron-down"
@@ -77,6 +79,7 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	pencil: Pencil,
 	paperclip: Paperclip,
 	calendar: Calendar,
+	"chart-line": ChartLine,
 	"chevron-left": ChevronLeft,
 	"chevron-right": ChevronRight,
 	"chevron-down": ChevronDown,

@@ -20,6 +20,8 @@ type SyncPayload = {
 	typographyPreset?: TypographyPresetId;
 	defaultGrouping?: GroupingId;
 	notificationsEnabled?: boolean;
+	reportEmailEnabled?: boolean;
+	pushEnabled?: boolean;
 	resetAppearance?: boolean;
 };
 
@@ -55,6 +57,8 @@ export function PreferencesSyncBridge() {
 				typographyPreset: payload.typographyPreset,
 				defaultGrouping: payload.defaultGrouping,
 				notificationsEnabled: payload.notificationsEnabled,
+				reportEmailEnabled: payload.reportEmailEnabled,
+				pushEnabled: payload.pushEnabled,
 			};
 
 			const hasValue = Object.values(patch).some((value) => value !== undefined);

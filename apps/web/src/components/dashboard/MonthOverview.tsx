@@ -6,6 +6,7 @@ import { PeriodSwitcher } from "./PeriodSwitcher";
 type MonthOverviewProps = {
 	income: number;
 	expense: number;
+	pendingFixedExpenses?: number;
 	grouping?: GroupingId;
 	anchor?: Date;
 	onPrev?: () => void;
@@ -16,6 +17,7 @@ type MonthOverviewProps = {
 export function MonthOverview({
 	income,
 	expense,
+	pendingFixedExpenses = 0,
 	grouping = "month",
 	anchor,
 	onPrev,
@@ -23,6 +25,7 @@ export function MonthOverview({
 	showSwitcher = false,
 }: MonthOverviewProps) {
 	const net = income - expense;
+	const projectedNet = net - pendingFixedExpenses;
 	const max = Math.max(income, expense, 1);
 	const incomePct = Math.round((income / max) * 100);
 	const expensePct = Math.round((expense / max) * 100);
@@ -78,12 +81,24 @@ export function MonthOverview({
 			<div className="month-overview__net">
 				<span className="month-overview__label">{periodNetLabel(grouping)}</span>
 				<span
-					className={`tx-amount${net < 0 ? " tx-amount--expense" : " tx-amount--income"}`}
+					className={`tx-amount${net < 0 ? " tx-amount--expense" : " tx-amount--transfer"}`}
 				>
 					{net < 0 ? "−" : "+"}
 					{formatCOP(Math.abs(net))}
 				</span>
 			</div>
+
+			{pendingFixedExpenses > 0 ? (
+				<div className="month-overview__net month-overview__net--projected">
+					<span className="month-overview__label">
+						Neto con gastos fijos pendientes
+					</span>
+					<span className="month-overview__net-projected">
+						{projectedNet < 0 ? "−" : "+"}
+						{formatCOP(Math.abs(projectedNet))}
+					</span>
+				</div>
+			) : null}
 		</section>
 	);
 }

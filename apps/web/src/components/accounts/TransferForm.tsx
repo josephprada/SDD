@@ -1,4 +1,5 @@
 import { CategoryChoice } from "@app/components/ui/CategoryChoice";
+import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { FieldError } from "@app/components/ui/FieldError";
 import { parseCOPInput } from "@app/lib/format/currency";
 import { fromDateInputValue, toDateInputValue } from "@app/lib/format/date";
@@ -110,11 +111,10 @@ export function TransferForm({
 				))}
 			</select>
 
-			<Input
+			<CurrencyInput
 				label="Monto"
-				inputMode="numeric"
 				value={amount}
-				onChange={(e) => setAmount(e.target.value)}
+				onChange={setAmount}
 				required
 			/>
 

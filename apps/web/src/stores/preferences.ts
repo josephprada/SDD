@@ -31,6 +31,8 @@ export type ServerPreferences = {
 	defaultGrouping: GroupingId;
 	language: "es" | "en";
 	notificationsEnabled: boolean;
+	reportEmailEnabled: boolean;
+	pushEnabled: boolean;
 };
 
 interface PreferencesState {
@@ -42,6 +44,8 @@ interface PreferencesState {
 	defaultGrouping: GroupingId;
 	language: "es" | "en";
 	notificationsEnabled: boolean;
+	reportEmailEnabled: boolean;
+	pushEnabled: boolean;
 	initialized: boolean;
 	init: () => void;
 	setTheme: (mode: ThemeMode, syncServer?: boolean) => void;
@@ -50,6 +54,8 @@ interface PreferencesState {
 	setTypographyPreset: (preset: TypographyPresetId, syncServer?: boolean) => void;
 	setDefaultGrouping: (grouping: GroupingId, syncServer?: boolean) => void;
 	setNotificationsEnabled: (enabled: boolean, syncServer?: boolean) => void;
+	setReportEmailEnabled: (enabled: boolean, syncServer?: boolean) => void;
+	setPushEnabled: (enabled: boolean, syncServer?: boolean) => void;
 	resetAppearanceLocal: () => void;
 	reconcileFromServer: (prefs: ServerPreferences | null | undefined) => void;
 	isDefaultAppearance: () => boolean;
@@ -64,6 +70,8 @@ type SyncPayload = {
 	typographyPreset?: TypographyPresetId;
 	defaultGrouping?: GroupingId;
 	notificationsEnabled?: boolean;
+	reportEmailEnabled?: boolean;
+	pushEnabled?: boolean;
 	resetAppearance?: boolean;
 };
 
@@ -84,6 +92,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
 	defaultGrouping: DEFAULT_GROUPING,
 	language: DEFAULT_LANGUAGE,
 	notificationsEnabled: DEFAULT_NOTIFICATIONS_ENABLED,
+	reportEmailEnabled: true,
+	pushEnabled: false,
 	initialized: false,
 
 	init: () => {
@@ -147,6 +157,18 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
 		if (syncServer) queueSync({ notificationsEnabled: enabled });
 	},
 
+	setReportEmailEnabled: (enabled, syncServer = true) => {
+		localStorage.setItem("jp-wallet.reportEmailEnabled", String(enabled));
+		set({ reportEmailEnabled: enabled });
+		if (syncServer) queueSync({ reportEmailEnabled: enabled });
+	},
+
+	setPushEnabled: (enabled, syncServer = true) => {
+		localStorage.setItem("jp-wallet.pushEnabled", String(enabled));
+		set({ pushEnabled: enabled });
+		if (syncServer) queueSync({ pushEnabled: enabled });
+	},
+
 	resetAppearanceLocal: () => {
 		get().setTheme(DEFAULT_APPEARANCE.theme, false);
 		get().setAccentPreset(DEFAULT_APPEARANCE.accentPreset, false);
@@ -163,6 +185,8 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
 		get().setTypographyPreset(prefs.typographyPreset, false);
 		get().setDefaultGrouping(prefs.defaultGrouping, false);
 		get().setNotificationsEnabled(prefs.notificationsEnabled, false);
+		get().setReportEmailEnabled(prefs.reportEmailEnabled, false);
+		get().setPushEnabled(prefs.pushEnabled, false);
 		set({ language: prefs.language === "en" ? "es" : prefs.language });
 	},
 
