@@ -47,11 +47,6 @@ jobs:
       - name: Verify build output
         run: test -f "${{ env.WEB_DIST }}/index.html"
 
-      - name: Prepare deploy SSH key
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/deploy_key
-          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-
       - name: Backup current release on VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -78,14 +73,16 @@ jobs:
             sudo rm -rf ${{ env.VPS_WEB_ROOT }}/*
 
       - name: Sync static files to VPS
-        env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_PORT: ${{ secrets.VPS_SSH_PORT }}
-          VPS_USER: ${{ secrets.VPS_SSH_USER }}
-        run: |
-          tar -C "${{ env.WEB_DIST }}" -czf - . | \
-            ssh -p "${VPS_PORT}" -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new \
-            "${VPS_USER}@${VPS_HOST}" "tar -xzf - -C ${{ env.VPS_WEB_ROOT }}"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "${{ env.WEB_DIST }}/*"
+          target: "${{ env.VPS_WEB_ROOT }}"
+          strip_components: 3
+          overwrite: true
 
       - name: Fix permissions and reload Nginx
         uses: appleboy/ssh-action@v1.2.0
