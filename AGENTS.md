@@ -63,7 +63,7 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ## Último change cerrado: web-budgets-reports ✅ (2026-07-05)
 
-Producción tras merge a `main`: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
+Producción: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
 
 | Artefacto | Ruta |
 |-----------|------|
@@ -72,7 +72,8 @@ Producción tras merge a `main`: `https://wallet.lavalex.co` · Convex prod · C
 | Diseño técnico | `changes/web-budgets-reports/design.md` |
 | Quickstart QA | `changes/web-budgets-reports/quickstart.md` |
 
-**Siguiente change planificado** (ver `SPEC.md` roadmap): pendiente definir Change 5.
+**Siguiente change planificado:** **Change 5 — `web-credits`** (Créditos y Préstamos).  
+**Change 6 — `web-tax-dian`** (Declaración de Renta DIAN) queda al final: debe integrar créditos, cuentas y transacciones.
 
 ---
 

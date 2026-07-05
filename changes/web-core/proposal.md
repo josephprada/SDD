@@ -29,7 +29,7 @@ Entregar el núcleo funcional de JP-WALLET sobre la base ya establecida en `web-
 - **Presupuestos y alertas** (Change 4)
 - **Reportes y Panel de Resultados con gráficos** avanzados / exports PDF-CSV (Change 4)
 - **Configuración completa**: gestión de categorías como panel dedicado de settings, agrupación temporal configurable (semana/trimestre/semestre), idioma, notificaciones (Change 3)
-- **Declaración de Renta** (Change 5) y **Créditos y Préstamos** (Change 6)
+- **Créditos y Préstamos** (Change 5) y **Declaración de Renta** (Change 6 — último; integra créditos)
 - **Transacciones recurrentes** (scheduled functions) — diferidas a un change posterior
 - **Gastos compartidos / grupos** (futuro)
 - **Re-exposición del theme toggle en UI** (sigue oculto por decisión D-07 de `web-foundation`; lógica disponible)

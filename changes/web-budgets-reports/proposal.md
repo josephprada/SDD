@@ -82,7 +82,7 @@ Se complementan: un gasto fijo puede asociarse a una categoría que también ten
 - Frecuencias distintas a mensual en gastos fijos (semanal, anual) — diferido.
 - Exportación JSON; benchmarks entre usuarios.
 - SMS, WhatsApp, notificaciones nativas Android/iOS (app store).
-- Créditos, DIAN — Changes 5–6.
+- Créditos (Change 5), DIAN (Change 6 — último).
 
 ## Capabilities
 
