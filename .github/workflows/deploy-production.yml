@@ -83,14 +83,10 @@ jobs:
           VPS_PORT: ${{ secrets.VPS_SSH_PORT }}
           VPS_USER: ${{ secrets.VPS_SSH_USER }}
         run: |
-          rsync -avz --no-owner --no-group --no-times --omit-dir-times --delete \
+          # Clean step empties the web root; skip --delete to avoid nginx-owned file errors
+          rsync -avz --no-owner --no-group --no-times --omit-dir-times \
             -e "ssh -p ${VPS_PORT} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
             "${{ env.WEB_DIST }}/" "${VPS_USER}@${VPS_HOST}:${{ env.VPS_WEB_ROOT }}/"
-          rc=$?
-          # 23 = partial transfer (often stale nginx-owned files); uploads still succeed after clean step
-          if [ "$rc" -ne 0 ] && [ "$rc" -ne 23 ]; then
-            exit "$rc"
-          fi
 
       - name: Fix permissions and reload Nginx
         uses: appleboy/ssh-action@v1.2.0
