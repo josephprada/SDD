@@ -18,12 +18,12 @@
 
 **Purpose**: Fundación testeable sin UI.
 
-- [ ] T001 Crear `convex/lib/creditAmortization.ts` — monthlyRate, PMT, generateScheduleCuotaFija, generateScheduleCapitalConstant
-- [ ] T002 Crear `convex/lib/creditRecalc.ts` — recalcAfterAbono (shorten_term / lower_installment)
-- [ ] T003 Crear `convex/lib/creditDates.ts` — resolvePaymentDate (día 31 clamp), markOverdue
-- [ ] T004 Crear `convex/lib/creditAmortization.test.ts` — casos QA $40M, abono $6M/año, saldo final 0
-- [ ] T005 [P] Extender `convex/lib/validators.ts` — rateType, scheduleMode, reminderOffsets crédito
-- [ ] T006 [P] Crear `apps/web/src/styles/credits-savings.css` + carpetas `components/credits`, `components/savings`, `lib/credits`
+- [x] T001 Crear `convex/lib/creditAmortization.ts` — monthlyRate, PMT, generateScheduleCuotaFija, generateScheduleCapitalConstant
+- [x] T002 Crear `convex/lib/creditRecalc.ts` — recalcAfterAbono (shorten_term / lower_installment)
+- [x] T003 Crear `convex/lib/creditDates.ts` — resolvePaymentDate (día 31 clamp), markOverdue
+- [x] T004 Crear `convex/lib/creditAmortization.test.ts` — casos QA $40M, abono $6M/año, saldo final 0
+- [x] T005 [P] Extender `convex/lib/validators.ts` — rateType, scheduleMode, reminderOffsets crédito
+- [x] T006 [P] Crear `apps/web/src/styles/credits-savings.css` + carpetas `components/credits`, `components/savings`, `lib/credits`
 
 **Checkpoint**: `bun test` pasa amortización.
 
@@ -33,10 +33,10 @@
 
 **Purpose**: Bloquea todas las user stories.
 
-- [ ] T007 Extender `convex/schema.ts` — tablas `credits`, `creditPayments`, `creditCapitalAbonos`, `creditDestinations`, `savingsGoals`, `savingsContributions`
-- [ ] T008 Extender `accounts` — `isCreditEscrow: boolean` default false
-- [ ] T009 Extender `transactions` — `creditId?`, `creditDestinationId?`, `isCreditFundMovement?`
-- [ ] T010 [P] Crear stubs `convex/credits.ts`, `creditPayments.ts`, `creditCapitalAbonos.ts`, `creditDestinations.ts`, `savingsGoals.ts`, `savingsContributions.ts`
+- [x] T007 Extender `convex/schema.ts` — tablas `credits`, `creditPayments`, `creditCapitalAbonos`, `creditDestinations`, `savingsGoals`, `savingsContributions`
+- [x] T008 Extender `accounts` — `isCreditEscrow: boolean` default false
+- [x] T009 Extender `transactions` — `creditId?`, `creditDestinationId?`, `isCreditFundMovement?`
+- [x] T010 [P] Crear stubs `convex/credits.ts`, `creditPayments.ts`, `creditCapitalAbonos.ts`, `creditDestinations.ts`, `savingsGoals.ts`, `savingsContributions.ts`
 
 **Checkpoint**: `bunx convex dev` sin errores de schema.
 
@@ -46,12 +46,12 @@
 
 **Goal**: Crear crédito, generar tabla, listar, detalle cuotas.
 
-- [ ] T011 [US1] `credits.create` / `list` / `get` — modo `cuota_fija`
-- [ ] T012 [US1] `creditPayments.listByCredit` + generación en create
-- [ ] T013 [US1] `creditPayments.markPaid`
-- [ ] T014 [P] [US1] `CreditForm.tsx`, `CreditList.tsx`, `CreditPaymentTable.tsx`
-- [ ] T015 [US1] Rutas `/credits`, `/credits/:id` — tab Cuotas
-- [ ] T016 [US1] Wire Convex; validación lender/nombre libre (sin banco hardcoded)
+- [x] T011 [US1] `credits.create` / `list` / `get` — modo `cuota_fija`
+- [x] T012 [US1] `creditPayments.listByCredit` + generación en create
+- [x] T013 [US1] `creditPayments.markPaid`
+- [x] T014 [P] [US1] `CreditForm.tsx`, `CreditList.tsx`, `CreditPaymentTable.tsx`
+- [x] T015 [US1] Rutas `/credits`, `/credits/:id` — tab Cuotas
+- [x] T016 [US1] Wire Convex; validación lender/nombre libre (sin banco hardcoded)
 
 **Checkpoint**: quickstart §1 parcial (cuota_fija).
 
@@ -61,11 +61,11 @@
 
 **Goal**: Abono capital + recálculo + proyección.
 
-- [ ] T017 [US2] `creditCapitalAbonos.create` + list
-- [ ] T018 [US2] Integrar `creditRecalc` en mutation abono
-- [ ] T019 [US2] `credits.simulatePayoff`
-- [ ] T020 [P] [US2] `CapitalAbonoForm.tsx`, `PayoffSimulator.tsx`
-- [ ] T021 [US2] Tab **Abonos** en detalle crédito
+- [x] T017 [US2] `creditCapitalAbonos.create` + list
+- [x] T018 [US2] Integrar `creditRecalc` en mutation abono
+- [x] T019 [US2] `credits.simulatePayoff`
+- [x] T020 [P] [US2] `CapitalAbonoForm.tsx`, `PayoffSimulator.tsx`
+- [x] T021 [US2] Tab **Abonos** en detalle crédito
 
 **Checkpoint**: quickstart §4.
 
@@ -75,9 +75,9 @@
 
 **Goal**: CRUD rubros + resumen + gráfico.
 
-- [ ] T022 [US3] `creditDestinations` CRUD + totales en `credits.get`
-- [ ] T023 [P] [US3] `DestinationList.tsx`, `DestinationForm.tsx`, `DestinationChart.tsx` (Recharts lazy)
-- [ ] T024 [US3] Tab **Destinos**; advertencia suma > principal
+- [x] T022 [US3] `creditDestinations` CRUD + totales en `credits.get`
+- [x] T023 [P] [US3] `DestinationList.tsx`, `DestinationForm.tsx`, `DestinationChart.tsx` (Recharts lazy)
+- [x] T024 [US3] Tab **Destinos**; advertencia suma > principal
 
 **Checkpoint**: quickstart §2.
 
@@ -87,13 +87,13 @@
 
 **Goal**: Aislamiento nómina; gasto desde fondo.
 
-- [ ] T025 [US4] `accounts.linkToCredit`; `isCreditEscrow` en create/update cuenta
-- [ ] T026 [US4] `credits.fundSummary`, `listFundMovements`
-- [ ] T027 [US4] `credits.spendFromFund` — wizard atómico
-- [ ] T028 [US4] Modificar `dashboard.overview` — excluir escrow
-- [ ] T029 [US4] Modificar `transactions.list` — `includeCreditMovements` default false
-- [ ] T030 [P] [US4] `SpendFromFundWizard.tsx`, `CreditFundCard.tsx` (dashboard P2)
-- [ ] T031 [US4] Tab **Movimientos**; regla no-income al vincular escrow
+- [x] T025 [US4] `accounts.linkToCredit`; `isCreditEscrow` en create/update cuenta
+- [x] T026 [US4] `credits.fundSummary`, `listFundMovements`
+- [x] T027 [US4] `credits.spendFromFund` — wizard atómico
+- [x] T028 [US4] Modificar `dashboard.overview` — excluir escrow
+- [x] T029 [US4] Modificar `transactions.list` — `includeCreditMovements` default false
+- [x] T030 [P] [US4] `SpendFromFundWizard.tsx`, `CreditFundCard.tsx` (dashboard P2)
+- [x] T031 [US4] Tab **Movimientos**; regla no-income al vincular escrow
 
 **Checkpoint**: quickstart §3 + §1 balance personal.
 
@@ -103,10 +103,10 @@
 
 **Goal**: `/savings` CRUD + aportes + linkedCreditId.
 
-- [ ] T032 [US7] `savingsGoals` CRUD + `savingsContributions.create`
-- [ ] T033 [US7] Progreso %, auto-complete ≥100%
-- [ ] T034 [P] [US7] `SavingsGoalList.tsx`, `SavingsGoalForm.tsx`, `ContributionForm.tsx`
-- [ ] T035 [US7] Ruta `/savings`; sugerencia abono si linkedCreditId + umbral
+- [x] T032 [US7] `savingsGoals` CRUD + `savingsContributions.create`
+- [x] T033 [US7] Progreso %, auto-complete ≥100%
+- [x] T034 [P] [US7] `SavingsGoalList.tsx`, `SavingsGoalForm.tsx`, `ContributionForm.tsx`
+- [x] T035 [US7] Ruta `/savings`; sugerencia abono si linkedCreditId + umbral
 
 **Checkpoint**: quickstart §6.
 
@@ -116,10 +116,10 @@
 
 **Goal**: Completitud VIS; alertas cuota.
 
-- [ ] T036 [US1] Modo `capital_constant` + `manual` en create; `updateManualRow`
-- [ ] T037 [US1] Import filas manual UI (sin CSV P1 opcional)
-- [ ] T038 [US6] `credits.processReminders` + extender `notifications.processDaily`
-- [ ] T039 [US6] Tipo `credit_due` en `notificationLog`
+- [x] T036 [US1] Modo `capital_constant` + `manual` en create; `updateManualRow`
+- [x] T037 [US1] Import filas manual UI (sin CSV P1 opcional)
+- [x] T038 [US6] `credits.processReminders` + extender `notifications.processDaily`
+- [x] T039 [US6] Tipo `credit_due` en `notificationLog`
 
 **Checkpoint**: quickstart §1 modo manual; recordatorio push/in-app.
 
@@ -129,13 +129,31 @@
 
 **Goal**: Shell, mobile, lint.
 
-- [ ] T040 [US8] `NavDesktop` + `NavMobile` («Más») — Créditos, Ahorros
-- [ ] T041 [P] Empty states, loading, a11y tablas
-- [ ] T042 `targetPayoffDate` en header crédito
-- [ ] T043 Actualizar `AGENTS.md` al cerrar change
-- [ ] T044 `bun run build` + `bun run lint` + quickstart completo
+- [x] T040 [US8] `NavDesktop` + `NavMobile` («Más») — Créditos, Ahorros
+- [x] T041 [P] Empty states, loading, a11y tablas
+- [x] T042 `targetPayoffDate` en header crédito
+- [x] T043 Actualizar `AGENTS.md` al cerrar change
+- [x] T044 `bun run build` + `bun run lint` + quickstart completo
 
 **Checkpoint**: Change 5 listo para merge `testing`.
+
+---
+
+## Phase 10: Iteración UX (post-plan v1.4)
+
+**Goal**: Refinar flujos acordados en sesión 2026-07-05; alinear spec/design.
+
+- [x] T045 Categorías fondo — `creditCategories.ts`, `fundExpenseCategoryIds`, delete vs unlink
+- [x] T046 Pago cuota desde Movimientos — `creditPaymentContext`, `creditPaymentRegistration`
+- [x] T047 Gasto fondo simplificado — `creditFundSpend.ts`, `creditFundContext`; sin wizard en UI Fondo
+- [x] T048 `TransactionForm` — rubro, cuenta default desembolso; `TransactionRow` con `destinationName`
+- [x] T049 Rubros `spentTotal` — `creditDestinations.list` + barra progreso en `DestinationList`
+- [x] T050 `FieldHelp` en `CreditSettingsForm` + `FundExpenseCategoryPicker`
+- [x] T051 Dashboard — `dash-credits` glass, cards internas, total gris alineado con Disponible
+- [x] T052 Edición rubros por clic; toast guardar ajustes; eliminar `SpendFromFundWizard` de Fondo
+- [x] T053 Actualizar `spec.md`, `design.md`, `tasks.md` con desvíos v1.5
+
+**Checkpoint**: Documentación alineada; listo para siguientes ajustes.
 
 ---
 
@@ -169,4 +187,4 @@ Phase 9 Polish
 
 **Mínimo usable**: Phases 1–5 (crédito + abonos + rubros).  
 **Flujo usuario completo**: + Phase 6 (escrow) + Phase 7 (metas).  
-**Total**: 44 tareas · 9 fases
+**Total**: 53 tareas · 10 fases

@@ -17,6 +17,7 @@ export type TransactionItem = {
 	categoryName: string;
 	categoryIcon: string;
 	categoryColor?: string;
+	destinationName?: string;
 	notes?: string;
 };
 

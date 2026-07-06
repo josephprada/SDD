@@ -1,3 +1,4 @@
+import { CreditFundCard } from "@app/components/credits/CreditFundCard";
 import { DashboardBalanceCard } from "@app/components/dashboard/DashboardBalanceCard";
 import { DashboardBudgetAlerts } from "@app/components/dashboard/DashboardBudgetAlerts";
 import { DashboardFixedExpenses } from "@app/components/dashboard/DashboardFixedExpenses";
@@ -183,6 +184,28 @@ export function HomeRoute() {
 							items={atRiskBudgets as BudgetItem[]}
 							periodLabel={formatMonthYear(anchor)}
 						/>
+					) : null}
+
+					{overview.creditFundCards &&
+					overview.creditFundCards.length > 0 ? (
+						<section
+							className="dash-credits glass"
+							aria-label="Créditos activos"
+						>
+							<div className="section-header">
+								<h2 className="section-title">Créditos</h2>
+								<Link to="/credits" className="link-accent show-desktop">
+									Ver todos
+								</Link>
+							</div>
+							<ul className="dash-credits__list">
+								{overview.creditFundCards.map((card) => (
+									<li key={card.creditId}>
+										<CreditFundCard {...card} />
+									</li>
+								))}
+							</ul>
+						</section>
 					) : null}
 
 					<section

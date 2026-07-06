@@ -7,8 +7,9 @@ export const list = query({
 	args: {
 		type: v.optional(categoryTypeValidator),
 		includeArchived: v.optional(v.boolean()),
+		includeCreditLinked: v.optional(v.boolean()),
 	},
-	handler: async (ctx, { type, includeArchived }) => {
+	handler: async (ctx, { type, includeArchived, includeCreditLinked }) => {
 		const userId = await requireUserId(ctx);
 
 		let categories = type
@@ -25,6 +26,10 @@ export const list = query({
 
 		if (!includeArchived) {
 			categories = categories.filter((c) => !c.archived);
+		}
+
+		if (!includeCreditLinked) {
+			categories = categories.filter((c) => !c.linkedCreditId);
 		}
 
 		return categories.sort((a, b) => a.name.localeCompare(b.name, "es"));

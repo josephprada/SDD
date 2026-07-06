@@ -83,6 +83,24 @@ export function NavDesktop() {
 					Reportes
 				</NavLink>
 				<NavLink
+					to="/credits"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="landmark" size={18} />
+					Créditos
+				</NavLink>
+				<NavLink
+					to="/savings"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="wallet" size={18} />
+					Ahorros
+				</NavLink>
+				<NavLink
 					to="/settings"
 					className={({ isActive }) =>
 						`sidebar-link${isActive ? " sidebar-link--active" : ""}`

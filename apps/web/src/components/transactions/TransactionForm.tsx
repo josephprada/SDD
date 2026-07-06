@@ -8,12 +8,8 @@ import { CategoryChoice } from "@app/components/ui/CategoryChoice";
 import { FieldError } from "@app/components/ui/FieldError";
 import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import type { TransactionType } from "@app/lib/core/types";
-import {
-	formatCOPInput,
-	formatCOPInputFromRaw,
-	parseCOPInput,
-} from "@app/lib/format/currency";
-import { fromDateInputValue, toDateInputValue } from "@app/lib/format/date";
+import { formatCOPInput, formatCOPInputFromRaw, formatCOP, parseCOPInput } from "@app/lib/format/currency";
+import { fromDateInputValue, formatShortDate, toDateInputValue } from "@app/lib/format/date";
 import { periodKeyFromDate } from "@app/lib/period";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { api } from "@convex/_generated/api";
@@ -32,9 +28,11 @@ type TransactionFormProps = {
 		toAccountId: Id<"accounts">;
 		categoryId: Id<"categories">;
 		notes: string;
+		destinationName?: string;
 	}>;
 	transactionId?: Id<"transactions">;
 	loading?: boolean;
+	serverError?: string;
 	onSubmit: (values: {
 		type: TransactionType;
 		amount: number;
@@ -43,6 +41,11 @@ type TransactionFormProps = {
 		toAccountId?: Id<"accounts">;
 		categoryId: Id<"categories">;
 		notes?: string;
+		creditPaymentId?: Id<"creditPayments">;
+		creditFundSpend?: {
+			creditId: Id<"credits">;
+			destinationId: Id<"creditDestinations">;
+		};
 	}) => void;
 	onCancel: () => void;
 	onDelete?: () => void;
@@ -66,6 +69,7 @@ export function TransactionForm({
 	initial,
 	transactionId,
 	loading = false,
+	serverError,
 	onSubmit,
 	onCancel,
 	onDelete,
@@ -89,6 +93,12 @@ export function TransactionForm({
 		initial?.categoryId ?? "",
 	);
 	const [notes, setNotes] = useState(initial?.notes ?? "");
+	const [creditPaymentOverride, setCreditPaymentOverride] = useState<
+		Id<"creditPayments"> | ""
+	>("");
+	const [fundDestinationOverride, setFundDestinationOverride] = useState<
+		Id<"creditDestinations"> | ""
+	>("");
 	const [error, setError] = useState("");
 	const amountInputRef = useRef<HTMLInputElement>(null);
 	const attachmentCount = useAttachmentCount(transactionId);
@@ -96,6 +106,78 @@ export function TransactionForm({
 	const filteredCategories = categories.filter(
 		(c) => !c.archived && c.type === type,
 	);
+
+	const selectedCategory = filteredCategories.find((c) => c._id === categoryId);
+	const isFundExpenseFlow =
+		!transactionId &&
+		type === "expense" &&
+		selectedCategory?.linkedCreditPurpose === "fund_expense";
+	const isCreditPaymentCandidate =
+		!transactionId &&
+		type === "expense" &&
+		!!selectedCategory?.linkedCreditId &&
+		selectedCategory?.linkedCreditPurpose !== "fund_expense" &&
+		selectedCategory?.linkedCreditPurpose !== "disbursement_income";
+
+	const creditContext = useQuery(
+		api.creditPaymentContext.getContextForCategory,
+		isCreditPaymentCandidate && categoryId ? { categoryId } : "skip",
+	);
+	const isCreditPaymentFlow = isCreditPaymentCandidate && !!creditContext;
+
+	const fundContext = useQuery(
+		api.creditFundContext.getContextForCategory,
+		isFundExpenseFlow && categoryId ? { categoryId } : "skip",
+	);
+
+	const creditPaymentLoading =
+		isCreditPaymentCandidate && creditContext === undefined;
+	const creditPaymentUnavailable =
+		isCreditPaymentCandidate && creditContext === null;
+
+	const fundExpenseLoading = isFundExpenseFlow && fundContext === undefined;
+	const fundExpenseUnavailable = isFundExpenseFlow && fundContext === null;
+
+	const resolvedFundDestinationId = useMemo(() => {
+		if (!fundContext) return "";
+		if (
+			fundDestinationOverride &&
+			fundContext.destinations.some((d) => d._id === fundDestinationOverride)
+		) {
+			return fundDestinationOverride;
+		}
+		return (
+			fundContext.defaultDestinationId ?? fundContext.destinations[0]?._id ?? ""
+		);
+	}, [fundContext, fundDestinationOverride]);
+
+	const resolvedCreditPaymentId = useMemo(() => {
+		if (!creditContext) return "";
+		if (
+			creditPaymentOverride &&
+			creditContext.payableInstallments.some(
+				(p) => p._id === creditPaymentOverride,
+			)
+		) {
+			return creditPaymentOverride;
+		}
+		return (
+			creditContext.defaultPaymentId ??
+			creditContext.payableInstallments[0]?._id ??
+			""
+		);
+	}, [creditContext, creditPaymentOverride]);
+
+	const selectedInstallment = creditContext?.payableInstallments.find(
+		(p) => p._id === resolvedCreditPaymentId,
+	);
+	const isCreditAmountLocked =
+		isCreditPaymentFlow && !!selectedInstallment && selectedInstallment.totalDue > 0;
+
+	const creditDisplayAmount =
+		isCreditAmountLocked && selectedInstallment
+			? formatCOPInput(selectedInstallment.totalDue)
+			: amount;
 
 	const draftAmount = parseCOPInput(amount) ?? 0;
 	const periodKey = useMemo(
@@ -123,6 +205,23 @@ export function TransactionForm({
 	}, [type, filteredCategories, categoryId]);
 
 	useEffect(() => {
+		setCreditPaymentOverride("");
+		setFundDestinationOverride("");
+	}, [categoryId]);
+
+	useEffect(() => {
+		if (creditContext?.paymentAccountId) {
+			setAccountId(creditContext.paymentAccountId);
+		} else if (fundContext?.disbursementAccountId) {
+			setAccountId(fundContext.disbursementAccountId);
+		}
+	}, [
+		creditContext?.paymentAccountId,
+		fundContext?.disbursementAccountId,
+		categoryId,
+	]);
+
+	useEffect(() => {
 		const input = amountInputRef.current;
 		if (!input) return;
 
@@ -142,12 +241,31 @@ export function TransactionForm({
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		const parsed = parseCOPInput(amount);
+		if (fundExpenseLoading) {
+			setError("Cargando datos del fondo…");
+			return;
+		}
+		if (fundExpenseUnavailable) {
+			setError("Este crédito no tiene fondo configurado para gastos");
+			return;
+		}
+		if (creditPaymentLoading) {
+			setError("Cargando datos de la cuota…");
+			return;
+		}
+		if (creditPaymentUnavailable) {
+			setError("Este crédito no tiene cuenta de pago configurada");
+			return;
+		}
+
+		const parsed = isCreditAmountLocked && selectedInstallment
+			? selectedInstallment.totalDue
+			: parseCOPInput(amount);
 		if (!parsed || parsed <= 0) {
 			setError("Ingresa un monto válido");
 			return;
 		}
-		if (!accountId) {
+		if (!isFundExpenseFlow && !accountId) {
 			setError(
 				type === "transfer"
 					? "Selecciona la cuenta origen"
@@ -169,18 +287,75 @@ export function TransactionForm({
 			setError("Selecciona una categoría");
 			return;
 		}
+		if (isFundExpenseFlow) {
+			if (!resolvedFundDestinationId) {
+				setError("Selecciona el rubro del crédito");
+				return;
+			}
+			if (!accountId) {
+				setError("Selecciona la cuenta");
+				return;
+			}
+			if (
+				accountId === fundContext?.disbursementAccountId &&
+				parsed > (fundContext?.escrowBalance ?? 0)
+			) {
+				setError("El monto supera el saldo disponible del fondo");
+				return;
+			}
+		}
+		if (isCreditPaymentFlow) {
+			if (!resolvedCreditPaymentId) {
+				setError("Selecciona la cuota a pagar");
+				return;
+			}
+			if (!selectedInstallment || selectedInstallment.totalDue <= 0) {
+				setError("La cuota seleccionada no tiene un valor definido");
+				return;
+			}
+		}
 		setError("");
 		onSubmit({
 			type,
 			amount: parsed,
 			date: fromDateInputValue(date),
-			accountId,
+			accountId: accountId as Id<"accounts">,
 			toAccountId:
 				type === "transfer" ? (toAccountId as Id<"accounts">) : undefined,
 			categoryId,
 			notes: notes.trim() || undefined,
+			creditPaymentId: resolvedCreditPaymentId || undefined,
+			creditFundSpend: isFundExpenseFlow
+				? {
+						creditId: fundContext!.creditId,
+						destinationId: resolvedFundDestinationId as Id<"creditDestinations">,
+					}
+				: undefined,
 		});
 	};
+
+	const creditSubmitBlocked =
+		isCreditPaymentFlow &&
+		(creditPaymentLoading ||
+			creditPaymentUnavailable ||
+			!resolvedCreditPaymentId ||
+			!selectedInstallment ||
+			selectedInstallment.totalDue <= 0);
+
+	const fundParsedAmount = parseCOPInput(amount) ?? 0;
+	const fundEscrowExceeded =
+		isFundExpenseFlow &&
+		accountId === fundContext?.disbursementAccountId &&
+		fundParsedAmount > (fundContext?.escrowBalance ?? 0);
+
+	const fundSubmitBlocked =
+		isFundExpenseFlow &&
+		(fundExpenseLoading ||
+			fundExpenseUnavailable ||
+			!resolvedFundDestinationId ||
+			!accountId ||
+			fundParsedAmount <= 0 ||
+			fundEscrowExceeded);
 
 	return (
 		<form className="tx-form tx-form--modal" onSubmit={handleSubmit} noValidate>
@@ -195,7 +370,8 @@ export function TransactionForm({
 						inputMode="numeric"
 						autoComplete="off"
 						placeholder="0"
-						value={amount}
+						value={creditDisplayAmount}
+						readOnly={isCreditAmountLocked}
 						onChange={(e) => handleAmountChange(e.target.value)}
 						onPaste={(e) => {
 							e.preventDefault();
@@ -230,13 +406,117 @@ export function TransactionForm({
 				/>
 			</fieldset>
 
-			{budgetPreview ? (
+			{isCreditPaymentFlow && creditPaymentLoading ? (
+				<p className="tx-form__hint">Cargando cuotas del crédito…</p>
+			) : null}
+
+			{isCreditPaymentFlow && creditPaymentUnavailable ? (
+				<p className="tx-form__hint" role="alert">
+					Este crédito no tiene cuenta de pago configurada. Configúrala en los
+					ajustes del crédito.
+				</p>
+			) : null}
+
+			{isCreditPaymentFlow && creditContext ? (
+				<>
+					<p className="tx-form__hint">
+						Cuota de <strong>{creditContext.creditName}</strong>. Al guardar se
+						marcará la cuota como pagada.
+					</p>
+					<label className="jp-input-label" htmlFor="tx-credit-installment">
+						Cuota a pagar
+					</label>
+					<select
+						id="tx-credit-installment"
+						className="jp-input"
+						value={resolvedCreditPaymentId}
+						onChange={(e) =>
+							setCreditPaymentOverride(
+								e.target.value as Id<"creditPayments">,
+							)
+						}
+					>
+						{creditContext.payableInstallments.length === 0 ? (
+							<option value="">No hay cuotas pendientes</option>
+						) : (
+							creditContext.payableInstallments.map((payment) => (
+								<option key={payment._id} value={payment._id}>
+									#{payment.installmentNumber} — vence{" "}
+									{formatShortDate(payment.dueDate)} —{" "}
+									{payment.totalDue > 0
+										? formatCOP(payment.totalDue)
+										: "Sin valor definido"}
+								</option>
+							))
+						)}
+					</select>
+				</>
+			) : null}
+
+			{isFundExpenseFlow && fundExpenseLoading ? (
+				<p className="tx-form__hint">Cargando fondo del crédito…</p>
+			) : null}
+
+			{isFundExpenseFlow && fundExpenseUnavailable ? (
+				<p className="tx-form__hint" role="alert">
+					Configura las cuentas del crédito y al menos una categoría de fondo en
+					los ajustes.
+				</p>
+			) : null}
+
+			{isFundExpenseFlow && fundContext ? (
+				<>
+					<p className="tx-form__hint">
+						Gasto del fondo de <strong>{fundContext.creditName}</strong>.
+						Disponible en desembolso:{" "}
+						<strong>{formatCOP(fundContext.escrowBalance)}</strong>. Quedará
+						registrado en Movimientos y en la pestaña Fondo.
+					</p>
+					<label className="jp-input-label" htmlFor="tx-fund-destination">
+						Rubro del crédito
+					</label>
+					<select
+						id="tx-fund-destination"
+						className="jp-input"
+						value={resolvedFundDestinationId}
+						onChange={(e) =>
+							setFundDestinationOverride(
+								e.target.value as Id<"creditDestinations">,
+							)
+						}
+					>
+						{fundContext.destinations.length === 0 ? (
+							<option value="">Crea un rubro en el crédito primero</option>
+						) : (
+							fundContext.destinations.map((destination) => (
+								<option key={destination._id} value={destination._id}>
+									{destination.name} ({formatCOP(destination.amount)})
+								</option>
+							))
+						)}
+					</select>
+				</>
+			) : null}
+
+			{transactionId && initial?.destinationName ? (
+				<p className="tx-form__hint">
+					Rubro del crédito: <strong>{initial.destinationName}</strong>
+				</p>
+			) : null}
+
+			{budgetPreview && !isCreditPaymentFlow && !isFundExpenseFlow ? (
 				<BudgetThresholdAlert preview={budgetPreview} draftAmount={draftAmount} />
 			) : null}
 
 			<label className="jp-input-label" htmlFor="tx-account">
 				{type === "transfer" ? "Cuenta origen" : "Cuenta"}
 			</label>
+			{isFundExpenseFlow ? (
+				<p className="tx-form__hint">
+					Por defecto la cuenta de desembolso (
+					{fundContext?.disbursementAccountName ?? "fondo"}). Puedes cambiarla.
+				</p>
+			) : null}
 			<select
 				id="tx-account"
 				className="jp-input"
@@ -246,11 +526,19 @@ export function TransactionForm({
 				{activeAccounts.map((a) => (
 					<option key={a._id} value={a._id}>
 						{a.name}
+						{isFundExpenseFlow && a._id === fundContext?.disbursementAccountId
+							? " (desembolso)"
+							: ""}
 					</option>
 				))}
 			</select>
+			{fundEscrowExceeded ? (
+				<p className="tx-form__hint" role="alert">
+					El monto supera el saldo del fondo ({formatCOP(fundContext?.escrowBalance ?? 0)}).
+				</p>
+			) : null}
 
-			{type === "transfer" ? (
+			{!isFundExpenseFlow && type === "transfer" ? (
 				<>
 					<label className="jp-input-label" htmlFor="tx-to-account">
 						Cuenta destino
@@ -298,13 +586,14 @@ export function TransactionForm({
 				</div>
 			) : null}
 
-				<FieldError message={error} />
+				<FieldError message={error || serverError} />
 			</div>
 
 			<FormModalFooter
 				onCancel={onCancel}
 				onDelete={onDelete}
 				loading={loading}
+				submitDisabled={creditSubmitBlocked || fundSubmitBlocked}
 				submitLabel="Guardar movimiento"
 			/>
 		</form>

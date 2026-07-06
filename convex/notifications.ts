@@ -21,6 +21,7 @@ const typeValidator = v.union(
 	v.literal("fixed_expense_reminder"),
 	v.literal("budget_threshold"),
 	v.literal("period_report"),
+	v.literal("credit_due"),
 );
 
 export const subscribePush = mutation({
@@ -227,6 +228,7 @@ export const processDaily = internalMutation({
 	handler: async (ctx) => {
 		await ctx.scheduler.runAfter(0, internal.fixedExpenses.processReminders, {});
 		await ctx.scheduler.runAfter(0, internal.reports.processPeriodClosures, {});
+		await ctx.scheduler.runAfter(0, internal.credits.processReminders, {});
 		return null;
 	},
 });

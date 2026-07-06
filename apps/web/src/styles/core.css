@@ -598,7 +598,8 @@
 .accounts-compact,
 .quick-actions,
 .dash-budget-alerts,
-.dash-fixed-expenses {
+.dash-fixed-expenses,
+.dash-credits {
 	padding: var(--space-4);
 	border-radius: var(--radius-lg);
 }
@@ -1500,6 +1501,10 @@
 	gap: 0;
 }
 
+.tx-form--modal .tx-form__scroll {
+	overflow-x: clip;
+}
+
 .tx-form__scroll,
 .modal-form__scroll {
 	flex: 1;
@@ -1687,6 +1692,92 @@
 	margin: calc(var(--space-1) * -1) 0 0;
 	font-size: var(--text-sm);
 	color: var(--color-text-muted);
+}
+
+.field-label-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-2);
+	width: 100%;
+	max-width: 100%;
+}
+
+.field-label-row .jp-input-label {
+	margin: 0;
+	flex: 1;
+	min-width: 0;
+}
+
+.field-help {
+	position: relative;
+	display: inline-flex;
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+.field-help__trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: var(--color-text-muted);
+	cursor: help;
+	border-radius: var(--radius-full);
+	line-height: 0;
+	transition: color var(--motion-duration-fast) var(--motion-ease-out);
+}
+
+.field-help__trigger:hover,
+.field-help__trigger:focus-visible {
+	color: var(--color-accent);
+	outline: none;
+}
+
+.field-help__tooltip {
+	position: absolute;
+	top: calc(100% + var(--space-2));
+	right: 0;
+	left: auto;
+	z-index: 20;
+	width: max-content;
+	max-width: min(13rem, calc(100vw - 2 * var(--space-4) - 1.5rem));
+	padding: var(--space-2) var(--space-3);
+	border-radius: var(--radius-md);
+	background-color: var(--color-surface-1);
+	border: 1px solid var(--color-border);
+	box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
+	font-size: var(--text-sm);
+	font-weight: var(--font-normal, 400);
+	line-height: 1.45;
+	color: var(--color-text-primary);
+	text-align: left;
+	white-space: normal;
+	word-wrap: break-word;
+	overflow-wrap: anywhere;
+	pointer-events: none;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-4px);
+	transition:
+		opacity var(--motion-duration-fast) var(--motion-ease-out),
+		transform var(--motion-duration-fast) var(--motion-ease-out),
+		visibility var(--motion-duration-fast);
+}
+
+.field-help:hover .field-help__tooltip,
+.field-help:focus-within .field-help__tooltip {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.field-help__tooltip {
+		transition: none;
+	}
 }
 
 .tx-form__amount {

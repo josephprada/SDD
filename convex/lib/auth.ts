@@ -59,3 +59,27 @@ export async function requireAttachmentOwnership(
 	}
 	return attachment;
 }
+
+export async function requireCreditOwnership(
+	ctx: Ctx,
+	userId: Id<"users">,
+	creditId: Id<"credits">,
+) {
+	const credit = await ctx.db.get(creditId);
+	if (!credit || credit.userId !== userId) {
+		throw new Error("Credit not found");
+	}
+	return credit;
+}
+
+export async function requireSavingsGoalOwnership(
+	ctx: Ctx,
+	userId: Id<"users">,
+	goalId: Id<"savingsGoals">,
+) {
+	const goal = await ctx.db.get(goalId);
+	if (!goal || goal.userId !== userId) {
+		throw new Error("Savings goal not found");
+	}
+	return goal;
+}

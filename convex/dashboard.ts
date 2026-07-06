@@ -21,14 +21,45 @@ export const overview = query({
 			)
 			.collect();
 
-		const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+		const totalBalance = accounts
+			.filter((a) => !a.isCreditEscrow)
+			.reduce((sum, a) => sum + a.balance, 0);
 
-		const activeAccounts = accounts.sort(compareAccounts).map((a) => ({
+		const activeAccounts = accounts
+			.filter((a) => !a.isCreditEscrow)
+			.sort(compareAccounts)
+			.map((a) => ({
 				_id: a._id,
 				name: a.name,
 				type: a.type,
 				balance: a.balance,
 			}));
+
+		const credits = await ctx.db
+			.query("credits")
+			.withIndex("by_user_status", (q) =>
+				q.eq("userId", userId).eq("status", "active"),
+			)
+			.collect();
+
+		const creditFundCards = [];
+		for (const credit of credits) {
+			if (!credit.disbursementAccountId) continue;
+			const disbursementAccount = accounts.find(
+				(a) => a._id === credit.disbursementAccountId,
+			);
+			if (disbursementAccount) {
+				const available = disbursementAccount.balance;
+				creditFundCards.push({
+					creditId: credit._id,
+					name: credit.name,
+					principal: credit.principal,
+					escrowBalance: available,
+					spentFromDisbursement: Math.max(0, credit.principal - available),
+					availableFromDisbursement: available,
+				});
+			}
+		}
 
 		const transactions = await ctx.db
 			.query("transactions")
@@ -36,7 +67,10 @@ export const overview = query({
 			.collect();
 
 		const periodTransactions = transactions.filter(
-			(t) => t.date >= periodStart && t.date <= periodEnd,
+			(t) =>
+				t.date >= periodStart &&
+				t.date <= periodEnd &&
+				!t.isCreditFundMovement,
 		);
 
 		let monthlyIncome = 0;
@@ -60,6 +94,7 @@ export const overview = query({
 			activeAccounts,
 			recentTransactions,
 			recentTotal: sorted.length,
+			creditFundCards,
 		};
 	},
 });

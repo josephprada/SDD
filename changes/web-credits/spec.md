@@ -4,11 +4,28 @@
 
 **Created**: 2026-07-05
 
-**Status**: Draft (v1.4 — + fondo aislado / cuenta escrow)
+**Status**: In progress (v1.5 — iteración UX post-planificación)
 
 **Change**: web-credits (Change 5)
 
 **Input**: Créditos colombianos versátiles, abonos a capital extraordinarios, metas de ahorro. Caso real: Banco Agrario VIS $40M a 10 años; ahorro **$500.000/mes** → abono anual **$6.000.000** → meta pagar en ~5 años.
+
+---
+
+## Iteración implementada (2026-07-05)
+
+Ajustes acordados en sesión que **refinan** el plan v1.4 sin cambiar el alcance del change:
+
+| Área | Plan original | Implementado |
+|------|---------------|--------------|
+| Gasto desde fondo | Wizard meta→ahorros→gasto→devolución (`spendFromFund`) | **Un solo gasto** desde modal Movimientos (`creditFundSpend`); cuenta default = desembolso; visible en Fondo y `/transactions` con filtro |
+| Pestaña Fondo | Formulario / wizard en detalle | **Solo listado** de gastos; nuevo gasto vía botón Movimientos; clic en gasto → editar transacción |
+| Categorías fondo | No especificado | Picker multi-categoría en crear/ajustes; `linkedCreditPurpose`; al eliminar crédito: categorías **nuevas** se borran, **enlazadas** se desvinculan |
+| Pago cuota | Marcar pagada en tabla | También desde **modal Movimientos** (`creditPaymentContext`) con cuenta de pago del crédito |
+| Rubros | Lista + gráfico asignado | + **`spentTotal`** por rubro, barra de progreso, edición por clic |
+| Ajustes crédito | Hints en párrafo | **`FieldHelp`** (icono help) como en modal crear crédito; toast al guardar |
+| Dashboard créditos | `CreditFundCard` P2 | Card `glass` contenedora + cards internas; total alineado a la derecha con Disponible, en gris |
+| Edición rubros | Botón editar | **Clic en tarjeta** para editar (sin botón lápiz) |
 
 ---
 
@@ -131,7 +148,7 @@ Como usuario, quiero registrar en qué se va cada peso del crédito desembolsado
 **Acceptance Scenarios**:
 
 1. **Given** crédito $40M sin rubros, **When** creo destino «Construcción escaleras» $1.500.000, **Then** resumen muestra asignado $1,5M y sin asignar $38,5M.
-2. **Given** rubro existente, **When** registro gasto vinculado (transacción), **Then** el rubro refleja el vínculo y puede pasar a `completed`.
+2. **Given** rubro existente, **When** registro gasto vinculado (transacción), **Then** el rubro refleja **`spentTotal`** acumulado y barra de progreso vs. monto planificado.
 3. **Given** suma de rubros > principal, **When** intento guardar, **Then** advertencia o rechazo según regla (warn en v1, no bloquear si usuario confirma overflow menor).
 4. **Given** pestaña Destinos, **When** abro detalle del crédito, **Then** veo lista, montos, estados y gráfico de distribución.
 5. **Given** rubro con factura, **When** adjunto imagen/PDF, **Then** queda asociado al destino (reutilizar attachments).
@@ -147,7 +164,7 @@ Como usuario, quiero que los $40M desembolsados vivan en una cuenta meta aparte 
 **Acceptance Scenarios**:
 
 1. **Given** crédito $40M, **When** vinculo `disbursementAccountId` a «BBVA Meta VIS», **Then** tarjeta «Fondo crédito» muestra saldo meta y no suma al balance personal del home.
-2. **Given** `operatingAccountId` = «BBVA Ahorros», **When** uso asistente «Gastar desde fondo» $1.500.000 rubro Escaleras, **Then** se crean transferencia meta→ahorros, gasto vinculado al rubro, y opcional devolución sobrante — todos con `creditId`.
+2. **Given** `operatingAccountId` = «BBVA Ahorros», **When** registro gasto $1.500.000 rubro Escaleras desde **modal Movimientos** (cuenta desembolso por defecto), **Then** se crea **un gasto** con `creditId` + `creditDestinationId` y aparece en pestaña Fondo del crédito.
 3. **Given** lista `/transactions` por defecto, **When** no activo filtro crédito, **Then** no veo movimientos del fondo escrow.
 4. **Given** detalle del crédito pestaña Movimientos del fondo, **When** abro, **Then** veo transferencias y gastos del crédito ordenados.
 5. **Given** desembolso inicial, **When** configuro crédito, **Then** no se registra como ingreso de nómina — solo saldo en cuenta escrow vinculada.
@@ -244,7 +261,10 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - **FR-019**: MUST vincular `disbursementAccountId` (cuenta meta) al crédito.
 - **FR-020**: MAY vincular `operatingAccountId` (nómina/ahorros pasarela).
 - **FR-021**: Transacciones del fondo MUST soportar `creditId`, `creditDestinationId?`, `isCreditFundMovement`.
-- **FR-022**: Asistente «Gastar desde fondo» MUST orquestar meta→ahorros→gasto→(opcional) devolución meta.
+- **FR-022**: Gasto desde fondo MUST registrarse vía modal Movimientos con `creditFundContext`; **un solo movimiento** tipo `expense` con `creditDestinationId`. Mutation `spendFromFund` (wizard multi-tx) queda como **legacy opcional** no expuesta en UI v1.5.
+- **FR-022b**: MUST permitir categorías de gasto del fondo (`fundExpenseCategoryIds`) en crear/ajustes crédito.
+- **FR-022c**: Pago de cuota MAY registrarse desde modal Movimientos vía `creditPaymentContext`.
+- **FR-022d**: `creditDestinations.list` MUST incluir `spentTotal` por rubro.
 - **FR-023**: Pestaña **Movimientos del fondo** en detalle del crédito.
 - **FR-024**: `/transactions` MUST ocultar movimientos con `creditId` por defecto; toggle para mostrarlos.
 - **FR-025**: Desembolso MUST NOT registrarse como `income` en cuenta nómina al configurar crédito vinculado.
@@ -280,7 +300,7 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - **SC-003**: Meta ahorro $500.000/mes × 12 = $6.000.000 acumulados; UI coherente con abono anual.
 - **SC-004**: Rubros «Escaleras» $1,5M → sin asignar $38,5M correcto en resumen.
 - **SC-005**: Dashboard personal excluye escrow; tarjeta «Fondo crédito VIS» muestra saldo meta.
-- **SC-006**: Asistente fondo registra flujo $1,5M Escaleras sin aparecer en `/transactions` por defecto.
+- **SC-006**: Gasto fondo $1,5M Escaleras desde Movimientos aparece en pestaña Fondo; no en `/transactions` por defecto.
 - **SC-007**: Cuotas pagadas intactas tras 3 abonos consecutivos.
 - **SC-008**: Meta de ahorro + navegación sin regresión.
 - **SC-009**: 0 fugas de datos entre usuarios.

@@ -17,6 +17,11 @@ import {
 import { compareTransactions } from "./lib/transactions";
 import { clearFixedExpensePaymentForDeletedTransaction } from "./lib/fixedExpensePayments";
 import {
+	createAndRegisterCreditPayment,
+	revertCreditPaymentForTransaction,
+} from "./lib/creditPaymentRegistration";
+import { executeSpendFromFund } from "./lib/creditFundSpend";
+import {
 	transactionTypeValidator,
 	validatePositiveCopAmount,
 } from "./lib/validators";
@@ -32,12 +37,14 @@ export type TransactionListItem = {
 	accountId: Id<"accounts">;
 	toAccountId?: Id<"accounts">;
 	categoryId: Id<"categories">;
+	creditDestinationId?: Id<"creditDestinations">;
 	notes?: string;
 	accountName: string;
 	toAccountName?: string;
 	categoryName: string;
 	categoryIcon: string;
 	categoryColor: string;
+	destinationName?: string;
 	sortOrder?: number;
 	createdAt: number;
 	updatedAt: number;
@@ -52,6 +59,9 @@ export async function enrichTransaction(
 	const toAccount = transaction.toAccountId
 		? await ctx.db.get(transaction.toAccountId)
 		: null;
+	const destination = transaction.creditDestinationId
+		? await ctx.db.get(transaction.creditDestinationId)
+		: null;
 
 	return {
 		_id: transaction._id,
@@ -61,12 +71,14 @@ export async function enrichTransaction(
 		accountId: transaction.accountId,
 		toAccountId: transaction.toAccountId,
 		categoryId: transaction.categoryId,
+		creditDestinationId: transaction.creditDestinationId,
 		notes: transaction.notes,
 		accountName: account?.name ?? "Cuenta",
 		toAccountName: toAccount?.name,
 		categoryName: category?.name ?? "Categoría",
 		categoryIcon: category?.icon ?? "package",
 		categoryColor: category?.color ?? "#7F8C8D",
+		destinationName: destination?.name,
 		sortOrder: transaction.sortOrder,
 		createdAt: transaction.createdAt,
 		updatedAt: transaction.updatedAt,
@@ -146,6 +158,8 @@ export const list = query({
 		amountMax: v.optional(v.number()),
 		search: v.optional(v.string()),
 		limit: v.optional(v.number()),
+		includeCreditMovements: v.optional(v.boolean()),
+		creditId: v.optional(v.id("credits")),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
@@ -154,6 +168,14 @@ export const list = query({
 			.query("transactions")
 			.withIndex("by_user", (q) => q.eq("userId", userId))
 			.collect();
+
+		const includeCredit = args.includeCreditMovements ?? false;
+		if (!includeCredit && !args.creditId) {
+			transactions = transactions.filter((t) => !t.isCreditFundMovement);
+		}
+		if (args.creditId) {
+			transactions = transactions.filter((t) => t.creditId === args.creditId);
+		}
 
     if (args.dateFrom !== undefined) {
       const dateFrom = args.dateFrom;
@@ -256,9 +278,46 @@ export const create = mutation({
 		toAccountId: v.optional(v.id("accounts")),
 		categoryId: v.id("categories"),
 		notes: v.optional(v.string()),
+		creditPaymentId: v.optional(v.id("creditPayments")),
+		creditFundSpend: v.optional(
+			v.object({
+				creditId: v.id("credits"),
+				destinationId: v.id("creditDestinations"),
+			}),
+		),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
+
+		if (args.creditFundSpend) {
+			if (args.type !== "expense") {
+				throw new Error("Credit fund spends must be expenses");
+			}
+			const result = await executeSpendFromFund(ctx, userId, {
+				creditId: args.creditFundSpend.creditId,
+				destinationId: args.creditFundSpend.destinationId,
+				amount: args.amount,
+				categoryId: args.categoryId,
+				expenseAccountId: args.accountId,
+				notes: args.notes,
+				date: args.date,
+			});
+			return result.expenseId;
+		}
+
+		if (args.creditPaymentId) {
+			if (args.type !== "expense") {
+				throw new Error("Credit payments must be expenses");
+			}
+			return await createAndRegisterCreditPayment(ctx, userId, {
+				paymentId: args.creditPaymentId,
+				paidDate: args.date,
+				accountId: args.accountId,
+				categoryId: args.categoryId,
+				notes: args.notes,
+			});
+		}
+
 		const amount = await validateTransactionInput(ctx, userId, args);
 		const deltas = getBalanceDeltas({ ...args, amount });
 		const now = Date.now();
@@ -428,6 +487,8 @@ export const remove = mutation({
 			userId,
 			transaction,
 		);
+
+		await revertCreditPaymentForTransaction(ctx, userId, transactionId);
 
 		await ctx.db.delete(transactionId);
 

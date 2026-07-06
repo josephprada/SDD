@@ -14,7 +14,7 @@ Change 5 materializa **créditos** (pasivo), **fondo escrow** (cuenta vinculada 
 
 Backend: 5 tablas nuevas; extensiones `accounts.isCreditEscrow`, `transactions.creditId`; libs puras `creditAmortization`, `creditRecalc`.
 
-Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; wizard gasto desde fondo; dashboard filtrado.
+Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal Movimientos; dashboard filtrado.
 
 ---
 
@@ -29,8 +29,8 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; wizard gasto desde fond
 | D-05 | Escrow | **`disbursementAccountId` + `isCreditEscrow`** | No saldo virtual duplicado |
 | D-06 | Balance personal | **Excluir escrow** en `dashboard.overview` | Tarjeta `credits.fundSummary` aparte |
 | D-07 | Movimientos crédito | **`creditId` en transactions**; filtro default off en `/transactions` | Vista principal limpia |
-| D-08 | Wizard gasto | **Mutation compuesta** `credits.spendFromFund` | 2–3 txs atómicas |
-| D-09 | Rubros | **Tabla `creditDestinations`** separada | ≠ categorías gasto |
+| D-08 | Gasto fondo | **Gasto único** `creditFundSpend` desde modal Movimientos; `spendFromFund` legacy | UX más simple que wizard 3 txs |
+| D-09 | Rubros | **Tabla `creditDestinations`** + `spentTotal` en list | ≠ categorías gasto |
 | D-10 | Metas | **Tabla propia**; `linkedCreditId` opcional | ≠ escrow obra |
 | D-11 | Desembolso | **No income** — ajuste `initialBalance` escrow al vincular | Evita inflar nómina |
 | D-12 | Recordatorios | **Extender cron** `processDaily` + `credit_due` | Reutiliza push/in-app |
@@ -38,6 +38,12 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; wizard gasto desde fond
 | D-14 | Simulador | **Query** `credits.simulatePayoff` | Sin persistir |
 | D-15 | Manual schedule | **Import CSV opcional P2**; filas UI P1 | VIS extracto |
 | D-16 | Bancos | **Sin hardcode** nombres/ APIs | Solo campos libres |
+| D-17 | Categorías fondo | **`fundExpenseCategoryIds`** + `linkedCreditPurpose` en categories | Sync en create/update; delete vs unlink al borrar crédito |
+| D-18 | Pago cuota | **`creditPaymentContext`** + `transactions.create` | Cuota desde modal Movimientos |
+| D-19 | UX rubros | **Edición por clic** en tarjeta | Sin botón lápiz |
+| D-20 | UX hints | **`FieldHelp`** en ajustes crédito | Paridad con CreditForm |
+| D-21 | Dashboard créditos | **Card `dash-credits` glass** + cards internas | Total muted alineado con Disponible |
+| D-22 | Pestaña Fondo | **Listado read-only**; gastos vía Movimientos | Sin wizard en detalle |
 
 ---
 
@@ -52,7 +58,7 @@ transactions ◄─────────┼── creditCapitalAbonos        
   creditId             │                               │
   creditDestinationId  │                               │
          │             ▼                               │
-         └── spendFromFund wizard ──► creditDestinations
+         └── creditFundSpend / transactions ──► creditDestinations
                                               │
 savingsGoals ◄── linkedCreditId (abono)       │
 savingsContributions                          │
@@ -116,7 +122,7 @@ simulateAnnualAbonos(params): { payoffDate, monthsRemaining }
 
 | Export | Tipo | Descripción |
 |--------|------|-------------|
-| `list` | query | Rubros + totales |
+| `list` | query | Rubros + totales + **`spentTotal`** |
 | `create` / `update` / `remove` | mutation | CRUD |
 
 ### `convex/savingsGoals.ts` + `savingsContributions.ts`
@@ -145,8 +151,9 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 
 1. **Cuotas** — `CreditPaymentTable`, marcar pagada
 2. **Abonos** — `CapitalAbonoList`, form + simulador
-3. **Destinos** — `DestinationList`, torta, form rubro
-4. **Movimientos** — txs con `creditId`
+3. **Destinos** — `DestinationList` (spentTotal + progreso), torta, form rubro (clic para editar)
+4. **Fondo** — gastos del crédito (`listFundMovements`); clic → editar transacción
+5. **Ajustes** — `CreditSettingsForm` con `FieldHelp`
 
 ### Componentes clave
 
@@ -154,8 +161,9 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 components/credits/
   CreditList.tsx, CreditForm.tsx, CreditDetailHeader.tsx
   CreditPaymentTable.tsx, CapitalAbonoForm.tsx, PayoffSimulator.tsx
-  DestinationList.tsx, DestinationChart.tsx, SpendFromFundWizard.tsx
-  CreditFundCard.tsx (dashboard)
+  DestinationList.tsx, DestinationChart.tsx
+  CreditSettingsForm.tsx, FundExpenseCategoryPicker.tsx, FieldHelp.tsx, FormSelect.tsx
+  CreditFundCard.tsx (dashboard `dash-credits`)
 components/savings/
   SavingsGoalList.tsx, SavingsGoalForm.tsx, ContributionList.tsx
 ```

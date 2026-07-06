@@ -4,7 +4,8 @@ import type { ResolvedUserPreferences } from "./preferences";
 export type NotificationType =
 	| "fixed_expense_reminder"
 	| "budget_threshold"
-	| "period_report";
+	| "period_report"
+	| "credit_due";
 
 export type NotificationChannel = "email" | "push" | "in_app";
 

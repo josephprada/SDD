@@ -61,19 +61,20 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Último change cerrado: web-budgets-reports ✅ (2026-07-05)
+## Change en curso: web-credits 🚧 (2026-07-05)
 
-Producción: `https://wallet.lavalex.co` · Convex prod · CI en `main`.
+Rama: `feat/web-credits` — créditos, abonos, rubros, fondo escrow, metas ahorro.
 
 | Artefacto | Ruta |
 |-----------|------|
-| Spec | `changes/web-budgets-reports/spec.md` |
-| Propuesta | `changes/web-budgets-reports/proposal.md` |
-| Diseño técnico | `changes/web-budgets-reports/design.md` |
-| Quickstart QA | `changes/web-budgets-reports/quickstart.md` |
+| Spec | `changes/web-credits/spec.md` |
+| Propuesta | `changes/web-credits/proposal.md` |
+| Diseño técnico | `changes/web-credits/design.md` |
+| Quickstart QA | `changes/web-credits/quickstart.md` |
+| Tasks | `changes/web-credits/tasks.md` |
 
-**Siguiente change planificado:** **Change 5 — `web-credits`** (Créditos, Préstamos, Ahorros/Metas, fondo escrow).  
-**Change 6 — `web-tax-dian`** (Declaración de Renta DIAN) queda al final: debe integrar créditos, metas, cuentas y transacciones.
+**Change anterior cerrado:** web-budgets-reports ✅ — `https://wallet.lavalex.co`  
+**Change 6 — `web-tax-dian`** queda al final (integra créditos + metas).
 
 ---
 

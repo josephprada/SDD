@@ -9,6 +9,15 @@ import {
 	themeValidator,
 	typographyPresetValidator,
 } from "./lib/preferences";
+import {
+	abonoRecalcEffectValidator,
+	creditPaymentStatusValidator,
+	creditStatusValidator,
+	destinationStatusValidator,
+	rateTypeValidator,
+	savingsGoalStatusValidator,
+	scheduleModeValidator,
+} from "./lib/validators";
 
 const accountTypeValidator = v.union(
 	v.literal("cash"),
@@ -70,13 +79,24 @@ export default defineSchema({
 		type: categoryTypeValidator,
 		archived: v.optional(v.boolean()),
 		isSystem: v.optional(v.boolean()),
+		linkedCreditId: v.optional(v.id("credits")),
+		linkedCreditPurpose: v.optional(
+			v.union(
+				v.literal("payment"),
+				v.literal("fund_expense"),
+				v.literal("disbursement_income"),
+			),
+		),
+		/** Si true, la categoría se elimina al borrar el crédito vinculado */
+		linkedCreditAutoDelete: v.optional(v.boolean()),
 		createdAt: v.number(),
 		updatedAt: v.optional(v.number()),
 		archivedAt: v.optional(v.number()),
 	})
 		.index("by_user", ["userId"])
 		.index("by_user_type", ["userId", "type"])
-		.index("by_user_type_archived", ["userId", "type", "archived"]),
+		.index("by_user_type_archived", ["userId", "type", "archived"])
+		.index("by_linked_credit", ["linkedCreditId"]),
 
 	accounts: defineTable({
 		userId: v.id("users"),
@@ -85,6 +105,7 @@ export default defineSchema({
 		initialBalance: v.number(),
 		balance: v.number(),
 		archived: v.boolean(),
+		isCreditEscrow: v.optional(v.boolean()),
 		sortOrder: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -103,6 +124,9 @@ export default defineSchema({
 		categoryId: v.id("categories"),
 		notes: v.optional(v.string()),
 		sourceFixedExpenseId: v.optional(v.id("fixedExpenses")),
+		creditId: v.optional(v.id("credits")),
+		creditDestinationId: v.optional(v.id("creditDestinations")),
+		isCreditFundMovement: v.optional(v.boolean()),
 		sortOrder: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -175,6 +199,7 @@ export default defineSchema({
 			v.literal("fixed_expense_reminder"),
 			v.literal("budget_threshold"),
 			v.literal("period_report"),
+			v.literal("credit_due"),
 		),
 		referenceId: v.string(),
 		channel: v.union(
@@ -186,4 +211,107 @@ export default defineSchema({
 	})
 		.index("by_dedupeKey", ["dedupeKey"])
 		.index("by_user_sent", ["userId", "sentAt"]),
+
+	credits: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		lender: v.string(),
+		principal: v.number(),
+		rateType: rateTypeValidator,
+		interestRate: v.number(),
+		termMonths: v.number(),
+		startDate: v.number(),
+		paymentDay: v.number(),
+		scheduleMode: scheduleModeValidator,
+		fixedInstallment: v.optional(v.number()),
+		defaultRecalcOnAbono: abonoRecalcEffectValidator,
+		targetPayoffDate: v.optional(v.number()),
+		insuranceMonthly: v.optional(v.number()),
+		disbursementAccountId: v.optional(v.id("accounts")),
+		operatingAccountId: v.optional(v.id("accounts")),
+		paymentCategoryId: v.optional(v.id("categories")),
+		fundExpenseCategoryIds: v.optional(v.array(v.id("categories"))),
+		disbursementIncomeCategoryId: v.optional(v.id("categories")),
+		disbursementTransactionId: v.optional(v.id("transactions")),
+		outstandingBalance: v.number(),
+		reminderOffsets: v.array(v.number()),
+		status: creditStatusValidator,
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_status", ["userId", "status"]),
+
+	creditPayments: defineTable({
+		creditId: v.id("credits"),
+		installmentNumber: v.number(),
+		dueDate: v.number(),
+		paidDate: v.optional(v.number()),
+		principal: v.number(),
+		interest: v.number(),
+		insuranceAmount: v.optional(v.number()),
+		otherFees: v.optional(v.number()),
+		totalDue: v.number(),
+		status: creditPaymentStatusValidator,
+		transactionId: v.optional(v.id("transactions")),
+		isProjected: v.boolean(),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_credit", ["creditId"])
+		.index("by_credit_status", ["creditId", "status"])
+		.index("by_credit_due", ["creditId", "dueDate"]),
+
+	creditCapitalAbonos: defineTable({
+		creditId: v.id("credits"),
+		amount: v.number(),
+		paidAt: v.number(),
+		recalcEffect: abonoRecalcEffectValidator,
+		transactionId: v.optional(v.id("transactions")),
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_credit", ["creditId"]),
+
+	creditDestinations: defineTable({
+		creditId: v.id("credits"),
+		name: v.string(),
+		amount: v.number(),
+		spentAt: v.optional(v.number()),
+		status: destinationStatusValidator,
+		transactionIds: v.optional(v.array(v.id("transactions"))),
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_credit", ["creditId"]),
+
+	savingsGoals: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		targetAmount: v.number(),
+		currentAmount: v.number(),
+		deadline: v.optional(v.number()),
+		accountId: v.optional(v.id("accounts")),
+		linkedCreditId: v.optional(v.id("credits")),
+		icon: v.optional(v.string()),
+		color: v.optional(v.string()),
+		status: savingsGoalStatusValidator,
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_status", ["userId", "status"]),
+
+	savingsContributions: defineTable({
+		goalId: v.id("savingsGoals"),
+		amount: v.number(),
+		contributedAt: v.number(),
+		transactionId: v.optional(v.id("transactions")),
+		notes: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_goal", ["goalId"]),
 });

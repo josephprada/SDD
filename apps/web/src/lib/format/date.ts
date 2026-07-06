@@ -23,6 +23,7 @@ export function formatShortDate(timestamp: number): string {
 	return new Date(timestamp).toLocaleDateString("es-CO", {
 		day: "numeric",
 		month: "short",
+		year: "numeric",
 	});
 }
 

@@ -37,20 +37,23 @@ export function TransactionRow({
 			? `${tx.accountName} → ${tx.toAccountName ?? ""}`
 			: tx.accountName;
 
-	const metaLine =
+	const metaParts =
 		variant === "dashboard"
 			? [
 					formatShortDate(tx.date),
 					accountLabel,
 					tx.notes?.trim() || null,
 				]
-					.filter(Boolean)
-					.join(" · ")
-			: `${formatShortDate(tx.date)} · ${
+			: [
+					formatShortDate(tx.date),
 					tx.type === "transfer"
 						? accountLabel
-						: `${tx.accountName} · ${tx.categoryName}`
-				}`;
+						: tx.destinationName
+							? tx.accountName
+							: `${tx.accountName} · ${tx.categoryName}`,
+				];
+
+	const metaLine = metaParts.filter(Boolean).join(" · ");
 
 	return (
 		<li
@@ -99,7 +102,11 @@ export function TransactionRow({
 			</span>
 			<div className="tx-row__body">
 				<span className="tx-row__title">
-					{tx.type === "transfer" ? "Transferencia" : tx.categoryName}
+					{tx.type === "transfer"
+						? "Transferencia"
+						: tx.destinationName
+							? `${tx.categoryName} · ${tx.destinationName}`
+							: tx.categoryName}
 				</span>
 				<span className="tx-row__meta">{metaLine}</span>
 			</div>
