@@ -6,6 +6,7 @@ import { ReportFilters } from "@app/components/reports/ReportFilters";
 import { ReportFixedExpensesSection } from "@app/components/reports/ReportFixedExpensesSection";
 import { ReportSummaryCard } from "@app/components/reports/ReportSummaryCard";
 import { TrendChart } from "@app/components/reports/TrendChart";
+import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import type { BudgetItem, FixedExpenseItem } from "@app/lib/budgets/types";
 import type { ReportExportPayload } from "@app/lib/export/reportExportTypes";
 import type { ReportSummary } from "@app/lib/reports/types";
@@ -121,8 +122,17 @@ export function ReportsRoute() {
 	return (
 		<div className="animate-stagger">
 			<header className="page-header animate-stagger-item">
-				<h1 className="page-title">Reportes</h1>
-				<p className="page-subtitle">Panel de resultados financieros</p>
+				<div className="dash-header__brand show-desktop">
+					<BrandLogoMark size={42} />
+					<div>
+						<h1 className="page-title">Reportes</h1>
+						<p className="page-subtitle">Panel de resultados financieros</p>
+					</div>
+				</div>
+				<div className="page-header__mobile show-mobile">
+					<BrandLogoMark size={28} />
+					<h1 className="page-title">Reportes</h1>
+				</div>
 			</header>
 
 			<ReportFilters

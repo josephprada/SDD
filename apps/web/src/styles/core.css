@@ -1157,6 +1157,11 @@
 	font-weight: var(--font-normal);
 }
 
+.tx-table__rubro {
+	color: var(--color-accent);
+	font-weight: var(--font-medium);
+}
+
 .tx-table__amount-col {
 	text-align: right;
 	vertical-align: middle;
@@ -1425,7 +1430,6 @@
 .category-panel .tx-form__scroll {
 	padding: 0;
 	overflow: visible;
-	flex: none;
 	min-height: auto;
 }
 
@@ -1471,6 +1475,7 @@
 	padding: var(--space-3) var(--space-4) var(--space-4);
 	border-top: 1px solid var(--color-border);
 	background: var(--color-surface-1);
+	box-sizing: border-box;
 }
 
 .modal__body > .tx-form,
@@ -1479,7 +1484,15 @@
 	flex-direction: column;
 	flex: 1;
 	min-height: 0;
+	align-self: stretch;
+	width: 100%;
+}
+
+.modal__body > .tx-form.tx-form--modal {
+	display: grid;
+	grid-template-rows: minmax(0, 1fr) auto;
 	height: 100%;
+	min-height: 0;
 }
 
 .modal__body > .modal-form {
@@ -1488,13 +1501,14 @@
 }
 
 .modal__body > .modal-form .form-panel__actions {
-	margin-top: auto;
+	margin-top: 0;
 	margin-inline: calc(-1 * var(--space-4));
 	margin-bottom: calc(-1 * var(--space-4));
 }
 
 .modal__body > .tx-form .form-panel__actions {
-	margin-top: auto;
+	margin-top: 0;
+	flex-shrink: 0;
 }
 
 .tx-form--modal {
@@ -1502,18 +1516,24 @@
 }
 
 .tx-form--modal .tx-form__scroll {
-	overflow-x: clip;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	overflow-anchor: none;
+	overscroll-behavior: contain;
 }
 
 .tx-form__scroll,
 .modal-form__scroll {
-	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
 	padding: var(--space-4);
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-3);
+	display: block;
+}
+
+.tx-form__scroll > * + *,
+.modal-form__scroll > * + * {
+	margin-top: var(--space-3);
 }
 
 .category-fieldset {
@@ -1918,6 +1938,8 @@
 	align-items: center;
 	justify-content: center;
 	padding: var(--space-4);
+	overflow: hidden;
+	overscroll-behavior: none;
 }
 
 .action-sheet-backdrop {
@@ -1963,6 +1985,7 @@
 	padding: var(--space-4);
 	border-bottom: 1px solid var(--color-border);
 	background: var(--color-surface-1);
+	z-index: 2;
 }
 
 .modal__title {
@@ -1992,23 +2015,38 @@
 	}
 
 	.modal {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: var(--modal-vv-offset, 0px);
+		display: grid;
+		grid-template-rows: auto minmax(0, 1fr);
 		width: 100%;
-		height: 100dvh;
-		max-height: 100dvh;
+		height: var(--modal-vv-height, 100svh);
+		max-height: var(--modal-vv-height, 100svh);
 		margin: 0;
 		border-radius: 0;
 		border: none;
 		box-sizing: border-box;
-		padding-top: env(safe-area-inset-top, 0px);
+		padding-top: 0;
+	}
+
+	.modal__header {
+		padding-top: calc(var(--space-4) + env(safe-area-inset-top, 0px));
 	}
 
 	.modal__body {
-		padding-bottom: 0;
-		flex: 1;
+		display: flex;
+		flex-direction: column;
+		height: 100%;
 		min-height: 0;
+		padding-bottom: 0;
+		overflow: hidden;
 	}
 
 	.modal__body .form-panel__actions {
+		flex-shrink: 0;
+		padding: var(--space-3) var(--space-4);
 		padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
 	}
 

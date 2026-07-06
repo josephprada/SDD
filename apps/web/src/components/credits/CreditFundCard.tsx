@@ -19,7 +19,7 @@ export function CreditFundCard({
 }: CreditFundCardProps) {
 	return (
 		<Link
-			to={`/credits/${creditId}?tab=fund`}
+			to={`/credits/${creditId}?tab=destinations`}
 			className="credit-fund-card interactive-lift"
 		>
 			<strong className="credit-fund-card__name">{name}</strong>

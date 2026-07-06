@@ -177,6 +177,31 @@ export const savingsGoalStatusValidator = v.union(
 	v.literal("paused"),
 );
 
+export const savingsGoalSnapshotValidator = v.object({
+	name: v.string(),
+	targetAmount: v.number(),
+	currentAmount: v.number(),
+	deadline: v.optional(v.number()),
+	accountId: v.optional(v.id("accounts")),
+	linkedCreditId: v.optional(v.id("credits")),
+	linkedFixedExpenseId: v.optional(v.id("fixedExpenses")),
+	icon: v.optional(v.string()),
+	color: v.optional(v.string()),
+	status: savingsGoalStatusValidator,
+	notes: v.optional(v.string()),
+	createdAt: v.number(),
+	contributions: v.array(
+		v.object({
+			amount: v.number(),
+			contributedAt: v.number(),
+			transactionId: v.optional(v.id("transactions")),
+			sourceTransactionId: v.optional(v.id("transactions")),
+			notes: v.optional(v.string()),
+			createdAt: v.number(),
+		}),
+	),
+});
+
 export function validateCreditName(name: string): string {
 	const trimmed = validateNonEmptyName(name);
 	if (trimmed.length > MAX_CREDIT_NAME_LENGTH) {

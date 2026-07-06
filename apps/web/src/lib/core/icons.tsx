@@ -21,6 +21,7 @@ import {
 	Minus,
 	Paperclip,
 	Pencil,
+	PiggyBank,
 	Plus,
 	Search,
 	SearchX,
@@ -66,7 +67,8 @@ export type CoreIconName =
 	| "circle-alert"
 	| "circle-help"
 	| "badge-dollar-sign"
-	| "landmark";
+	| "landmark"
+	| "piggy-bank";
 
 const iconMap: Record<CoreIconName, LucideIcon> = {
 	house: House,
@@ -101,6 +103,7 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	"circle-help": CircleHelp,
 	"badge-dollar-sign": BadgeDollarSign,
 	landmark: Landmark,
+	"piggy-bank": PiggyBank,
 };
 
 type IconProps = {

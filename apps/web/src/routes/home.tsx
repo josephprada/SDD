@@ -174,6 +174,7 @@ export function HomeRoute() {
 									amount: item.amount,
 									categoryName: item.categoryName,
 									dueDate: item.dueDate,
+									periodKey,
 								})
 							}
 						/>

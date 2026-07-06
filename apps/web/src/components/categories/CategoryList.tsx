@@ -22,6 +22,27 @@ const typeOptions = [
 	{ value: "transfer" as const, label: "Transferencias" },
 ];
 
+function creditLinkedLabel(category: Doc<"categories">): string | null {
+	if (!category.linkedCreditId) return null;
+	switch (category.linkedCreditPurpose) {
+		case "payment":
+			return "Cuota de crédito";
+		case "disbursement_income":
+			return "Desembolso de crédito";
+		case "fund_expense":
+			return "Gasto del fondo de crédito";
+		default:
+			return "Vinculada a crédito";
+	}
+}
+
+function categorySubtitle(category: Doc<"categories">, count: number): string {
+	if (category.isSystem) return "Categoría del sistema";
+	const linked = creditLinkedLabel(category);
+	if (linked) return linked;
+	return `${count} ${count === 1 ? "movimiento" : "movimientos"}`;
+}
+
 export function CategoryList({
 	categories,
 	type,
@@ -64,16 +85,20 @@ export function CategoryList({
 					{filtered.map((cat) => {
 						const count = counts[cat._id] ?? 0;
 						const isSelected = selectedId === cat._id;
+						const canEdit = !cat.isSystem && onEdit;
+						const canArchive =
+							!cat.isSystem && !cat.linkedCreditId && onArchive;
+
 						return (
 							<li
 								key={cat._id}
-								className={`category-list__item glass${isSelected ? " category-list__item--active" : ""}`}
+								className={`category-list__item glass interactive-lift${isSelected ? " category-list__item--active" : ""}`}
 							>
 								<button
 									type="button"
 									className="category-list__main"
-									onClick={() => onEdit?.(cat)}
-									disabled={cat.isSystem}
+									onClick={() => canEdit && onEdit(cat)}
+									disabled={!canEdit}
 								>
 									<span
 										className="category-list__icon"
@@ -87,41 +112,24 @@ export function CategoryList({
 									<span className="category-list__body">
 										<span className="category-list__name">{cat.name}</span>
 										<span className="category-list__count">
-											{cat.isSystem
-												? "Categoría del sistema"
-												: `${count} ${count === 1 ? "movimiento" : "movimientos"}`}
+											{categorySubtitle(cat, count)}
 										</span>
 									</span>
 								</button>
-								<div className="category-list__actions">
-									{cat.isSystem ? (
-										<span
-											className="category-list__lock"
-											aria-label="Bloqueada"
+								{cat.isSystem ? (
+									<span className="category-list__lock" aria-label="Bloqueada">
+										🔒
+									</span>
+								) : canArchive ? (
+									<div className="category-list__actions">
+										<IconButton
+											aria-label={`Archivar ${cat.name}`}
+											onClick={() => onArchive(cat)}
 										>
-											🔒
-										</span>
-									) : (
-										<>
-											{onEdit ? (
-												<IconButton
-													aria-label={`Editar ${cat.name}`}
-													onClick={() => onEdit(cat)}
-												>
-													<CoreIcon name="edit" size={16} />
-												</IconButton>
-											) : null}
-											{onArchive ? (
-												<IconButton
-													aria-label={`Archivar ${cat.name}`}
-													onClick={() => onArchive(cat)}
-												>
-													<CoreIcon name="trash" size={16} />
-												</IconButton>
-											) : null}
-										</>
-									)}
-								</div>
+											<CoreIcon name="trash" size={16} />
+										</IconButton>
+									</div>
+								) : null}
 							</li>
 						);
 					})}

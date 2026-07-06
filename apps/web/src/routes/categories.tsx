@@ -16,7 +16,10 @@ import { useMemo, useState } from "react";
 export function CategoriesRoute() {
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const categories =
-		useQuery(api.categories.list, { includeArchived: false }) ?? [];
+		useQuery(api.categories.list, {
+			includeArchived: false,
+			includeCreditLinked: true,
+		}) ?? [];
 	const transactions = useQuery(api.transactions.list, {}) ?? [];
 	const createCategory = useMutation(api.categories.create);
 	const updateCategory = useMutation(api.categories.update);
@@ -110,7 +113,7 @@ export function CategoriesRoute() {
 			serverError={serverError}
 			onSubmit={mode === "edit" ? handleUpdate : handleCreate}
 			onCancel={closePanel}
-			onArchive={editing ? () => setArchiving(editing) : undefined}
+			onArchive={editing && !editing.linkedCreditId ? () => setArchiving(editing) : undefined}
 		/>
 	);
 

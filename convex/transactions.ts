@@ -16,11 +16,14 @@ import {
 } from "./lib/balance";
 import { compareTransactions } from "./lib/transactions";
 import { clearFixedExpensePaymentForDeletedTransaction } from "./lib/fixedExpensePayments";
+import { registerFixedExpensePayment } from "./lib/fixedExpenseTransaction";
+import { periodKeyFromTimestamp } from "./lib/period";
 import {
 	createAndRegisterCreditPayment,
 	revertCreditPaymentForTransaction,
 } from "./lib/creditPaymentRegistration";
 import { executeSpendFromFund } from "./lib/creditFundSpend";
+import { revertSavingsContributionForTransaction } from "./lib/savingsGoalFixedExpense";
 import {
 	transactionTypeValidator,
 	validatePositiveCopAmount,
@@ -285,9 +288,25 @@ export const create = mutation({
 				destinationId: v.id("creditDestinations"),
 			}),
 		),
+		fixedExpenseId: v.optional(v.id("fixedExpenses")),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
+
+		if (args.fixedExpenseId) {
+			if (args.type !== "expense") {
+				throw new Error("Fixed expense payments must be expenses");
+			}
+			return await registerFixedExpensePayment(ctx, userId, {
+				fixedExpenseId: args.fixedExpenseId,
+				accountId: args.accountId,
+				amount: args.amount,
+				date: args.date,
+				periodKey: periodKeyFromTimestamp(args.date),
+				categoryId: args.categoryId,
+				notes: args.notes,
+			});
+		}
 
 		if (args.creditFundSpend) {
 			if (args.type !== "expense") {
@@ -489,6 +508,12 @@ export const remove = mutation({
 		);
 
 		await revertCreditPaymentForTransaction(ctx, userId, transactionId);
+
+		await revertSavingsContributionForTransaction(
+			ctx,
+			userId,
+			transactionId,
+		);
 
 		await ctx.db.delete(transactionId);
 

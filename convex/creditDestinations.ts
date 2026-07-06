@@ -7,6 +7,7 @@ import {
 	validateCreditNotes,
 	validatePositiveCopAmount,
 } from "./lib/validators";
+import { enrichTransaction } from "./transactions";
 
 export const list = query({
 	args: { creditId: v.id("credits") },
@@ -17,15 +18,19 @@ export const list = query({
 			.query("creditDestinations")
 			.withIndex("by_credit", (q) => q.eq("creditId", creditId))
 			.collect();
+		const destinationIds = new Set(destinations.map((d) => d._id));
 		const transactions = await ctx.db
 			.query("transactions")
 			.withIndex("by_user", (q) => q.eq("userId", userId))
 			.collect();
 		const spentByDestination = new Map<string, number>();
+		const rawByDestination = new Map<string, typeof transactions>();
 		for (const transaction of transactions) {
 			if (
 				transaction.type !== "expense" ||
-				!transaction.creditDestinationId
+				!transaction.creditDestinationId ||
+				!destinationIds.has(transaction.creditDestinationId) ||
+				transaction.creditId !== creditId
 			) {
 				continue;
 			}
@@ -34,15 +39,37 @@ export const list = query({
 				key,
 				(spentByDestination.get(key) ?? 0) + transaction.amount,
 			);
+			const bucket = rawByDestination.get(key) ?? [];
+			bucket.push(transaction);
+			rawByDestination.set(key, bucket);
 		}
 		const totalAllocated = destinations.reduce((s, d) => s + d.amount, 0);
-		return {
-			destinations: destinations
+		const destinationsWithSpend = await Promise.all(
+			destinations
 				.sort((a, b) => a.createdAt - b.createdAt)
-				.map((destination) => ({
-					...destination,
-					spentTotal: spentByDestination.get(destination._id) ?? 0,
-				})),
+				.map(async (destination) => {
+					const rawMovements = rawByDestination.get(destination._id) ?? [];
+					const movements = await Promise.all(
+						rawMovements
+							.sort((a, b) => b.date - a.date)
+							.map((transaction) => enrichTransaction(ctx, transaction)),
+					);
+					return {
+						...destination,
+						spentTotal: spentByDestination.get(destination._id) ?? 0,
+						movements: movements.map((movement) => ({
+							_id: movement._id,
+							amount: movement.amount,
+							date: movement.date,
+							notes: movement.notes,
+							categoryName: movement.categoryName,
+							accountName: movement.accountName,
+						})),
+					};
+				}),
+		);
+		return {
+			destinations: destinationsWithSpend,
 			totalAllocated,
 			unallocated: credit.principal - totalAllocated,
 			overAllocated: totalAllocated > credit.principal,

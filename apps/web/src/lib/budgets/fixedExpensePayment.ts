@@ -4,4 +4,5 @@ export type FixedExpensePaymentTarget = {
 	amount: number;
 	categoryName?: string;
 	dueDate?: number;
+	periodKey?: string;
 };

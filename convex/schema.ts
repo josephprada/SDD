@@ -16,6 +16,7 @@ import {
 	destinationStatusValidator,
 	rateTypeValidator,
 	savingsGoalStatusValidator,
+	savingsGoalSnapshotValidator,
 	scheduleModeValidator,
 } from "./lib/validators";
 
@@ -173,6 +174,8 @@ export default defineSchema({
 		active: v.boolean(),
 		lastPaidPeriodKey: v.optional(v.string()),
 		lastPaidTransactionId: v.optional(v.id("transactions")),
+		linkedSavingsGoalId: v.optional(v.id("savingsGoals")),
+		onlyPeriodKey: v.optional(v.string()),
 		notes: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -270,6 +273,7 @@ export default defineSchema({
 		recalcEffect: abonoRecalcEffectValidator,
 		transactionId: v.optional(v.id("transactions")),
 		notes: v.optional(v.string()),
+		savingsGoalSnapshot: v.optional(savingsGoalSnapshotValidator),
 		createdAt: v.number(),
 	})
 		.index("by_credit", ["creditId"]),
@@ -295,6 +299,7 @@ export default defineSchema({
 		deadline: v.optional(v.number()),
 		accountId: v.optional(v.id("accounts")),
 		linkedCreditId: v.optional(v.id("credits")),
+		linkedFixedExpenseId: v.optional(v.id("fixedExpenses")),
 		icon: v.optional(v.string()),
 		color: v.optional(v.string()),
 		status: savingsGoalStatusValidator,
@@ -303,15 +308,19 @@ export default defineSchema({
 		updatedAt: v.number(),
 	})
 		.index("by_user", ["userId"])
-		.index("by_user_status", ["userId", "status"]),
+		.index("by_user_status", ["userId", "status"])
+		.index("by_linked_fixed_expense", ["linkedFixedExpenseId"]),
 
 	savingsContributions: defineTable({
 		goalId: v.id("savingsGoals"),
 		amount: v.number(),
 		contributedAt: v.number(),
 		transactionId: v.optional(v.id("transactions")),
+		sourceTransactionId: v.optional(v.id("transactions")),
 		notes: v.optional(v.string()),
 		createdAt: v.number(),
 	})
-		.index("by_goal", ["goalId"]),
+		.index("by_goal", ["goalId"])
+		.index("by_transaction", ["transactionId"])
+		.index("by_source_transaction", ["sourceTransactionId"]),
 });

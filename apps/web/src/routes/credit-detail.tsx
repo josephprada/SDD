@@ -1,4 +1,5 @@
 import { CapitalAbonoForm } from "@app/components/credits/CapitalAbonoForm";
+import type { CapitalAbonoFormValues } from "@app/components/credits/CapitalAbonoForm";
 import { MarkCreditPaymentModal } from "@app/components/credits/MarkCreditPaymentModal";
 import { CreditPaymentTable } from "@app/components/credits/CreditPaymentTable";
 import { DestinationChart } from "@app/components/credits/DestinationChart";
@@ -6,12 +7,13 @@ import { DestinationForm } from "@app/components/credits/DestinationForm";
 import { DestinationList } from "@app/components/credits/DestinationList";
 import { PayoffSimulator } from "@app/components/credits/PayoffSimulator";
 import { Modal } from "@app/components/ui/Modal";
+import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
 import { ManualPaymentForm } from "@app/components/credits/ManualPaymentForm";
 import { CreditSettingsForm } from "@app/components/credits/CreditSettingsForm";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
 import {
 	CREDIT_STATUS_LABELS,
-	FUND_TAB_LABEL,
+	RECALC_EFFECT_LABELS,
 	type CreditTab,
 } from "@app/lib/credits/types";
 import { formatCOP } from "@app/lib/format/currency";
@@ -30,13 +32,24 @@ type CreditPayment = FunctionReturnType<
 	typeof api.creditPayments.listByCredit
 >[number];
 
+type CreditAbono = FunctionReturnType<
+	typeof api.creditCapitalAbonos.list
+>[number];
+
 const TABS: Array<{ id: CreditTab; label: string }> = [
 	{ id: "payments", label: "Cuotas" },
 	{ id: "abonos", label: "Abonos" },
 	{ id: "destinations", label: "Destinos" },
-	{ id: "fund", label: FUND_TAB_LABEL },
 	{ id: "settings", label: "Ajustes" },
 ];
+
+const VALID_TABS = new Set<CreditTab>(TABS.map((t) => t.id));
+
+function resolveTab(raw: string | null): CreditTab {
+	if (raw === "fund") return "destinations";
+	if (raw && VALID_TABS.has(raw as CreditTab)) return raw as CreditTab;
+	return "payments";
+}
 
 export function CreditDetailRoute() {
 	const navigate = useNavigate();
@@ -45,17 +58,16 @@ export function CreditDetailRoute() {
 	const { id } = useParams<{ id: string }>();
 	const creditId = id as Id<"credits">;
 	const [searchParams, setSearchParams] = useSearchParams();
-	const tab = (searchParams.get("tab") as CreditTab) || "payments";
+	const tab = resolveTab(searchParams.get("tab"));
 
 	const credit = useQuery(api.credits.get, { creditId });
 	const payments = useQuery(api.creditPayments.listByCredit, { creditId });
 	const abonos = useQuery(api.creditCapitalAbonos.list, { creditId });
+	const savingsGoals = useQuery(api.savingsGoals.list, {});
+	const linkedGoals =
+		savingsGoals?.filter((g) => g.linkedCreditId === creditId) ?? [];
 	const destinations = useQuery(api.creditDestinations.list, { creditId });
 	const fundSummary = useQuery(api.credits.fundSummary, { creditId });
-	const fundMovements = useQuery(api.credits.listFundMovements, {
-		creditId,
-		limit: 20,
-	});
 	const categories = useQuery(api.categories.list, {
 		type: "expense",
 		includeArchived: false,
@@ -70,6 +82,8 @@ export function CreditDetailRoute() {
 	const markPaid = useMutation(api.creditPayments.markPaid);
 	const markUnpaid = useMutation(api.creditPayments.markUnpaid);
 	const createAbono = useMutation(api.creditCapitalAbonos.create);
+	const updateAbono = useMutation(api.creditCapitalAbonos.update);
+	const removeAbono = useMutation(api.creditCapitalAbonos.remove);
 	const createDestination = useMutation(api.creditDestinations.create);
 	const updateDestination = useMutation(api.creditDestinations.update);
 	const removeDestination = useMutation(api.creditDestinations.remove);
@@ -88,6 +102,13 @@ export function CreditDetailRoute() {
 		useState<Id<"creditDestinations"> | null>(null);
 	const [manualModal, setManualModal] = useState(false);
 	const [abonoModal, setAbonoModal] = useState(false);
+	const [editingAbonoId, setEditingAbonoId] =
+		useState<Id<"creditCapitalAbonos"> | null>(null);
+	const [abonoInitial, setAbonoInitial] =
+		useState<Partial<CapitalAbonoFormValues>>();
+	const [abonoSavingsGoalId, setAbonoSavingsGoalId] =
+		useState<Id<"savingsGoals"> | null>(null);
+	const [confirmDeleteAbono, setConfirmDeleteAbono] = useState(false);
 	const [editingPayment, setEditingPayment] = useState<CreditPayment | null>(
 		null,
 	);
@@ -97,6 +118,16 @@ export function CreditDetailRoute() {
 	const [settingsError, setSettingsError] = useState("");
 	const [error, setError] = useState("");
 	const scheduleRequested = useRef(false);
+
+	useEffect(() => {
+		const raw = searchParams.get("tab");
+		if (raw === "fund" || (raw && !VALID_TABS.has(raw as CreditTab))) {
+			setSearchParams(
+				{ tab: raw === "fund" ? "destinations" : "payments" },
+				{ replace: true },
+			);
+		}
+	}, [searchParams, setSearchParams]);
 
 	useEffect(() => {
 		if (
@@ -144,6 +175,63 @@ export function CreditDetailRoute() {
 		setDestModal(false);
 		setEditingDestinationId(null);
 		setError("");
+	};
+
+	const editingAbono = editingAbonoId
+		? abonos.find((abono) => abono._id === editingAbonoId)
+		: null;
+
+	const closeAbonoModal = () => {
+		setAbonoModal(false);
+		setEditingAbonoId(null);
+		setAbonoInitial(undefined);
+		setAbonoSavingsGoalId(null);
+		setError("");
+	};
+
+	const openAbonoModal = (
+		initial?: Partial<CapitalAbonoFormValues>,
+		savingsGoalId?: Id<"savingsGoals">,
+	) => {
+		setEditingAbonoId(null);
+		setAbonoInitial(initial);
+		setAbonoSavingsGoalId(savingsGoalId ?? null);
+		setError("");
+		setAbonoModal(true);
+	};
+
+	const openEditAbono = (abono: CreditAbono) => {
+		setEditingAbonoId(abono._id);
+		setAbonoInitial({
+			amount: abono.amount,
+			paidAt: abono.paidAt,
+			recalcEffect: abono.recalcEffect,
+			notes: abono.notes,
+		});
+		setError("");
+		setAbonoModal(true);
+	};
+
+	const isGoalReadyForAbono = (goal: (typeof linkedGoals)[number]) =>
+		goal.status === "completed" || goal.currentAmount >= goal.targetAmount;
+
+	const handleDeleteAbono = async () => {
+		if (!editingAbonoId) return;
+		setLoading(true);
+		try {
+			await removeAbono({ abonoId: editingAbonoId });
+			setConfirmDeleteAbono(false);
+			closeAbonoModal();
+			showToast({
+				title: "Abono eliminado",
+				body: "Las cuotas se recalcularon. Si aplicó una meta de ahorro, esta fue restaurada.",
+			});
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "Error al eliminar abono");
+			setConfirmDeleteAbono(false);
+		} finally {
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -328,12 +416,15 @@ export function CreditDetailRoute() {
 				}}
 				title={
 					editingPayment
-						? `Cuota #${editingPayment.installmentNumber}`
+						? editingPayment.totalDue > 0
+							? `Editar cuota #${editingPayment.installmentNumber}`
+							: `Cuota #${editingPayment.installmentNumber}`
 						: "Valor de cuota"
 				}
 			>
 				{editingPayment ? (
 					<ManualPaymentForm
+						key={editingPayment._id}
 						installmentNumber={editingPayment.installmentNumber}
 						dueDate={editingPayment.dueDate}
 						initialTotal={editingPayment.totalDue}
@@ -371,19 +462,101 @@ export function CreditDetailRoute() {
 				<div className="credit-tab-panel">
 					<div className="credits-header">
 						<h2 className="section-title">Abonos a capital</h2>
-						<Button onClick={() => setAbonoModal(true)}>
+						<Button
+							onClick={() =>
+								openAbonoModal({
+									recalcEffect: credit.defaultRecalcOnAbono,
+								})
+							}
+						>
 							Registrar abono
 						</Button>
 					</div>
 					<PayoffSimulator creditId={creditId} />
+					{linkedGoals.length > 0 ? (
+						<div>
+							<h3 className="section-title">Ahorro para abonos</h3>
+							<ul className="credit-list">
+								{linkedGoals.map((goal) => {
+									const pct = Math.min(
+										100,
+										Math.round(goal.percent * 100),
+									);
+									const ready = isGoalReadyForAbono(goal);
+									return (
+										<li
+											key={goal._id}
+											className="credit-card glass savings-goal-card destination-card"
+										>
+											<div className="destination-card__header">
+												<div className="credit-card__main credit-card__main--static">
+													<div className="credit-card__row">
+														<strong>{goal.name}</strong>
+														<span>{pct}%</span>
+													</div>
+													<div className="savings-progress" aria-hidden>
+														<div
+															className="savings-progress__fill"
+															style={{ width: `${pct}%` }}
+														/>
+													</div>
+													<span className="credit-card__lender">
+														Ahorrado {formatCOP(goal.currentAmount)} de{" "}
+														{formatCOP(goal.targetAmount)}
+														{ready
+															? " — meta cumplida"
+															: " — sigue aportando para habilitar el abono"}
+													</span>
+												</div>
+												{ready ? (
+													<div className="credit-card__actions">
+														<Button
+															onClick={() =>
+																openAbonoModal(
+																	{
+																		amount: goal.currentAmount,
+																		paidAt: Date.now(),
+																		recalcEffect:
+																			credit.defaultRecalcOnAbono,
+																		notes: `Abono desde meta «${goal.name}»`,
+																	},
+																	goal._id,
+																)
+															}
+														>
+															Abonar a capital
+														</Button>
+													</div>
+												) : null}
+											</div>
+										</li>
+									);
+								})}
+							</ul>
+						</div>
+					) : null}
 					{abonos.length > 0 ? (
 						<ul className="credit-list">
-							{abonos.map((a) => (
-								<li key={a._id} className="credit-card glass">
-									<div className="credit-card__row">
-										<strong>{formatFullDate(a.paidAt)}</strong>
-										<span>{formatCOP(a.amount)}</span>
-									</div>
+							{abonos.map((abono) => (
+								<li key={abono._id} className="credit-card glass interactive-lift">
+									<button
+										type="button"
+										className="credit-card__main"
+										onClick={() => openEditAbono(abono)}
+									>
+										<div className="credit-card__row">
+											<strong>{formatFullDate(abono.paidAt)}</strong>
+											<span>{formatCOP(abono.amount)}</span>
+										</div>
+										<span className="credit-card__lender">
+											{RECALC_EFFECT_LABELS[abono.recalcEffect]}
+										</span>
+										{abono.notes ? (
+											<span className="credit-card__lender">
+												{abono.notes}
+											</span>
+										) : null}
+									</button>
 								</li>
 							))}
 						</ul>
@@ -395,27 +568,57 @@ export function CreditDetailRoute() {
 					)}
 					<Modal
 						open={abonoModal}
-						onClose={() => {
-							setAbonoModal(false);
-							setError("");
-						}}
-						title="Registrar abono a capital"
+						onClose={closeAbonoModal}
+						title={
+							editingAbonoId
+								? "Editar abono a capital"
+								: "Registrar abono a capital"
+						}
 					>
 						<CapitalAbonoForm
+							key={editingAbonoId ?? abonoInitial?.amount ?? "new"}
+							initial={abonoInitial ?? editingAbono ?? undefined}
 							error={error}
 							loading={loading}
-							onCancel={() => setAbonoModal(false)}
+							onCancel={closeAbonoModal}
+							onDelete={
+								editingAbonoId
+									? () => setConfirmDeleteAbono(true)
+									: undefined
+							}
+							submitLabel={
+								editingAbonoId ? "Guardar abono" : "Registrar abono"
+							}
 							onSubmit={async (values) => {
 								setLoading(true);
 								setError("");
 								try {
-									await createAbono({ creditId, ...values });
-									setAbonoModal(false);
+									if (editingAbonoId) {
+										await updateAbono({
+											abonoId: editingAbonoId,
+											...values,
+										});
+										showToast({
+											title: "Abono actualizado",
+											body: "Las cuotas pendientes se recalcularon.",
+										});
+									} else {
+										await createAbono({
+											creditId,
+											...values,
+											savingsGoalId: abonoSavingsGoalId ?? undefined,
+										});
+										showToast({
+											title: "Abono registrado",
+											body: "El abono a capital quedó aplicado al crédito.",
+										});
+									}
+									closeAbonoModal();
 								} catch (e) {
 									setError(
 										e instanceof Error
 											? e.message
-											: "Error al registrar abono",
+											: "Error al guardar abono",
 									);
 								} finally {
 									setLoading(false);
@@ -423,13 +626,28 @@ export function CreditDetailRoute() {
 							}}
 						/>
 					</Modal>
+					<ConfirmDialog
+						open={confirmDeleteAbono}
+						title="Eliminar abono a capital"
+						description="Se recalcularán las cuotas pendientes. Si este abono consumió una meta de ahorro, la meta volverá a aparecer en Ahorros."
+						confirmLabel="Eliminar"
+						variant="danger"
+						onConfirm={handleDeleteAbono}
+						onCancel={() => setConfirmDeleteAbono(false)}
+					/>
 				</div>
 			) : null}
 
 			{tab === "destinations" ? (
 				<div>
 					<div className="credits-header">
-						<h2 className="section-title">Rubros / destinos</h2>
+						<div>
+							<h2 className="section-title">Rubros / destinos</h2>
+							<p className="page-subtitle">
+								Registra nuevos gastos del fondo desde el botón de movimientos,
+								usando las categorías de gasto del crédito.
+							</p>
+						</div>
 						<Button
 							onClick={() => {
 								setEditingDestinationId(null);
@@ -449,6 +667,9 @@ export function CreditDetailRoute() {
 							setEditingDestinationId(destination._id);
 							setDestModal(true);
 						}}
+						onMovementClick={(transactionId) =>
+							openEditTransaction(transactionId as Id<"transactions">)
+						}
 						onDelete={async (destinationId) => {
 							await removeDestination({
 								destinationId: destinationId as Id<"creditDestinations">,
@@ -497,59 +718,6 @@ export function CreditDetailRoute() {
 							}}
 						/>
 					</Modal>
-				</div>
-			) : null}
-
-			{tab === "fund" ? (
-				<div>
-					{fundSummary ? (
-						<div className="credit-summary">
-							<div className="credit-summary__item">
-								<span className="credit-summary__label">
-									Saldo del fondo
-								</span>
-								<strong>{formatCOP(fundSummary.escrowBalance)}</strong>
-							</div>
-							<div className="credit-summary__item">
-								<span className="credit-summary__label">Sin asignar</span>
-								<strong>{formatCOP(fundSummary.unallocated)}</strong>
-							</div>
-						</div>
-					) : null}
-					<p className="tx-form__hint">
-						Registra nuevos gastos del fondo desde el botón de movimientos,
-						usando las categorías de gasto del crédito.
-					</p>
-					{fundMovements && fundMovements.length > 0 ? (
-						<>
-							<h3 className="section-title">Gastos registrados del fondo</h3>
-							<ul className="credit-list">
-								{fundMovements.map((t) => (
-									<li key={t._id}>
-										<button
-											type="button"
-											className="credit-card glass interactive-lift credit-card--fund-tx"
-											onClick={() => openEditTransaction(t._id)}
-										>
-											<div className="credit-card__row">
-												<span>{t.destinationName}</span>
-												<strong>{formatCOP(t.amount)}</strong>
-											</div>
-											<span className="credit-card__lender">
-												{t.categoryName} · {t.accountName} ·{" "}
-												{formatFullDate(t.date)}
-											</span>
-											{t.notes ? (
-												<span className="credit-card__lender">{t.notes}</span>
-											) : null}
-										</button>
-									</li>
-								))}
-							</ul>
-						</>
-					) : (
-						<p className="budget-empty">Aún no hay gastos registrados del fondo.</p>
-					)}
 				</div>
 			) : null}
 

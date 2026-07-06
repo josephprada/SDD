@@ -11,29 +11,42 @@ import { toDateInputValue } from "@app/lib/format/date";
 import { Input } from "@jp-ds";
 import { useState } from "react";
 
+export type CapitalAbonoFormValues = {
+	amount: number;
+	paidAt: number;
+	recalcEffect: AbonoRecalcEffect;
+	notes?: string;
+};
+
 type CapitalAbonoFormProps = {
-	onSubmit: (values: {
-		amount: number;
-		paidAt: number;
-		recalcEffect: AbonoRecalcEffect;
-		notes?: string;
-	}) => Promise<void>;
+	initial?: Partial<CapitalAbonoFormValues>;
+	onSubmit: (values: CapitalAbonoFormValues) => Promise<void>;
 	onCancel: () => void;
+	onDelete?: () => void;
 	loading?: boolean;
 	error?: string;
+	submitLabel?: string;
 };
 
 export function CapitalAbonoForm({
+	initial,
 	onSubmit,
 	onCancel,
+	onDelete,
 	loading,
 	error,
+	submitLabel,
 }: CapitalAbonoFormProps) {
-	const [amountRaw, setAmountRaw] = useState("");
-	const [paidAt, setPaidAt] = useState(toDateInputValue(Date.now()));
-	const [recalcEffect, setRecalcEffect] =
-		useState<AbonoRecalcEffect>("shorten_term");
-	const [notes, setNotes] = useState("");
+	const [amountRaw, setAmountRaw] = useState(
+		initial?.amount ? String(initial.amount) : "",
+	);
+	const [paidAt, setPaidAt] = useState(
+		initial?.paidAt ? toDateInputValue(initial.paidAt) : toDateInputValue(Date.now()),
+	);
+	const [recalcEffect, setRecalcEffect] = useState<AbonoRecalcEffect>(
+		initial?.recalcEffect ?? "shorten_term",
+	);
+	const [notes, setNotes] = useState(initial?.notes ?? "");
 
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
@@ -88,8 +101,9 @@ export function CapitalAbonoForm({
 			</div>
 			<FormModalFooter
 				onCancel={onCancel}
+				onDelete={onDelete}
 				loading={loading}
-				submitLabel="Registrar abono"
+				submitLabel={submitLabel ?? "Registrar abono"}
 			/>
 		</form>
 	);

@@ -37,12 +37,14 @@ export function TransactionRow({
 			? `${tx.accountName} → ${tx.toAccountName ?? ""}`
 			: tx.accountName;
 
+	const showNotesInTitle = Boolean(tx.destinationName && tx.notes?.trim());
+
 	const metaParts =
 		variant === "dashboard"
 			? [
 					formatShortDate(tx.date),
 					accountLabel,
-					tx.notes?.trim() || null,
+					showNotesInTitle ? null : tx.notes?.trim() || null,
 				]
 			: [
 					formatShortDate(tx.date),
@@ -51,6 +53,7 @@ export function TransactionRow({
 						: tx.destinationName
 							? tx.accountName
 							: `${tx.accountName} · ${tx.categoryName}`,
+					showNotesInTitle ? null : tx.notes?.trim() || null,
 				];
 
 	const metaLine = metaParts.filter(Boolean).join(" · ");
@@ -105,7 +108,7 @@ export function TransactionRow({
 					{tx.type === "transfer"
 						? "Transferencia"
 						: tx.destinationName
-							? `${tx.categoryName} · ${tx.destinationName}`
+							? `${tx.categoryName}${tx.notes?.trim() ? ` - ${tx.notes.trim()}` : ""} · ${tx.destinationName}`
 							: tx.categoryName}
 				</span>
 				<span className="tx-row__meta">{metaLine}</span>

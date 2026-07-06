@@ -13,7 +13,7 @@ import { fromDateInputValue, formatShortDate, toDateInputValue } from "@app/lib/
 import { periodKeyFromDate } from "@app/lib/period";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { api } from "@convex/_generated/api";
-import { Input } from "@jp-ds";
+import { Input, Checkbox } from "@jp-ds";
 import { useQuery } from "convex/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -46,6 +46,7 @@ type TransactionFormProps = {
 			creditId: Id<"credits">;
 			destinationId: Id<"creditDestinations">;
 		};
+		fixedExpenseId?: Id<"fixedExpenses">;
 	}) => void;
 	onCancel: () => void;
 	onDelete?: () => void;
@@ -99,6 +100,10 @@ export function TransactionForm({
 	const [fundDestinationOverride, setFundDestinationOverride] = useState<
 		Id<"creditDestinations"> | ""
 	>("");
+	const [markFixedExpensePaid, setMarkFixedExpensePaid] = useState(false);
+	const [fixedExpenseOverride, setFixedExpenseOverride] = useState<
+		Id<"fixedExpenses"> | ""
+	>("");
 	const [error, setError] = useState("");
 	const amountInputRef = useRef<HTMLInputElement>(null);
 	const attachmentCount = useAttachmentCount(transactionId);
@@ -118,6 +123,50 @@ export function TransactionForm({
 		!!selectedCategory?.linkedCreditId &&
 		selectedCategory?.linkedCreditPurpose !== "fund_expense" &&
 		selectedCategory?.linkedCreditPurpose !== "disbursement_income";
+
+	const isFixedExpenseCandidate =
+		!transactionId && type === "expense" && Boolean(categoryId);
+
+	const draftAmount = parseCOPInput(amount) ?? 0;
+	const periodKey = useMemo(
+		() => periodKeyFromDate(new Date(fromDateInputValue(date))),
+		[date],
+	);
+
+	const fixedExpenseContext = useQuery(
+		api.fixedExpenseContext.getContextForCategory,
+		isFixedExpenseCandidate && categoryId
+			? { categoryId, periodKey }
+			: "skip",
+	);
+
+	const hasUnpaidFixedExpenses =
+		!!fixedExpenseContext &&
+		fixedExpenseContext.unpaidItems.length > 0 &&
+		!isCreditPaymentCandidate &&
+		!isFundExpenseFlow;
+	const fixedExpenseLoading =
+		isFixedExpenseCandidate && fixedExpenseContext === undefined;
+	const isFixedExpenseFlow = hasUnpaidFixedExpenses && markFixedExpensePaid;
+
+	const resolvedFixedExpenseId = useMemo(() => {
+		if (!fixedExpenseContext) return "";
+		if (
+			fixedExpenseOverride &&
+			fixedExpenseContext.unpaidItems.some(
+				(item) => item._id === fixedExpenseOverride,
+			)
+		) {
+			return fixedExpenseOverride;
+		}
+		return fixedExpenseContext.defaultFixedExpenseId ?? "";
+	}, [fixedExpenseContext, fixedExpenseOverride]);
+
+	const selectedFixedExpense = fixedExpenseContext?.unpaidItems.find(
+		(item) => item._id === resolvedFixedExpenseId,
+	);
+	const isFixedAmountLocked =
+		isFixedExpenseFlow && !!selectedFixedExpense && selectedFixedExpense.amount > 0;
 
 	const creditContext = useQuery(
 		api.creditPaymentContext.getContextForCategory,
@@ -177,13 +226,9 @@ export function TransactionForm({
 	const creditDisplayAmount =
 		isCreditAmountLocked && selectedInstallment
 			? formatCOPInput(selectedInstallment.totalDue)
-			: amount;
-
-	const draftAmount = parseCOPInput(amount) ?? 0;
-	const periodKey = useMemo(
-		() => periodKeyFromDate(new Date(fromDateInputValue(date))),
-		[date],
-	);
+			: isFixedAmountLocked && selectedFixedExpense
+				? formatCOPInput(selectedFixedExpense.amount)
+				: amount;
 
 	const budgetPreview = useQuery(
 		api.budgets.previewForTransaction,
@@ -207,7 +252,22 @@ export function TransactionForm({
 	useEffect(() => {
 		setCreditPaymentOverride("");
 		setFundDestinationOverride("");
+		setFixedExpenseOverride("");
 	}, [categoryId]);
+
+	useEffect(() => {
+		if (hasUnpaidFixedExpenses) {
+			setMarkFixedExpensePaid(true);
+		} else {
+			setMarkFixedExpensePaid(false);
+		}
+	}, [hasUnpaidFixedExpenses, categoryId, periodKey]);
+
+	useEffect(() => {
+		if (isFixedAmountLocked && selectedFixedExpense) {
+			setAmount(formatCOPInput(selectedFixedExpense.amount));
+		}
+	}, [isFixedAmountLocked, selectedFixedExpense]);
 
 	useEffect(() => {
 		if (creditContext?.paymentAccountId) {
@@ -260,7 +320,9 @@ export function TransactionForm({
 
 		const parsed = isCreditAmountLocked && selectedInstallment
 			? selectedInstallment.totalDue
-			: parseCOPInput(amount);
+			: isFixedAmountLocked && selectedFixedExpense
+				? selectedFixedExpense.amount
+				: parseCOPInput(amount);
 		if (!parsed || parsed <= 0) {
 			setError("Ingresa un monto válido");
 			return;
@@ -314,6 +376,16 @@ export function TransactionForm({
 				return;
 			}
 		}
+		if (isFixedExpenseFlow) {
+			if (!resolvedFixedExpenseId) {
+				setError("Selecciona el gasto fijo a registrar");
+				return;
+			}
+			if (!selectedFixedExpense) {
+				setError("Gasto fijo no válido para este período");
+				return;
+			}
+		}
 		setError("");
 		onSubmit({
 			type,
@@ -331,6 +403,10 @@ export function TransactionForm({
 						destinationId: resolvedFundDestinationId as Id<"creditDestinations">,
 					}
 				: undefined,
+			fixedExpenseId:
+				isFixedExpenseFlow && !isCreditPaymentFlow && !isFundExpenseFlow
+					? (resolvedFixedExpenseId as Id<"fixedExpenses">)
+					: undefined,
 		});
 	};
 
@@ -357,6 +433,13 @@ export function TransactionForm({
 			fundParsedAmount <= 0 ||
 			fundEscrowExceeded);
 
+	const fixedSubmitBlocked =
+		isFixedExpenseFlow &&
+		(fixedExpenseLoading ||
+			!resolvedFixedExpenseId ||
+			!selectedFixedExpense ||
+			selectedFixedExpense.amount <= 0);
+
 	return (
 		<form className="tx-form tx-form--modal" onSubmit={handleSubmit} noValidate>
 			<div className="tx-form__scroll brand-scroll">
@@ -371,7 +454,7 @@ export function TransactionForm({
 						autoComplete="off"
 						placeholder="0"
 						value={creditDisplayAmount}
-						readOnly={isCreditAmountLocked}
+						readOnly={isCreditAmountLocked || isFixedAmountLocked}
 						onChange={(e) => handleAmountChange(e.target.value)}
 						onPaste={(e) => {
 							e.preventDefault();
@@ -453,6 +536,64 @@ export function TransactionForm({
 				</>
 			) : null}
 
+			{isFixedExpenseCandidate && fixedExpenseLoading ? (
+				<p className="tx-form__hint">Buscando gastos fijos pendientes…</p>
+			) : null}
+
+			{hasUnpaidFixedExpenses && fixedExpenseContext ? (
+				<div className="credit-form-check">
+					<Checkbox
+						label="Registrar pago de gasto fijo"
+						checked={markFixedExpensePaid}
+						onChange={setMarkFixedExpensePaid}
+					/>
+					{markFixedExpensePaid ? (
+						<>
+							<p className="tx-form__hint">
+								Al guardar se marcará como pagado en Presupuestos → Gastos
+								fijos
+								{selectedFixedExpense?.linkedSavingsGoalName
+									? ` y se registrará el aporte en la meta «${selectedFixedExpense.linkedSavingsGoalName}»`
+									: ""}
+								.
+							</p>
+							{fixedExpenseContext.unpaidItems.length > 1 ? (
+								<>
+									<label
+										className="jp-input-label"
+										htmlFor="tx-fixed-expense"
+									>
+										Gasto fijo
+									</label>
+									<select
+										id="tx-fixed-expense"
+										className="jp-input"
+										value={resolvedFixedExpenseId}
+										onChange={(e) =>
+											setFixedExpenseOverride(
+												e.target.value as Id<"fixedExpenses">,
+											)
+										}
+									>
+										{fixedExpenseContext.unpaidItems.map((item) => (
+											<option key={item._id} value={item._id}>
+												{item.name} — día {item.dayOfMonth} —{" "}
+												{formatCOP(item.amount)}
+											</option>
+										))}
+									</select>
+								</>
+							) : (
+								<p className="tx-form__hint">
+									Gasto fijo: <strong>{selectedFixedExpense?.name}</strong> (
+									{formatCOP(selectedFixedExpense?.amount ?? 0)})
+								</p>
+							)}
+						</>
+					) : null}
+				</div>
+			) : null}
+
 			{isFundExpenseFlow && fundExpenseLoading ? (
 				<p className="tx-form__hint">Cargando fondo del crédito…</p>
 			) : null}
@@ -504,7 +645,10 @@ export function TransactionForm({
 				</p>
 			) : null}
 
-			{budgetPreview && !isCreditPaymentFlow && !isFundExpenseFlow ? (
+			{budgetPreview &&
+			!isCreditPaymentFlow &&
+			!isFundExpenseFlow &&
+			!isFixedExpenseFlow ? (
 				<BudgetThresholdAlert preview={budgetPreview} draftAmount={draftAmount} />
 			) : null}
 
@@ -593,7 +737,9 @@ export function TransactionForm({
 				onCancel={onCancel}
 				onDelete={onDelete}
 				loading={loading}
-				submitDisabled={creditSubmitBlocked || fundSubmitBlocked}
+				submitDisabled={
+					creditSubmitBlocked || fundSubmitBlocked || fixedSubmitBlocked
+				}
 				submitLabel="Guardar movimiento"
 			/>
 		</form>

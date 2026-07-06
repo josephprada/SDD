@@ -34,7 +34,7 @@ export function CreditList({ items }: CreditListProps) {
 						<div className="credit-card__row">
 							<strong>{credit.name}</strong>
 							<span className="credit-card__balance">
-								{formatCOP(credit.outstandingBalance)}
+								{formatCOP(credit.principal)}
 							</span>
 						</div>
 						<span className="credit-card__lender">{credit.lender}</span>

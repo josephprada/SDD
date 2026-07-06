@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { requireSavingsGoalOwnership, requireUserId } from "./lib/auth";
+import { insertSavingsGoalTransferTransaction } from "./lib/savingsGoalTransaction";
 import {
 	validateCreditNotes,
 	validatePositiveCopAmount,
@@ -13,6 +14,7 @@ export const create = mutation({
 		goalId: v.id("savingsGoals"),
 		amount: v.number(),
 		contributedAt: v.number(),
+		fromAccountId: v.optional(v.id("accounts")),
 		transactionId: v.optional(v.id("transactions")),
 		notes: v.optional(v.string()),
 	},
@@ -26,11 +28,27 @@ export const create = mutation({
 		const notes = validateCreditNotes(args.notes);
 		const now = Date.now();
 
+		let transactionId = args.transactionId;
+		if (!transactionId && goal.accountId) {
+			if (!args.fromAccountId) {
+				throw new Error("Selecciona la cuenta origen del aporte");
+			}
+			transactionId = await insertSavingsGoalTransferTransaction(ctx, userId, {
+				fromAccountId: args.fromAccountId,
+				toAccountId: goal.accountId,
+				amount,
+				date: args.contributedAt,
+				notes:
+					notes?.trim() ||
+					`Aporte manual — meta «${goal.name}»`,
+			});
+		}
+
 		const contributionId = await ctx.db.insert("savingsContributions", {
 			goalId: args.goalId,
 			amount,
 			contributedAt: args.contributedAt,
-			transactionId: args.transactionId,
+			transactionId,
 			notes,
 			createdAt: now,
 		});

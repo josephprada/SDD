@@ -67,6 +67,7 @@ export function BudgetsRoute() {
 			amount: item.amount,
 			categoryName: item.categoryName,
 			dueDate: item.nextDueDate,
+			periodKey,
 		});
 	};
 
@@ -109,11 +110,12 @@ export function BudgetsRoute() {
 		pushReminders: boolean;
 		notes?: string;
 		markAsPaid: boolean;
+		singleMonthOnly: boolean;
 	}) => {
 		setLoading(true);
 		setError("");
 		const wasPaid = editFixed?.isPaidCurrentPeriod ?? false;
-		const { markAsPaid, ...payload } = values;
+		const { markAsPaid, singleMonthOnly, ...payload } = values;
 		try {
 			let fixedId: Id<"fixedExpenses">;
 			if (editFixed) {
@@ -123,7 +125,11 @@ export function BudgetsRoute() {
 				});
 				fixedId = editFixed._id as Id<"fixedExpenses">;
 			} else {
-				fixedId = await createFixed(payload);
+				fixedId = await createFixed({
+					...payload,
+					onlyPeriodKey:
+						singleMonthOnly && periodKey ? periodKey : undefined,
+				});
 			}
 
 			if (markAsPaid && !wasPaid) {
@@ -136,6 +142,8 @@ export function BudgetsRoute() {
 					categoryName: expenseCategories.find(
 						(c) => c._id === payload.categoryId,
 					)?.name,
+					dueDate: editFixed?.nextDueDate,
+					periodKey,
 				});
 				return;
 			} else if (!markAsPaid && wasPaid) {
@@ -325,6 +333,7 @@ export function BudgetsRoute() {
 			>
 				<FixedExpenseForm
 					categories={expenseCategories}
+					periodKey={periodKey}
 					initial={
 						editFixed
 							? {
@@ -337,6 +346,7 @@ export function BudgetsRoute() {
 									pushReminders: editFixed.pushReminders,
 									notes: editFixed.notes,
 									isPaidCurrentPeriod: editFixed.isPaidCurrentPeriod,
+									onlyPeriodKey: editFixed.onlyPeriodKey,
 								}
 							: undefined
 					}

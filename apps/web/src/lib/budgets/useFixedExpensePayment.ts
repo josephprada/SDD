@@ -31,6 +31,7 @@ export function useFixedExpensePayment() {
 					id: target.id as Id<"fixedExpenses">,
 					accountId,
 					dueDate: target.dueDate,
+					periodKey: target.periodKey,
 				});
 				closePayment();
 			} catch (e) {

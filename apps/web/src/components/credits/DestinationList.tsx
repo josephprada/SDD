@@ -1,4 +1,5 @@
 import { formatCOP } from "@app/lib/format/currency";
+import { formatShortDate } from "@app/lib/format/date";
 import { CoreIcon } from "@app/lib/core/icons";
 import { IconButton } from "@jp-ds";
 import type { FunctionReturnType } from "convex/server";
@@ -11,15 +12,15 @@ type DestinationListProps = {
 	data: DestinationData;
 	onEdit: (destination: DestinationItem) => void;
 	onDelete: (id: string) => void;
+	onMovementClick?: (transactionId: string) => void;
 };
 
-const STATUS_LABELS = {
-	planned: "Planificado",
-	in_progress: "En progreso",
-	completed: "Completado",
-};
-
-export function DestinationList({ data, onEdit, onDelete }: DestinationListProps) {
+export function DestinationList({
+	data,
+	onEdit,
+	onDelete,
+	onMovementClick,
+}: DestinationListProps) {
 	const { destinations, totalAllocated, unallocated, overAllocated } = data;
 
 	return (
@@ -51,58 +52,91 @@ export function DestinationList({ data, onEdit, onDelete }: DestinationListProps
 								? Math.min(100, Math.round((spentTotal / d.amount) * 100))
 								: 0;
 						const overSpent = spentTotal > d.amount;
+						const movements = d.movements ?? [];
 
 						return (
-							<li key={d._id} className="credit-card glass interactive-lift">
-								<button
-									type="button"
-									className="credit-card__main"
-									onClick={() => onEdit(d)}
-								>
-									<div className="credit-card__row">
-										<strong>{d.name}</strong>
-										<span>{formatCOP(d.amount)}</span>
-									</div>
-									<span className="credit-card__lender">
-										{STATUS_LABELS[d.status]} · Planificado{" "}
-										{formatCOP(d.amount)}
-									</span>
-									<span
-										className={`credit-card__lender${overSpent ? " credit-card__lender--warn" : ""}`}
+							<li key={d._id} className="credit-card destination-card glass">
+								<div className="destination-card__header">
+									<button
+										type="button"
+										className="credit-card__main"
+										onClick={() => onEdit(d)}
 									>
-										Gastado {formatCOP(spentTotal)}
-										{spentTotal > 0 ? ` (${progress}% del rubro)` : ""}
-									</span>
-									{spentTotal > 0 ? (
-										<div
-											className="destination-progress"
-											role="progressbar"
-											aria-valuenow={Math.min(progress, 100)}
-											aria-valuemin={0}
-											aria-valuemax={100}
-											aria-label={`Gastado ${formatCOP(spentTotal)} de ${formatCOP(d.amount)}`}
-										>
-											<div
-												className={`destination-progress__bar${overSpent ? " destination-progress__bar--over" : ""}`}
-												style={{
-													width: `${Math.min(progress, 100)}%`,
-												}}
-											/>
+										<div className="credit-card__row">
+											<strong>{d.name}</strong>
+											<span>{formatCOP(d.amount)}</span>
 										</div>
-									) : null}
-								</button>
-								<div
-									className="credit-card__actions"
-									onClick={(event) => event.stopPropagation()}
-									onKeyDown={(event) => event.stopPropagation()}
-								>
-									<IconButton
-										aria-label={`Eliminar ${d.name}`}
-										onClick={() => onDelete(d._id)}
+										<span
+											className={`credit-card__lender${overSpent ? " credit-card__lender--warn" : ""}`}
+										>
+											Gastado {formatCOP(spentTotal)}
+											{spentTotal > 0 ? ` (${progress}% del rubro)` : ""}
+										</span>
+										{d.notes ? (
+											<span className="destination-card__notes">{d.notes}</span>
+										) : null}
+										{spentTotal > 0 ? (
+											<div
+												className="destination-progress"
+												role="progressbar"
+												aria-valuenow={Math.min(progress, 100)}
+												aria-valuemin={0}
+												aria-valuemax={100}
+												aria-label={`Gastado ${formatCOP(spentTotal)} de ${formatCOP(d.amount)}`}
+											>
+												<div
+													className={`destination-progress__bar${overSpent ? " destination-progress__bar--over" : ""}`}
+													style={{
+														width: `${Math.min(progress, 100)}%`,
+													}}
+												/>
+											</div>
+										) : null}
+									</button>
+									<div
+										className="credit-card__actions"
+										onClick={(event) => event.stopPropagation()}
+										onKeyDown={(event) => event.stopPropagation()}
 									>
-										<CoreIcon name="trash" size={16} />
-									</IconButton>
+										<IconButton
+											aria-label={`Eliminar ${d.name}`}
+											onClick={() => onDelete(d._id)}
+										>
+											<CoreIcon name="trash" size={16} />
+										</IconButton>
+									</div>
 								</div>
+								{movements.length > 0 ? (
+									<ul className="destination-movements">
+										{movements.map((movement) => (
+											<li key={movement._id}>
+												<button
+													type="button"
+													className="destination-movement"
+													onClick={() =>
+														onMovementClick?.(movement._id)
+													}
+												>
+													<div className="destination-movement__row">
+														<span className="destination-movement__desc">
+															{movement.categoryName}
+															{movement.notes?.trim()
+																? ` - ${movement.notes.trim()}`
+																: null}
+														</span>
+														<strong className="destination-movement__amount">
+															{formatCOP(movement.amount)}
+														</strong>
+													</div>
+													<span className="destination-movement__meta">
+														{formatShortDate(movement.date)} ·{" "}
+														{movement.accountName}
+													</span>
+												</button>
+											</li>
+										))}
+									</ul>
+								) : null}
 							</li>
 						);
 					})}

@@ -93,7 +93,6 @@ export type CreditTab =
 	| "payments"
 	| "abonos"
 	| "destinations"
-	| "fund"
 	| "settings";
 
 /** Cuenta donde entra el dinero del préstamo */
@@ -106,7 +105,7 @@ export const PAYMENT_ACCOUNT_HINT =
 	"Cuenta desde la que pagas las cuotas mensuales. Se usará por defecto al registrar pagos.";
 
 export const FUND_EXPENSE_CATEGORY_HINT =
-	"Categorías para registrar en qué rubro del crédito gastas (obra, materiales, etc.). Aparecen en Movimientos y en la pestaña Fondo.";
+	"Categorías para registrar en qué rubro del crédito gastas (obra, materiales, etc.). Aparecen en Movimientos y en la pestaña Destinos.";
 
 export const CREDIT_SETTINGS_SUMMARY_HINT =
 	"Monto, tasa y cuotas se definen al crear el crédito. Aquí puedes actualizar nombre, cuentas vinculadas y preferencias de abonos.";
@@ -124,5 +123,3 @@ export const FUND_ACCOUNT_HINT = DISBURSEMENT_ACCOUNT_HINT;
 
 export const OPERATING_ACCOUNT_LABEL = PAYMENT_ACCOUNT_LABEL;
 export const OPERATING_ACCOUNT_HINT = PAYMENT_ACCOUNT_HINT;
-
-export const FUND_TAB_LABEL = "Fondo del crédito";

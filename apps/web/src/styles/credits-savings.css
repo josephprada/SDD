@@ -52,10 +52,15 @@
 	cursor: pointer;
 }
 
+.credit-card__main--static {
+	cursor: default;
+}
+
 .credit-card__actions {
 	display: flex;
 	align-items: flex-start;
 	flex-shrink: 0;
+	gap: var(--space-2);
 }
 
 .credit-card__lender--warn {
@@ -79,6 +84,94 @@
 
 .destination-progress__bar--over {
 	background: var(--color-danger);
+}
+
+.destination-card:has(.credit-card__main) {
+	flex-direction: column;
+}
+
+.destination-card__header {
+	display: flex;
+	flex-direction: row;
+	align-items: stretch;
+	gap: var(--space-2);
+}
+
+.destination-card__notes {
+	display: block;
+	margin-top: var(--space-1);
+	font-size: var(--text-sm);
+	color: var(--color-text-muted);
+	font-style: italic;
+	line-height: 1.4;
+}
+
+.destination-movements {
+	list-style: none;
+	padding: 0;
+	margin: var(--space-2) 0 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	border-top: 1px solid var(--color-glass-border);
+	padding-top: var(--space-3);
+}
+
+.destination-movement {
+	width: 100%;
+	padding: var(--space-2) var(--space-3);
+	border-radius: var(--radius-md);
+	border: 1px solid transparent;
+	background: color-mix(in srgb, var(--color-surface-2) 50%, transparent);
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	text-align: left;
+	font: inherit;
+	color: inherit;
+	cursor: pointer;
+	transition:
+		border-color 0.15s ease,
+		background-color 0.15s ease;
+}
+
+.destination-movement:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 35%, var(--color-border));
+	background: color-mix(in srgb, var(--color-accent) 6%, var(--color-surface-2));
+}
+
+.destination-movement:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+}
+
+.destination-movement__row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: var(--space-2);
+}
+
+.destination-movement__desc {
+	font-size: var(--text-sm);
+	font-weight: var(--font-medium);
+	min-width: 0;
+}
+
+.destination-movement__amount {
+	font-size: var(--text-sm);
+	flex-shrink: 0;
+}
+
+.destination-movement__meta {
+	font-size: var(--text-xs);
+	color: var(--color-text-muted);
+}
+
+.destination-movement__notes {
+	font-size: var(--text-xs);
+	color: var(--color-text-secondary);
+	line-height: 1.4;
 }
 
 .credit-card--fund-tx {
@@ -166,6 +259,11 @@
 	gap: var(--space-3);
 }
 
+.tx-form__scroll.credit-form-grid > * + *,
+.credit-panel-form .credit-form-grid > * + * {
+	margin-top: 0;
+}
+
 @media (min-width: 640px) {
 	.credit-form-grid:not(.credit-form-grid--single),
 	.tx-form__scroll.credit-form-grid {
@@ -183,7 +281,19 @@
 }
 
 .credit-form-check {
+	flex-shrink: 0;
 	padding-block: var(--space-1);
+}
+
+.credit-form-check--with-help {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+}
+
+.credit-form-check .jp-checkbox {
+	flex: 1;
+	min-width: 0;
 }
 
 .credit-panel-form {
@@ -280,6 +390,13 @@
 	font-weight: var(--font-medium);
 }
 
+.payment-table__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	justify-content: flex-end;
+}
+
 .payment-status {
 	display: inline-block;
 	padding: 2px 8px;
@@ -308,6 +425,16 @@
 	margin: var(--space-3) 0;
 }
 
+.savings-goal-fixed-fields {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	border-radius: var(--radius-md);
+	border: 1px solid var(--color-glass-border);
+	background: color-mix(in srgb, var(--color-surface-2) 45%, transparent);
+}
+
 .savings-goal-list {
 	display: flex;
 	flex-direction: column;
@@ -320,6 +447,15 @@
 .savings-goal-card {
 	padding: var(--space-4);
 	border-radius: var(--radius-lg);
+}
+
+.savings-goal-card.destination-card {
+	padding: var(--space-3);
+	cursor: default;
+}
+
+.savings-goal-card .credit-card__main {
+	width: 100%;
 }
 
 .savings-progress {

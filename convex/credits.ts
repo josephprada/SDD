@@ -78,6 +78,7 @@ export const list = query({
 				lender: credit.lender,
 				principal: credit.principal,
 				outstandingBalance: credit.outstandingBalance,
+				defaultRecalcOnAbono: credit.defaultRecalcOnAbono,
 				status: credit.status,
 				nextPayment: pending
 					? {

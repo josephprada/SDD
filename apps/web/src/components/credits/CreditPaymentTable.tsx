@@ -150,46 +150,51 @@ export function CreditPaymentTable({
 										</span>
 									</td>
 									<td>
-										{missingAmount && onEditManual ? (
-											<Button
-												variant="secondary"
-												disabled={loadingId === p._id}
-												onClick={() => onEditManual(p)}
-											>
-												Ingresar valor
-											</Button>
-										) : p.status === "paid" && onMarkUnpaid ? (
-											<Button
-												variant="secondary"
-												disabled={loadingId === p._id}
-												onClick={() => onMarkUnpaid(p._id)}
-											>
-												{loadingId === p._id
-													? "…"
-													: "Volver a pendiente"}
-											</Button>
-										) : onRegisterPayment &&
-										  (p.status === "pending" || p.status === "overdue") &&
-										  !missingAmount ? (
-											<Button
-												variant="secondary"
-												disabled={loadingId === p._id}
-												onClick={() => onRegisterPayment(p)}
-											>
-												Registrar pago
-											</Button>
-										) : scheduleMode === "manual" &&
-										  onEditManual &&
-										  p.status !== "paid" &&
-										  p.status !== "cancelled" ? (
-											<Button
-												variant="secondary"
-												disabled={loadingId === p._id}
-												onClick={() => onEditManual(p)}
-											>
-												Editar
-											</Button>
-										) : null}
+										<div className="payment-table__actions">
+											{missingAmount && onEditManual ? (
+												<Button
+													variant="secondary"
+													disabled={loadingId === p._id}
+													onClick={() => onEditManual(p)}
+												>
+													Ingresar valor
+												</Button>
+											) : null}
+											{scheduleMode === "manual" &&
+											onEditManual &&
+											!missingAmount &&
+											(p.status === "pending" || p.status === "overdue") ? (
+												<Button
+													variant="secondary"
+													disabled={loadingId === p._id}
+													onClick={() => onEditManual(p)}
+												>
+													Editar valor
+												</Button>
+											) : null}
+											{onRegisterPayment &&
+											(p.status === "pending" || p.status === "overdue") &&
+											!missingAmount ? (
+												<Button
+													variant="secondary"
+													disabled={loadingId === p._id}
+													onClick={() => onRegisterPayment(p)}
+												>
+													Registrar pago
+												</Button>
+											) : null}
+											{p.status === "paid" && onMarkUnpaid ? (
+												<Button
+													variant="secondary"
+													disabled={loadingId === p._id}
+													onClick={() => onMarkUnpaid(p._id)}
+												>
+													{loadingId === p._id
+														? "…"
+														: "Volver a pendiente"}
+												</Button>
+											) : null}
+										</div>
 									</td>
 								</tr>
 							);

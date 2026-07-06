@@ -1,6 +1,7 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx, QueryCtx } from "../_generated/server";
 import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./period";
+import { revertSavingsContributionForTransaction } from "./savingsGoalFixedExpense";
 
 function transactionMatchesFixedExpensePayment(
 	transaction: Doc<"transactions">,
@@ -97,6 +98,8 @@ export async function clearFixedExpensePaymentForDeletedTransaction(
 
 	const item = await ctx.db.get(fixedExpenseId);
 	if (!item || item.userId !== userId) return;
+
+	await revertSavingsContributionForTransaction(ctx, userId, transaction._id);
 
 	if (
 		item.lastPaidTransactionId &&

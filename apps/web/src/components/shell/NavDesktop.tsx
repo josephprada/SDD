@@ -71,16 +71,7 @@ export function NavDesktop() {
 					}
 				>
 					<CoreIcon name="badge-dollar-sign" size={18} />
-					Presupuestos
-				</NavLink>
-				<NavLink
-					to="/reports"
-					className={({ isActive }) =>
-						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
-					}
-				>
-					<CoreIcon name="chart-line" size={18} />
-					Reportes
+					Presupuestos y Gastos fijos
 				</NavLink>
 				<NavLink
 					to="/credits"
@@ -97,8 +88,17 @@ export function NavDesktop() {
 						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
 					}
 				>
-					<CoreIcon name="wallet" size={18} />
+					<CoreIcon name="piggy-bank" size={18} />
 					Ahorros
+				</NavLink>
+				<NavLink
+					to="/reports"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="chart-line" size={18} />
+					Reportes
 				</NavLink>
 				<NavLink
 					to="/settings"
