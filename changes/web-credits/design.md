@@ -44,6 +44,25 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 | D-20 | UX hints | **`FieldHelp`** en ajustes crédito | Paridad con CreditForm |
 | D-21 | Dashboard créditos | **Card `dash-credits` glass** + cards internas | Total muted alineado con Disponible |
 | D-22 | Pestaña Fondo | **Listado read-only**; gastos vía Movimientos | Sin wizard en detalle |
+| D-23 | Crédito ya en marcha | **`alreadyInProgress`** + cuotas pagadas opcionales + `trackRemainingOnly` + saldo pendiente (obligatorio en manual) | `resolveInProgressCreditSchedule` en create |
+| D-24 | Cuentas en create crédito | **Desembolso y pago opcionales**; desembolso condicionado a switch «Incluye desembolso» | Completa en Ajustes después |
+| D-25 | Fecha inicio crédito | **Opcional** en create; default hoy vía `resolvePaymentDate` | Calendario de cuotas sin bloquear creación |
+| D-26 | Dashboard movimientos | **Últimos movimientos globales** (todos los tiempos); ingresos/gastos del card siguen filtrados por periodo activo | Evita ver solo 2 txs del mes con historial largo |
+| D-27 | Gastos fijos en dashboard | **Widget** = mes calendario del ancla; **pendingTotal métricas** = mismo `periodStart/End` que ingresos/gastos | No mezclar semana con deuda fija del mes completo |
+| D-28 | Listado gastos fijos próximos | **Una fila por gasto/mes**; excluir pagados (`isPaidCurrentPeriod` + `lastPaidTransactionId` en rango) | Sin barrido multi-mes que duplicaba filas |
+| D-29 | Meta + gasto fijo | **Cuota mensual sugerida** = `ceil(objetivo / meses hasta deadline)`; editable manualmente | `apps/web/src/lib/savings/computeMonthlySavings.ts` |
+| D-30 | Categorías | **`categories.usageCounts`** en subtítulo (movimientos, gastos fijos, presupuestos, créditos, metas) | Solo lectura informativa |
+| D-31 | Errores Convex UI | **`formatConvexError`** — mensajes amigables en formularios | `apps/web/src/lib/convex/formatError.ts` |
+| D-32 | JP-DS Input fecha | Placeholder muted + icono calendario apagado si vacío | `packages/jp-ds/components/Input.tsx` |
+| D-33 | FormSelect / Modal | Placeholder «Seleccionar» muted; modal form flex sin recorte en móvil | Paridad visual JP-DS |
+
+### Pendiente (iteración manual-first créditos)
+
+| # | Tema | Estado |
+|---|------|--------|
+| P-01 | Creación crédito minimal (solo nombre, prestamista, cuotas, día pago) | 🔲 Diseñado en sesión; no mergeado aún |
+| P-02 | `CreditInstallmentProgress` en detalle (sustituir card saldo deuda) | 🔲 |
+| P-03 | `fillSuggestedPayments` + Ajustes ampliados (monto, tasa, estimar cuotas) | 🔲 |
 
 ---
 

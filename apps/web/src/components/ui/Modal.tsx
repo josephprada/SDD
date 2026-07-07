@@ -55,15 +55,22 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
 			modal.style.setProperty("--modal-vv-offset", `${vv.offsetTop}px`);
 		};
 
+		const scheduleViewportSync = () => {
+			syncViewport();
+			requestAnimationFrame(syncViewport);
+		};
+
 		syncViewport();
-		vv?.addEventListener("resize", syncViewport);
-		vv?.addEventListener("scroll", syncViewport);
-		mobileMq.addEventListener("change", syncViewport);
+		vv?.addEventListener("resize", scheduleViewportSync);
+		vv?.addEventListener("scroll", scheduleViewportSync);
+		mobileMq.addEventListener("change", scheduleViewportSync);
+		modal.addEventListener("focusout", scheduleViewportSync);
 
 		return () => {
-			vv?.removeEventListener("resize", syncViewport);
-			vv?.removeEventListener("scroll", syncViewport);
-			mobileMq.removeEventListener("change", syncViewport);
+			vv?.removeEventListener("resize", scheduleViewportSync);
+			vv?.removeEventListener("scroll", scheduleViewportSync);
+			mobileMq.removeEventListener("change", scheduleViewportSync);
+			modal.removeEventListener("focusout", scheduleViewportSync);
 			clearViewportVars();
 		};
 	}, [mounted]);

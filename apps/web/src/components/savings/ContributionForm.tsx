@@ -101,10 +101,10 @@ export function ContributionForm({
 					label="Cuenta origen"
 					value={fromAccountId}
 					hint={SOURCE_ACCOUNT_HINT}
+					placeholder="Seleccionar cuenta"
 					onChange={(value) => setFromAccountId(value as Id<"accounts"> | "")}
 					required
 				>
-					<option value="">— Seleccionar cuenta —</option>
 					{sourceAccounts.map((account) => (
 						<option key={account._id} value={account._id}>
 							{account.name}

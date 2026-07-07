@@ -220,6 +220,7 @@ export function CreditSettingsForm({
 						label="Preferencia en abonos extra"
 						value={recalcEffect}
 						hint={recalcHint}
+						placeholder={false}
 						onChange={(v) => setRecalcEffect(v as AbonoRecalcEffect)}
 					>
 						{RECALC_EFFECT_OPTIONS.map((opt) => (
@@ -234,9 +235,9 @@ export function CreditSettingsForm({
 						label={FUND_ACCOUNT_LABEL}
 						value={fundAccountId}
 						hint={FUND_ACCOUNT_HINT}
+						placeholder="Sin cuenta vinculada"
 						onChange={setFundAccountId}
 					>
-						<option value="">— Sin cuenta vinculada —</option>
 						{accounts.map((a) => (
 							<option key={a._id} value={a._id}>
 								{a.name}
@@ -249,9 +250,9 @@ export function CreditSettingsForm({
 						label={OPERATING_ACCOUNT_LABEL}
 						value={operatingAccountId}
 						hint={OPERATING_ACCOUNT_HINT}
+						placeholder="Sin cuenta vinculada"
 						onChange={setOperatingAccountId}
 					>
-						<option value="">— Sin cuenta vinculada —</option>
 						{accounts.map((a) => (
 							<option key={a._id} value={a._id}>
 								{a.name}

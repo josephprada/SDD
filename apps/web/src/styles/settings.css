@@ -270,6 +270,10 @@
 	border-radius: var(--radius-md);
 	border: 1px solid var(--color-border);
 	background: var(--color-surface-2);
+	color: var(--color-text-primary);
+	font: inherit;
+	font-size: var(--text-base);
+	text-align: left;
 	cursor: pointer;
 	min-height: 44px;
 }
@@ -277,11 +281,19 @@
 .language-option--active {
 	border-color: var(--color-accent);
 	background: var(--color-accent-muted);
+	color: var(--color-text-primary);
+	font-weight: var(--font-semibold);
+}
+
+.language-option--active .preference-row__value {
+	color: var(--color-accent);
+	font-weight: var(--font-bold);
 }
 
 .language-option--disabled {
-	opacity: 0.55;
+	opacity: 0.72;
 	cursor: not-allowed;
+	color: var(--color-text-secondary);
 }
 
 .language-option__badge {
@@ -296,23 +308,52 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-2);
+	padding: var(--space-4);
 }
 
 .grouping-option {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	gap: var(--space-3);
+	width: 100%;
 	padding: var(--space-3);
 	border-radius: var(--radius-md);
 	border: 1px solid var(--color-border);
 	background: var(--color-surface-2);
+	color: var(--color-text-primary);
+	font: inherit;
+	font-size: var(--text-base);
+	text-align: left;
 	cursor: pointer;
 	min-height: 44px;
+	transition:
+		border-color var(--duration-fast),
+		background var(--duration-fast);
+}
+
+.grouping-option:focus-visible {
+	outline: 2px solid var(--color-border-focus);
+	outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.grouping-option:not(.grouping-option--active):hover {
+		border-color: color-mix(in srgb, var(--color-accent) 40%, var(--color-border));
+		background: color-mix(in srgb, var(--color-surface-2) 88%, var(--color-text-primary));
+	}
 }
 
 .grouping-option--active {
 	border-color: var(--color-accent);
 	background: var(--color-accent-muted);
+	color: var(--color-text-primary);
+	font-weight: var(--font-semibold);
+}
+
+.grouping-option--active .preference-row__value {
+	color: var(--color-accent);
+	font-weight: var(--font-bold);
 }
 
 @media (min-width: 768px) {

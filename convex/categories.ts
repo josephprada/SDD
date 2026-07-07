@@ -1,7 +1,99 @@
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { requireCategoryOwnership, requireUserId } from "./lib/auth";
 import { categoryTypeValidator, validateNonEmptyName } from "./lib/validators";
+
+export type CategoryUsageCounts = {
+	transactions: number;
+	fixedExpenses: number;
+	budgets: number;
+	credits: number;
+	savingsGoals: number;
+};
+
+const emptyUsage = (): CategoryUsageCounts => ({
+	transactions: 0,
+	fixedExpenses: 0,
+	budgets: 0,
+	credits: 0,
+	savingsGoals: 0,
+});
+
+export const usageCounts = query({
+	args: {},
+	handler: async (ctx) => {
+		const userId = await requireUserId(ctx);
+		const counts: Record<string, CategoryUsageCounts> = {};
+
+		const bump = (categoryId: Id<"categories">, field: keyof CategoryUsageCounts) => {
+			const key = categoryId as string;
+			if (!counts[key]) counts[key] = emptyUsage();
+			counts[key][field]++;
+		};
+
+		const transactions = await ctx.db
+			.query("transactions")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		for (const tx of transactions) {
+			bump(tx.categoryId, "transactions");
+		}
+
+		const fixedExpenses = await ctx.db
+			.query("fixedExpenses")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		const fixedExpenseCategoryById = new Map(
+			fixedExpenses.map((fe) => [fe._id, fe.categoryId]),
+		);
+		for (const fe of fixedExpenses) {
+			bump(fe.categoryId, "fixedExpenses");
+		}
+
+		const budgets = await ctx.db
+			.query("budgets")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		for (const budget of budgets) {
+			for (const categoryId of budget.categoryIds) {
+				bump(categoryId, "budgets");
+			}
+		}
+
+		const credits = await ctx.db
+			.query("credits")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		for (const credit of credits) {
+			const linkedCategories = new Set<Id<"categories">>();
+			if (credit.paymentCategoryId) {
+				linkedCategories.add(credit.paymentCategoryId);
+			}
+			if (credit.disbursementIncomeCategoryId) {
+				linkedCategories.add(credit.disbursementIncomeCategoryId);
+			}
+			for (const categoryId of credit.fundExpenseCategoryIds ?? []) {
+				linkedCategories.add(categoryId);
+			}
+			for (const categoryId of linkedCategories) {
+				bump(categoryId, "credits");
+			}
+		}
+
+		const goals = await ctx.db
+			.query("savingsGoals")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		for (const goal of goals) {
+			if (!goal.linkedFixedExpenseId) continue;
+			const categoryId = fixedExpenseCategoryById.get(goal.linkedFixedExpenseId);
+			if (categoryId) bump(categoryId, "savingsGoals");
+		}
+
+		return counts;
+	},
+});
 
 export const list = query({
 	args: {

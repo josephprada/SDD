@@ -289,11 +289,49 @@
 	display: flex;
 	align-items: flex-start;
 	gap: var(--space-2);
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
 }
 
 .credit-form-check .jp-checkbox {
 	flex: 1;
 	min-width: 0;
+}
+
+.credit-form-check .jp-checkbox__label {
+	overflow-wrap: anywhere;
+}
+
+.credit-form-check__help,
+.credit-form-field-hint {
+	margin: 0;
+	font-size: var(--text-xs);
+	color: var(--color-text-muted);
+	line-height: 1.4;
+}
+
+.credit-form-field-hint {
+	margin-top: calc(-1 * var(--space-1));
+}
+
+.credit-form-toggle-row {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-3);
+	padding-block: var(--space-1);
+}
+
+.credit-form-toggle-row__text {
+	flex: 1;
+	min-width: 0;
+}
+
+.credit-form-toggle-row__label {
+	display: block;
+	font-size: var(--text-sm);
+	font-weight: var(--font-medium);
 }
 
 .credit-panel-form {

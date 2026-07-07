@@ -253,15 +253,14 @@ export function TransactionForm({
 		setCreditPaymentOverride("");
 		setFundDestinationOverride("");
 		setFixedExpenseOverride("");
+		setMarkFixedExpensePaid(false);
 	}, [categoryId]);
 
 	useEffect(() => {
-		if (hasUnpaidFixedExpenses) {
-			setMarkFixedExpensePaid(true);
-		} else {
+		if (!hasUnpaidFixedExpenses) {
 			setMarkFixedExpensePaid(false);
 		}
-	}, [hasUnpaidFixedExpenses, categoryId, periodKey]);
+	}, [hasUnpaidFixedExpenses]);
 
 	useEffect(() => {
 		if (isFixedAmountLocked && selectedFixedExpense) {

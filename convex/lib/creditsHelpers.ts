@@ -14,9 +14,13 @@ export async function insertGeneratedPayments(
 	creditId: Id<"credits">,
 	rows: GeneratedPayment[],
 	isProjected: boolean,
+	options?: { markFirstPaidCount?: number },
 ) {
 	const now = Date.now();
+	const markPaidUpTo = options?.markFirstPaidCount ?? 0;
 	for (const row of rows) {
+		const isHistoricalPaid =
+			markPaidUpTo > 0 && row.installmentNumber <= markPaidUpTo;
 		await ctx.db.insert("creditPayments", {
 			creditId,
 			installmentNumber: row.installmentNumber,
@@ -26,7 +30,8 @@ export async function insertGeneratedPayments(
 			insuranceAmount: row.insuranceAmount,
 			otherFees: row.otherFees,
 			totalDue: row.totalDue,
-			status: "pending",
+			status: isHistoricalPaid ? "paid" : "pending",
+			paidDate: isHistoricalPaid ? row.dueDate : undefined,
 			isProjected,
 			createdAt: now,
 			updatedAt: now,
@@ -94,23 +99,28 @@ export function buildScheduleForCredit(credit: {
 	fixedInstallment?: number;
 	insuranceMonthly?: number;
 	outstandingBalance?: number;
+	dueDates?: number[];
+	startInstallmentNumber?: number;
+	/** For capital_constant when generating remaining installments only */
+	remainingTermMonths?: number;
 }): GeneratedPayment[] {
 	const monthlyRate = toMonthlyRate(credit.rateType, credit.interestRate);
 	const balance = credit.outstandingBalance ?? credit.principal;
-	const dueDates = generateDueDates(
-		credit.startDate,
-		credit.paymentDay,
-		credit.termMonths,
-	);
+	const dueDates =
+		credit.dueDates ??
+		generateDueDates(credit.startDate, credit.paymentDay, credit.termMonths);
 	const insurance = credit.insuranceMonthly ?? 0;
+	const startInstallmentNumber = credit.startInstallmentNumber ?? 1;
 
 	if (credit.scheduleMode === "capital_constant") {
+		const termMonths = credit.remainingTermMonths ?? credit.termMonths;
 		return generateScheduleCapitalConstant({
 			outstandingBalance: balance,
 			monthlyRate,
-			termMonths: credit.termMonths,
+			termMonths,
 			dueDates,
 			insuranceMonthly: insurance,
+			startInstallmentNumber,
 		});
 	}
 
@@ -120,7 +130,167 @@ export function buildScheduleForCredit(credit: {
 		dueDates,
 		insuranceMonthly: insurance,
 		fixedInstallment: credit.fixedInstallment,
+		startInstallmentNumber,
 	});
+}
+
+export function computeOutstandingAfterPaidInstallments(params: {
+	principal: number;
+	monthlyRate: number;
+	scheduleMode: ScheduleMode;
+	termMonths: number;
+	paidInstallmentsCount: number;
+	startDate: number;
+	paymentDay: number;
+	fixedInstallment?: number;
+}): number {
+	if (params.paidInstallmentsCount <= 0) return params.principal;
+	if (params.scheduleMode === "manual") return params.principal;
+
+	const allDueDates = generateDueDates(
+		params.startDate,
+		params.paymentDay,
+		params.termMonths,
+	);
+	const paidDueDates = allDueDates.slice(0, params.paidInstallmentsCount);
+
+	if (params.scheduleMode === "capital_constant") {
+		const rows = generateScheduleCapitalConstant({
+			outstandingBalance: params.principal,
+			monthlyRate: params.monthlyRate,
+			termMonths: params.termMonths,
+			dueDates: paidDueDates,
+		});
+		return params.principal - rows.reduce((sum, row) => sum + row.principal, 0);
+	}
+
+	const rows = generateScheduleCuotaFija({
+		outstandingBalance: params.principal,
+		monthlyRate: params.monthlyRate,
+		dueDates: paidDueDates,
+		fixedInstallment: params.fixedInstallment,
+	});
+	return params.principal - rows.reduce((sum, row) => sum + row.principal, 0);
+}
+
+export type InProgressCreditScheduleInput = {
+	principal: number;
+	rateType: Doc<"credits">["rateType"];
+	interestRate: number;
+	termMonths: number;
+	startDate: number;
+	paymentDay: number;
+	scheduleMode: ScheduleMode;
+	fixedInstallment?: number;
+	insuranceMonthly?: number;
+	paidInstallmentsCount: number;
+	trackRemainingOnly: boolean;
+	outstandingBalanceOverride?: number;
+};
+
+export function resolveInProgressCreditSchedule(
+	params: InProgressCreditScheduleInput,
+): {
+	schedule: GeneratedPayment[];
+	outstandingBalance: number;
+	isProjected: boolean;
+	markFirstPaidCount?: number;
+} {
+	const paid = params.paidInstallmentsCount;
+	const monthlyRate = toMonthlyRate(params.rateType, params.interestRate);
+	const allDueDates = generateDueDates(
+		params.startDate,
+		params.paymentDay,
+		params.termMonths,
+	);
+	const computedBalance = computeOutstandingAfterPaidInstallments({
+		principal: params.principal,
+		monthlyRate,
+		scheduleMode: params.scheduleMode,
+		termMonths: params.termMonths,
+		paidInstallmentsCount: paid,
+		startDate: params.startDate,
+		paymentDay: params.paymentDay,
+		fixedInstallment: params.fixedInstallment,
+	});
+	const outstandingBalance =
+		params.outstandingBalanceOverride ?? computedBalance;
+
+	if (params.trackRemainingOnly) {
+		const remainingMonths = params.termMonths - paid;
+		const remainingDueDates = allDueDates.slice(paid);
+
+		if (params.scheduleMode === "manual") {
+			const insurance = params.insuranceMonthly ?? 0;
+			return {
+				schedule: remainingDueDates.map((dueDate, index) => ({
+					installmentNumber: paid + 1 + index,
+					dueDate,
+					principal: 0,
+					interest: 0,
+					insuranceAmount: insurance,
+					otherFees: 0,
+					totalDue: insurance,
+				})),
+				outstandingBalance,
+				isProjected: false,
+			};
+		}
+
+		return {
+			schedule: buildScheduleForCredit({
+				principal: params.principal,
+				rateType: params.rateType,
+				interestRate: params.interestRate,
+				termMonths: params.termMonths,
+				startDate: params.startDate,
+				paymentDay: params.paymentDay,
+				scheduleMode: params.scheduleMode,
+				fixedInstallment: params.fixedInstallment,
+				insuranceMonthly: params.insuranceMonthly,
+				outstandingBalance,
+				dueDates: remainingDueDates,
+				startInstallmentNumber: paid + 1,
+				remainingTermMonths:
+					params.scheduleMode === "capital_constant"
+						? remainingMonths
+						: undefined,
+			}),
+			outstandingBalance,
+			isProjected: true,
+		};
+	}
+
+	if (params.scheduleMode === "manual") {
+		return {
+			schedule: generateManualScheduleSkeleton({
+				startDate: params.startDate,
+				paymentDay: params.paymentDay,
+				termMonths: params.termMonths,
+				insuranceMonthly: params.insuranceMonthly,
+			}),
+			outstandingBalance,
+			isProjected: false,
+			markFirstPaidCount: paid,
+		};
+	}
+
+	return {
+		schedule: buildScheduleForCredit({
+			principal: params.principal,
+			rateType: params.rateType,
+			interestRate: params.interestRate,
+			termMonths: params.termMonths,
+			startDate: params.startDate,
+			paymentDay: params.paymentDay,
+			scheduleMode: params.scheduleMode,
+			fixedInstallment: params.fixedInstallment,
+			insuranceMonthly: params.insuranceMonthly,
+		}),
+		outstandingBalance,
+		isProjected: true,
+		markFirstPaidCount: paid,
+	};
 }
 
 export async function getNextPendingPayment(

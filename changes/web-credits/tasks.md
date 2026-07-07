@@ -157,6 +157,26 @@
 
 ---
 
+## Phase 11: Iteración UX sesión 2026-07-07
+
+**Goal**: Créditos flexibles, dashboard fiable, metas con gasto fijo inteligente, polish transversal.
+
+- [x] T054 Crédito en marcha — `alreadyInProgress`, cuotas pagadas, `trackRemainingOnly`, saldo pendiente; cuentas opcionales en create
+- [x] T055 `credits.create` — `startDate` opcional; validación saldo en manual in-progress
+- [x] T056 Dashboard — últimos movimientos sin filtro de periodo (`convex/dashboard.ts`)
+- [x] T057 Dashboard gastos fijos — widget mes calendario + `pendingTotal` alineado al periodo de métricas (`home.tsx`, `listUpcomingForPeriod`)
+- [x] T058 Gastos fijos — deduplicar filas; mejor detección de pagado (`fixedExpensePayments.ts`)
+- [x] T059 Metas ahorro — cálculo automático cuota mensual si hay deadline (`computeMonthlySavings.ts`, `SavingsGoalForm.tsx`)
+- [x] T060 Categorías — `usageCounts` + subtítulos en `CategoryList`
+- [x] T061 `formatConvexError` en créditos, presupuestos, gastos fijos
+- [x] T062 JP-DS Input/FormSelect + Modal + `core.css` (métricas, overflow, tooltips)
+- [x] T063 Documentar decisiones D-23–D-33 en `design.md`
+- [ ] T064 Refactor manual-first créditos (P-01–P-03 en design.md)
+
+**Checkpoint**: Build OK; manual-first créditos queda para siguiente iteración.
+
+---
+
 ## Dependency Graph
 
 ```text
@@ -187,4 +207,4 @@ Phase 9 Polish
 
 **Mínimo usable**: Phases 1–5 (crédito + abonos + rubros).  
 **Flujo usuario completo**: + Phase 6 (escrow) + Phase 7 (metas).  
-**Total**: 53 tareas · 10 fases
+**Total**: 64 tareas · 11 fases (+ P-01–P-03 pendientes)

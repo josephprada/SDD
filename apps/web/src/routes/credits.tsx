@@ -1,3 +1,4 @@
+import { formatConvexError } from "@app/lib/convex/formatError";
 import { CreditForm } from "@app/components/credits/CreditForm";
 import { CreditList } from "@app/components/credits/CreditList";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
@@ -93,9 +94,7 @@ export function CreditsRoute() {
 							await createCredit(values);
 							setModalOpen(false);
 						} catch (e) {
-							setError(
-								e instanceof Error ? e.message : "Error al crear crédito",
-							);
+							setError(formatConvexError(e, "Error al crear crédito"));
 						}
 					}}
 				/>

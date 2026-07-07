@@ -25,7 +25,7 @@ export function RecentTransactionsList({
 			{transactions.length === 0 ? (
 				<EmptyState
 					title="Sin movimientos"
-					description="Aún no hay movimientos este mes."
+					description="Aún no hay movimientos registrados."
 					icon={<CoreIcon name="arrow-down-up" size={28} />}
 				/>
 			) : (

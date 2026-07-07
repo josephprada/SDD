@@ -120,9 +120,17 @@ select.jp-input {
   background-size: 18px;
 }
 
+select.jp-input.jp-input--placeholder {
+  color: var(--color-text-muted);
+}
+
 select.jp-input option {
   background: var(--color-surface-1);
   color: var(--color-text-primary);
+}
+
+select.jp-input option.jp-select-placeholder {
+  color: var(--color-text-muted);
 }
 
 select.jp-input option:checked {
@@ -137,6 +145,12 @@ select.jp-input option:checked {
   padding-right: var(--space-2);
 }
 
+.jp-input[type="date"].jp-input--placeholder,
+.jp-input[type="datetime-local"].jp-input--placeholder,
+.jp-input[type="time"].jp-input--placeholder {
+  color: var(--color-text-muted);
+}
+
 .jp-input[type="date"]::-webkit-calendar-picker-indicator,
 .jp-input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 .jp-input[type="time"]::-webkit-calendar-picker-indicator {
@@ -148,9 +162,25 @@ select.jp-input option:checked {
   filter: brightness(0) invert(1);
 }
 
+.jp-input[type="date"].jp-input--placeholder::-webkit-calendar-picker-indicator,
+.jp-input[type="datetime-local"].jp-input--placeholder::-webkit-calendar-picker-indicator,
+.jp-input[type="time"].jp-input--placeholder::-webkit-calendar-picker-indicator {
+  opacity: 0.42;
+}
+
 .jp-input[type="date"]::-webkit-datetime-edit,
-.jp-input[type="datetime-local"]::-webkit-datetime-edit {
-  color: var(--color-text-primary);
+.jp-input[type="datetime-local"]::-webkit-datetime-edit,
+.jp-input[type="time"]::-webkit-datetime-edit {
+  color: inherit;
+}
+
+.jp-input[type="date"].jp-input--placeholder::-webkit-datetime-edit,
+.jp-input[type="datetime-local"].jp-input--placeholder::-webkit-datetime-edit,
+.jp-input[type="time"].jp-input--placeholder::-webkit-datetime-edit,
+.jp-input[type="date"].jp-input--placeholder::-webkit-datetime-edit-day-field,
+.jp-input[type="date"].jp-input--placeholder::-webkit-datetime-edit-month-field,
+.jp-input[type="date"].jp-input--placeholder::-webkit-datetime-edit-year-field {
+  color: var(--color-text-muted);
 }
 
 .jp-input[type="date"]::-webkit-datetime-edit-fields-wrapper,
@@ -253,6 +283,7 @@ select.jp-input option:checked {
 }
 
 .jp-checkbox {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
@@ -268,10 +299,13 @@ select.jp-input option:checked {
 
 .jp-checkbox__input {
   position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
   opacity: 0;
   width: 1px;
   height: 1px;
   pointer-events: none;
+  transform: translateY(-50%);
 }
 
 .jp-checkbox__control {

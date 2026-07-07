@@ -17,18 +17,11 @@ function transactionMatchesFixedExpensePayment(
 	return true;
 }
 
-export async function hasValidPaymentTransaction(
+export async function findMatchingPaymentTransaction(
 	ctx: { db: QueryCtx["db"] },
 	item: Doc<"fixedExpenses">,
 	periodKey: string,
-): Promise<boolean> {
-	if (item.lastPaidPeriodKey !== periodKey) return false;
-
-	if (item.lastPaidTransactionId) {
-		const linked = await ctx.db.get(item.lastPaidTransactionId);
-		if (linked) return true;
-	}
-
+): Promise<Doc<"transactions"> | null> {
 	const { start, end } = periodKeyToMonthRange(periodKey);
 	const userTransactions = await ctx.db
 		.query("transactions")
@@ -38,7 +31,7 @@ export async function hasValidPaymentTransaction(
 	for (const transaction of userTransactions) {
 		if (transaction.sourceFixedExpenseId === item._id) {
 			if (transaction.date >= start && transaction.date <= end) {
-				return true;
+				return transaction;
 			}
 		}
 	}
@@ -47,11 +40,31 @@ export async function hasValidPaymentTransaction(
 		if (
 			transactionMatchesFixedExpensePayment(transaction, item, start, end)
 		) {
-			return true;
+			return transaction;
 		}
 	}
 
-	return false;
+	return null;
+}
+
+export async function hasValidPaymentTransaction(
+	ctx: { db: QueryCtx["db"] },
+	item: Doc<"fixedExpenses">,
+	periodKey: string,
+): Promise<boolean> {
+	if (item.lastPaidPeriodKey === periodKey) return true;
+
+	if (item.lastPaidTransactionId) {
+		const linked = await ctx.db.get(item.lastPaidTransactionId);
+		if (linked) {
+			const { start, end } = periodKeyToMonthRange(periodKey);
+			if (linked.date >= start && linked.date <= end) {
+				return true;
+			}
+		}
+	}
+
+	return (await findMatchingPaymentTransaction(ctx, item, periodKey)) !== null;
 }
 
 export async function clearFixedExpensePaymentForDeletedTransaction(
@@ -121,17 +134,39 @@ export async function reconcileFixedExpensePayment(
 ): Promise<boolean> {
 	if (!item.lastPaidPeriodKey) return false;
 
-	const valid = await hasValidPaymentTransaction(
+	if (item.lastPaidTransactionId) {
+		const linked = await ctx.db.get(item.lastPaidTransactionId);
+		if (linked) return false;
+	}
+
+	const matching = await findMatchingPaymentTransaction(
 		ctx,
 		item,
 		item.lastPaidPeriodKey,
 	);
-	if (valid) return false;
+	const now = Date.now();
 
-	await ctx.db.patch(item._id, {
-		lastPaidPeriodKey: undefined,
-		lastPaidTransactionId: undefined,
-		updatedAt: Date.now(),
-	});
-	return true;
+	if (matching) {
+		await ctx.db.patch(item._id, {
+			lastPaidTransactionId: matching._id,
+			updatedAt: now,
+		});
+		if (!matching.sourceFixedExpenseId) {
+			await ctx.db.patch(matching._id, {
+				sourceFixedExpenseId: item._id,
+				updatedAt: now,
+			});
+		}
+		return true;
+	}
+
+	if (item.lastPaidTransactionId) {
+		await ctx.db.patch(item._id, {
+			lastPaidTransactionId: undefined,
+			updatedAt: now,
+		});
+		return true;
+	}
+
+	return false;
 }

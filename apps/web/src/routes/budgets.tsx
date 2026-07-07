@@ -11,6 +11,7 @@ import type { BudgetItem, FixedExpenseItem } from "@app/lib/budgets/types";
 import { useFixedExpensePayment } from "@app/lib/budgets/useFixedExpensePayment";
 import { useReconcileFixedExpensePayments } from "@app/lib/budgets/useReconcileFixedExpensePayments";
 import { addMonths, formatMonthYear } from "@app/lib/format/date";
+import { formatConvexError } from "@app/lib/convex/formatError";
 import { periodKeyFromDate } from "@app/lib/period";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -43,6 +44,7 @@ export function BudgetsRoute() {
 	const createFixed = useMutation(api.fixedExpenses.create);
 	const updateFixed = useMutation(api.fixedExpenses.update);
 	const removeFixed = useMutation(api.fixedExpenses.remove);
+	const acknowledgePaid = useMutation(api.fixedExpenses.acknowledgePaidForPeriod);
 	const unmarkPaid = useMutation(api.fixedExpenses.unmarkPaid);
 	const payment = useFixedExpensePayment();
 
@@ -53,7 +55,11 @@ export function BudgetsRoute() {
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [confirmDeleteBudget, setConfirmDeleteBudget] = useState(false);
+	const [budgetToDelete, setBudgetToDelete] = useState<BudgetItem | null>(null);
 	const [confirmDeleteFixed, setConfirmDeleteFixed] = useState(false);
+	const [fixedToDelete, setFixedToDelete] = useState<FixedExpenseItem | null>(
+		null,
+	);
 
 	const expenseCategories = useMemo(() => categories ?? [], [categories]);
 	const isViewingCurrentMonth =
@@ -94,7 +100,7 @@ export function BudgetsRoute() {
 			setBudgetModal(false);
 			setEditBudget(null);
 		} catch (e) {
-			setError(e instanceof Error ? e.message : "Error al guardar");
+			setError(formatConvexError(e, "Error al guardar el presupuesto"));
 		} finally {
 			setLoading(false);
 		}
@@ -133,19 +139,11 @@ export function BudgetsRoute() {
 			}
 
 			if (markAsPaid && !wasPaid) {
-				setFixedModal(false);
-				setEditFixed(null);
-				payment.openPayment({
+				await acknowledgePaid({
 					id: fixedId,
-					name: payload.name,
-					amount: payload.amount,
-					categoryName: expenseCategories.find(
-						(c) => c._id === payload.categoryId,
-					)?.name,
-					dueDate: editFixed?.nextDueDate,
 					periodKey,
+					dueDate: editFixed?.nextDueDate,
 				});
-				return;
 			} else if (!markAsPaid && wasPaid) {
 				await unmarkPaid({ id: fixedId });
 			}
@@ -153,7 +151,7 @@ export function BudgetsRoute() {
 			setFixedModal(false);
 			setEditFixed(null);
 		} catch (e) {
-			setError(e instanceof Error ? e.message : "Error al guardar");
+			setError(formatConvexError(e, "Error al guardar el gasto fijo"));
 		} finally {
 			setLoading(false);
 		}
@@ -172,11 +170,13 @@ export function BudgetsRoute() {
 	};
 
 	const handleDeleteBudget = async () => {
-		if (!editBudget) return;
+		const target = budgetToDelete ?? editBudget;
+		if (!target) return;
 		setLoading(true);
 		try {
-			await removeBudget({ id: editBudget._id as Id<"budgets"> });
+			await removeBudget({ id: target._id as Id<"budgets"> });
 			setConfirmDeleteBudget(false);
+			setBudgetToDelete(null);
 			setBudgetModal(false);
 			setEditBudget(null);
 		} finally {
@@ -184,17 +184,31 @@ export function BudgetsRoute() {
 		}
 	};
 
+	const requestDeleteBudget = (item: BudgetItem) => {
+		setBudgetToDelete(item);
+		setConfirmDeleteBudget(true);
+		setBudgetModal(false);
+		setEditBudget(null);
+	};
+
 	const handleDeleteFixed = async () => {
-		if (!editFixed) return;
+		const target = fixedToDelete ?? editFixed;
+		if (!target) return;
 		setLoading(true);
 		try {
-			await removeFixed({ id: editFixed._id as Id<"fixedExpenses"> });
+			await removeFixed({ id: target._id as Id<"fixedExpenses"> });
 			setConfirmDeleteFixed(false);
+			setFixedToDelete(null);
 			setFixedModal(false);
 			setEditFixed(null);
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const requestDeleteFixed = (item: FixedExpenseItem) => {
+		setFixedToDelete(item);
+		setConfirmDeleteFixed(true);
 	};
 
 	return (
@@ -269,8 +283,11 @@ export function BudgetsRoute() {
 							setEditBudget(item);
 							setBudgetModal(true);
 						}}
-						onDelete={async (id) => {
-							await removeBudget({ id: id as Id<"budgets"> });
+						onDelete={(id) => {
+							const item = (budgets as BudgetItem[]).find(
+								(entry) => entry._id === id,
+							);
+							if (item) requestDeleteBudget(item);
 						}}
 					/>
 				</>
@@ -283,8 +300,11 @@ export function BudgetsRoute() {
 							setEditFixed(item);
 							setFixedModal(true);
 						}}
-						onDelete={async (id) => {
-							await removeFixed({ id: id as Id<"fixedExpenses"> });
+						onDelete={(id) => {
+							const item = (fixedExpenses as FixedExpenseItem[]).find(
+								(entry) => entry._id === id,
+							);
+							if (item) requestDeleteFixed(item);
 						}}
 						onMarkPaid={openFixedExpensePayment}
 					/>
@@ -318,7 +338,13 @@ export function BudgetsRoute() {
 						setEditBudget(null);
 					}}
 					onDelete={
-						editBudget ? () => setConfirmDeleteBudget(true) : undefined
+						editBudget
+							? () => {
+									setBudgetToDelete(editBudget);
+									setConfirmDeleteBudget(true);
+									setBudgetModal(false);
+								}
+							: undefined
 					}
 				/>
 			</Modal>
@@ -358,7 +384,12 @@ export function BudgetsRoute() {
 						setEditFixed(null);
 					}}
 					onDelete={
-						editFixed ? () => setConfirmDeleteFixed(true) : undefined
+						editFixed
+							? () => {
+									setFixedToDelete(editFixed);
+									setConfirmDeleteFixed(true);
+								}
+							: undefined
 					}
 				/>
 			</Modal>
@@ -370,7 +401,10 @@ export function BudgetsRoute() {
 				confirmLabel="Eliminar"
 				variant="danger"
 				onConfirm={handleDeleteBudget}
-				onCancel={() => setConfirmDeleteBudget(false)}
+				onCancel={() => {
+					setConfirmDeleteBudget(false);
+					setBudgetToDelete(null);
+				}}
 			/>
 			<ConfirmDialog
 				open={confirmDeleteFixed}
@@ -379,7 +413,10 @@ export function BudgetsRoute() {
 				confirmLabel="Eliminar"
 				variant="danger"
 				onConfirm={handleDeleteFixed}
-				onCancel={() => setConfirmDeleteFixed(false)}
+				onCancel={() => {
+					setConfirmDeleteFixed(false);
+					setFixedToDelete(null);
+				}}
 			/>
 
 			<MarkFixedExpensePaidModal

@@ -1,11 +1,26 @@
 import {
+	ALREADY_IN_PROGRESS_HINT,
+	ALREADY_IN_PROGRESS_LABEL,
+	CREDIT_PRINCIPAL_LABEL,
+	CREDIT_START_DATE_HINT,
+	CREDIT_START_DATE_LABEL,
+	DISBURSED_PRINCIPAL_LABEL,
 	DISBURSEMENT_ACCOUNT_HINT,
 	DISBURSEMENT_ACCOUNT_LABEL,
+	DISBURSEMENT_START_DATE_LABEL,
 	FUND_EXPENSE_CATEGORY_HINT,
+	HAS_DISBURSEMENT_HINT,
+	HAS_DISBURSEMENT_LABEL,
+	OUTSTANDING_BALANCE_HINT,
+	OUTSTANDING_BALANCE_LABEL,
+	PAID_INSTALLMENTS_HINT,
+	PAID_INSTALLMENTS_LABEL,
 	PAYMENT_ACCOUNT_HINT,
 	PAYMENT_ACCOUNT_LABEL,
 	RATE_TYPE_OPTIONS,
 	SCHEDULE_MODE_OPTIONS,
+	TRACK_REMAINING_ONLY_HINT,
+	TRACK_REMAINING_ONLY_LABEL,
 	type RateType,
 	type ScheduleMode,
 } from "@app/lib/credits/types";
@@ -29,14 +44,17 @@ export type CreditFormValues = {
 	rateType: RateType;
 	interestRate: number;
 	termMonths: number;
-	startDate: number;
+	startDate?: number;
 	paymentDay: number;
 	scheduleMode: ScheduleMode;
 	fixedInstallment?: number;
-	insuranceMonthly?: number;
-	disbursementAccountId: Id<"accounts">;
-	paymentAccountId: Id<"accounts">;
+	disbursementAccountId?: Id<"accounts">;
+	paymentAccountId?: Id<"accounts">;
 	registerDisbursementIncome?: boolean;
+	alreadyInProgress?: boolean;
+	paidInstallmentsCount?: number;
+	trackRemainingOnly?: boolean;
+	outstandingBalance?: number;
 	fundExpenseCategoryIds: Id<"categories">[];
 	newFundExpenseCategoryNames: string[];
 	notes?: string;
@@ -69,7 +87,11 @@ export function CreditForm({
 	const [paymentDay, setPaymentDay] = useState("");
 	const [scheduleMode, setScheduleMode] = useState<ScheduleMode | "">("");
 	const [fixedInstallmentRaw, setFixedInstallmentRaw] = useState("");
-	const [insuranceRaw, setInsuranceRaw] = useState("");
+	const [alreadyInProgress, setAlreadyInProgress] = useState(false);
+	const [paidInstallmentsRaw, setPaidInstallmentsRaw] = useState("");
+	const [trackRemainingOnly, setTrackRemainingOnly] = useState(true);
+	const [outstandingBalanceRaw, setOutstandingBalanceRaw] = useState("");
+	const [hasDisbursement, setHasDisbursement] = useState(false);
 	const [disbursementAccountId, setDisbursementAccountId] = useState("");
 	const [paymentAccountId, setPaymentAccountId] = useState("");
 	const [registerDisbursementIncome, setRegisterDisbursementIncome] =
@@ -80,6 +102,7 @@ export function CreditForm({
 			newNames: [],
 		});
 	const [fundCategoryError, setFundCategoryError] = useState("");
+	const [clientError, setClientError] = useState("");
 	const [notes, setNotes] = useState("");
 
 	const rateHint = useMemo(() => {
@@ -107,32 +130,88 @@ export function CreditForm({
 		return "Valor de la tasa (%)";
 	}, [rateType]);
 
+	const handleHasDisbursementChange = (checked: boolean) => {
+		setHasDisbursement(checked);
+		if (!checked) {
+			setDisbursementAccountId("");
+			setRegisterDisbursementIncome(false);
+			setFundCategories({ selectedIds: [], newNames: [] });
+			setFundCategoryError("");
+		}
+	};
+
+	const handleAlreadyInProgressChange = (checked: boolean) => {
+		setAlreadyInProgress(checked);
+		if (checked) {
+			setRegisterDisbursementIncome(false);
+		}
+	};
+
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
+		setClientError("");
 		const principal = parseCOPInput(principalRaw);
 		if (principal === null || principal <= 0) return;
-		if (!rateType || !scheduleMode || !startDate || !disbursementAccountId || !paymentAccountId) {
+		if (!rateType || !scheduleMode) {
+			return;
+		}
+		if (hasDisbursement && !disbursementAccountId) {
+			setClientError("Selecciona la cuenta de desembolso");
 			return;
 		}
 		if (
+			hasDisbursement &&
 			fundCategories.selectedIds.length === 0 &&
 			fundCategories.newNames.length === 0
 		) {
 			setFundCategoryError("Agrega al menos una categoría para gastos del fondo");
 			return;
 		}
-		setFundCategoryError("");
+		if (!hasDisbursement) {
+			setFundCategoryError("");
+		}
 		const term = Number.parseInt(termMonths, 10);
 		const rate = Number.parseFloat(interestRate);
 		const day = Number.parseInt(paymentDay, 10);
 		if (!Number.isFinite(term) || term <= 0) return;
 		if (!Number.isFinite(rate) || rate < 0) return;
 		if (!Number.isFinite(day) || day < 1 || day > 31) return;
+
+		let paidInstallmentsCount: number | undefined;
+		let outstandingBalance: number | undefined;
+
+		if (alreadyInProgress && paidInstallmentsRaw.trim()) {
+			const paid = Number.parseInt(paidInstallmentsRaw, 10);
+			if (!Number.isFinite(paid) || paid < 0) {
+				setClientError("Las cuotas pagadas deben ser un número válido");
+				return;
+			}
+			if (paid >= term) {
+				setClientError("Las cuotas pagadas deben ser menores que el plazo total");
+				return;
+			}
+			paidInstallmentsCount = paid;
+		}
+
+		if (alreadyInProgress) {
+			const parsedBalance = outstandingBalanceRaw
+				? parseCOPInput(outstandingBalanceRaw)
+				: null;
+			if (scheduleMode === "manual") {
+				if (parsedBalance === null || parsedBalance <= 0) {
+					setClientError(
+						"Indica el saldo capital pendiente para créditos manuales en marcha",
+					);
+					return;
+				}
+				outstandingBalance = parsedBalance;
+			} else if (parsedBalance !== null && parsedBalance > 0) {
+				outstandingBalance = parsedBalance;
+			}
+		}
+
 		const fixedInstallment = fixedInstallmentRaw
 			? parseCOPInput(fixedInstallmentRaw) ?? undefined
-			: undefined;
-		const insuranceMonthly = insuranceRaw
-			? parseCOPInput(insuranceRaw) ?? undefined
 			: undefined;
 
 		await onSubmit({
@@ -142,16 +221,30 @@ export function CreditForm({
 			rateType,
 			interestRate: rate,
 			termMonths: term,
-			startDate: new Date(startDate).getTime(),
+			startDate: startDate ? new Date(startDate).getTime() : undefined,
 			paymentDay: day,
 			scheduleMode,
 			fixedInstallment,
-			insuranceMonthly,
-			disbursementAccountId: disbursementAccountId as Id<"accounts">,
-			paymentAccountId: paymentAccountId as Id<"accounts">,
-			registerDisbursementIncome,
-			fundExpenseCategoryIds: fundCategories.selectedIds,
-			newFundExpenseCategoryNames: fundCategories.newNames,
+			disbursementAccountId: hasDisbursement
+				? (disbursementAccountId as Id<"accounts">)
+				: undefined,
+			paymentAccountId: paymentAccountId
+				? (paymentAccountId as Id<"accounts">)
+				: undefined,
+			registerDisbursementIncome:
+				hasDisbursement && !alreadyInProgress
+					? registerDisbursementIncome
+					: false,
+			alreadyInProgress,
+			paidInstallmentsCount,
+			trackRemainingOnly: alreadyInProgress ? trackRemainingOnly : undefined,
+			outstandingBalance,
+			fundExpenseCategoryIds: hasDisbursement
+				? fundCategories.selectedIds
+				: [],
+			newFundExpenseCategoryNames: hasDisbursement
+				? fundCategories.newNames
+				: [],
 			notes: notes.trim() || undefined,
 		});
 	};
@@ -173,7 +266,7 @@ export function CreditForm({
 				/>
 
 				<CurrencyInput
-					label="Monto desembolsado (COP)"
+					label={hasDisbursement ? DISBURSED_PRINCIPAL_LABEL : CREDIT_PRINCIPAL_LABEL}
 					value={principalRaw}
 					onChange={setPrincipalRaw}
 					required
@@ -187,7 +280,6 @@ export function CreditForm({
 						hint={rateHint}
 						onChange={(v) => setRateType(v as RateType | "")}
 					>
-						<option value="">— Seleccionar —</option>
 						{RATE_TYPE_OPTIONS.map((opt) => (
 							<option key={opt.value} value={opt.value}>
 								{opt.label}
@@ -208,13 +300,19 @@ export function CreditForm({
 					onChange={(e) => setTermMonths(e.target.value)}
 					required
 				/>
-				<Input
-					label="Fecha del desembolso"
-					type="date"
-					value={startDate}
-					onChange={(e) => setStartDate(e.target.value)}
-					required
-				/>
+				<div className="credit-form-grid__full">
+					<Input
+						label={
+							hasDisbursement
+								? DISBURSEMENT_START_DATE_LABEL
+								: CREDIT_START_DATE_LABEL
+						}
+						type="date"
+						value={startDate}
+						onChange={(e) => setStartDate(e.target.value)}
+					/>
+					<p className="credit-form-field-hint">{CREDIT_START_DATE_HINT}</p>
+				</div>
 				<Input
 					label="Día de pago de la cuota (1–31)"
 					value={paymentDay}
@@ -230,7 +328,6 @@ export function CreditForm({
 						hint={scheduleHint}
 						onChange={(v) => setScheduleMode(v as ScheduleMode | "")}
 					>
-						<option value="">— Seleccionar —</option>
 						{SCHEDULE_MODE_OPTIONS.map((opt) => (
 							<option key={opt.value} value={opt.value}>
 								{opt.label}
@@ -247,28 +344,134 @@ export function CreditForm({
 					/>
 				) : null}
 
-				<CurrencyInput
-					label="Seguro de vida / otros fijos mensuales (opcional)"
-					value={insuranceRaw}
-					onChange={setInsuranceRaw}
-				/>
-
-				<div className="credit-form-grid__full">
-					<FormSelect
-						id="credit-disbursement-account"
-						label={DISBURSEMENT_ACCOUNT_LABEL}
-						value={disbursementAccountId}
-						hint={DISBURSEMENT_ACCOUNT_HINT}
-						onChange={setDisbursementAccountId}
+				<div className="credit-form-grid__full credit-form-toggle-row">
+					<div className="credit-form-toggle-row__text">
+						<span className="credit-form-toggle-row__label">
+							{ALREADY_IN_PROGRESS_LABEL}
+						</span>
+						<p className="credit-form-field-hint">{ALREADY_IN_PROGRESS_HINT}</p>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={alreadyInProgress}
+						aria-label={
+							alreadyInProgress
+								? "Desactivar crédito en marcha"
+								: "Activar crédito en marcha"
+						}
+						className={`toggle-switch${alreadyInProgress ? " toggle-switch--on" : ""}`}
+						onClick={() => handleAlreadyInProgressChange(!alreadyInProgress)}
 					>
-						<option value="">— Seleccionar cuenta —</option>
-						{accounts.map((a) => (
-							<option key={a._id} value={a._id}>
-								{a.name}
-							</option>
-						))}
-					</FormSelect>
+						<span className="toggle-switch__thumb" />
+					</button>
 				</div>
+
+				{alreadyInProgress ? (
+					<>
+						<div className="credit-form-grid__full">
+							<Input
+								label={PAID_INSTALLMENTS_LABEL}
+								value={paidInstallmentsRaw}
+								onChange={(e) => setPaidInstallmentsRaw(e.target.value)}
+							/>
+							<p className="credit-form-field-hint">{PAID_INSTALLMENTS_HINT}</p>
+						</div>
+						<CurrencyInput
+							label={OUTSTANDING_BALANCE_LABEL}
+							value={outstandingBalanceRaw}
+							onChange={setOutstandingBalanceRaw}
+							required={scheduleMode === "manual"}
+						/>
+						<p className="credit-form-field-hint">{OUTSTANDING_BALANCE_HINT}</p>
+						<div className="credit-form-grid__full credit-form-toggle-row">
+							<div className="credit-form-toggle-row__text">
+								<span className="credit-form-toggle-row__label">
+									{TRACK_REMAINING_ONLY_LABEL}
+								</span>
+								<p className="credit-form-field-hint">
+									{TRACK_REMAINING_ONLY_HINT}
+								</p>
+							</div>
+							<button
+								type="button"
+								role="switch"
+								aria-checked={trackRemainingOnly}
+								aria-label={
+									trackRemainingOnly
+										? "Desactivar solo cuotas restantes"
+										: "Activar solo cuotas restantes"
+								}
+								className={`toggle-switch${trackRemainingOnly ? " toggle-switch--on" : ""}`}
+								onClick={() => setTrackRemainingOnly(!trackRemainingOnly)}
+							>
+								<span className="toggle-switch__thumb" />
+							</button>
+						</div>
+					</>
+				) : null}
+
+				<div className="credit-form-grid__full credit-form-toggle-row">
+					<div className="credit-form-toggle-row__text">
+						<span className="credit-form-toggle-row__label">
+							{HAS_DISBURSEMENT_LABEL}
+						</span>
+						<p className="credit-form-field-hint">{HAS_DISBURSEMENT_HINT}</p>
+					</div>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={hasDisbursement}
+						aria-label={
+							hasDisbursement
+								? "Desactivar desembolso en cuenta"
+								: "Activar desembolso en cuenta"
+						}
+						className={`toggle-switch${hasDisbursement ? " toggle-switch--on" : ""}`}
+						onClick={() => handleHasDisbursementChange(!hasDisbursement)}
+					>
+						<span className="toggle-switch__thumb" />
+					</button>
+				</div>
+
+				{hasDisbursement ? (
+					<>
+						<div className="credit-form-grid__full">
+							<FormSelect
+								id="credit-disbursement-account"
+								label={DISBURSEMENT_ACCOUNT_LABEL}
+								value={disbursementAccountId}
+								hint={DISBURSEMENT_ACCOUNT_HINT}
+								placeholder="Seleccionar cuenta"
+								onChange={setDisbursementAccountId}
+							>
+								{accounts.map((a) => (
+									<option key={a._id} value={a._id}>
+										{a.name}
+									</option>
+								))}
+							</FormSelect>
+						</div>
+
+						{disbursementAccountId && !alreadyInProgress ? (
+							<div className="credit-form-grid__full credit-form-check">
+								<Checkbox
+									label="Registrar el desembolso como ingreso en esta cuenta"
+									checked={registerDisbursementIncome}
+									onChange={setRegisterDisbursementIncome}
+								/>
+							</div>
+						) : null}
+
+						<FundExpenseCategoryPicker
+							hint={FUND_EXPENSE_CATEGORY_HINT}
+							availableCategories={expenseCategories}
+							value={fundCategories}
+							onChange={setFundCategories}
+							error={fundCategoryError}
+						/>
+					</>
+				) : null}
 
 				<div className="credit-form-grid__full">
 					<FormSelect
@@ -276,9 +479,9 @@ export function CreditForm({
 						label={PAYMENT_ACCOUNT_LABEL}
 						value={paymentAccountId}
 						hint={PAYMENT_ACCOUNT_HINT}
+						placeholder="Seleccionar cuenta"
 						onChange={setPaymentAccountId}
 					>
-						<option value="">— Seleccionar cuenta —</option>
 						{accounts.map((a) => (
 							<option key={a._id} value={a._id}>
 								{a.name}
@@ -286,24 +489,6 @@ export function CreditForm({
 						))}
 					</FormSelect>
 				</div>
-
-				{disbursementAccountId ? (
-					<div className="credit-form-grid__full credit-form-check">
-						<Checkbox
-							label="Registrar el desembolso como ingreso en esta cuenta"
-							checked={registerDisbursementIncome}
-							onChange={setRegisterDisbursementIncome}
-						/>
-					</div>
-				) : null}
-
-				<FundExpenseCategoryPicker
-					hint={FUND_EXPENSE_CATEGORY_HINT}
-					availableCategories={expenseCategories}
-					value={fundCategories}
-					onChange={setFundCategories}
-					error={fundCategoryError}
-				/>
 
 				<Input
 					label="Notas"
@@ -313,7 +498,7 @@ export function CreditForm({
 				/>
 
 				<div className="credit-form-grid__full">
-					<FieldError message={error} />
+					<FieldError message={clientError || error} />
 				</div>
 			</div>
 

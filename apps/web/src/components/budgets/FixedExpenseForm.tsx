@@ -2,14 +2,13 @@ import { CategoryChoice } from "@app/components/ui/CategoryChoice";
 import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { DigitsInput } from "@app/components/ui/DigitsInput";
 import { FieldError } from "@app/components/ui/FieldError";
-import { FieldHelp } from "@app/components/ui/FieldHelp";
 import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import { ReminderOffsetsEditor } from "@app/components/budgets/ReminderOffsetsEditor";
 import { periodLabelFromKey } from "@app/lib/budgets/periodLabel";
 import type { Id } from "@convex/_generated/dataModel";
 import { formatCOPInput, parseCOPInput } from "@app/lib/format/currency";
 import { Checkbox, Input } from "@jp-ds";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 type CategoryOption = {
 	_id: Id<"categories">;
@@ -88,14 +87,6 @@ export function FixedExpenseForm({
 	const [error, setError] = useState("");
 	const periodLabel = periodKey ? periodLabelFromKey(periodKey) : "";
 
-	const handleSingleMonthOnly = useCallback((checked: boolean) => {
-		const active = document.activeElement;
-		if (active instanceof HTMLElement) active.blur();
-		requestAnimationFrame(() => {
-			setSingleMonthOnly(checked);
-		});
-	}, []);
-
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
 		const amount = parseCOPInput(amountStr);
@@ -157,15 +148,18 @@ export function FixedExpenseForm({
 					maxLength={2}
 				/>
 				{isCreate && periodKey ? (
-					<div className="credit-form-check credit-form-check--with-help">
+					<div className="fixed-expense-form__checks">
 						<Checkbox
 							label={`Solo para ${periodLabel}`}
 							checked={singleMonthOnly}
-							onChange={handleSingleMonthOnly}
+							onChange={setSingleMonthOnly}
 						/>
-						<FieldHelp
-							text={`No se repetirá en los meses siguientes. Solo aparece en ${periodLabel}.`}
-						/>
+						{singleMonthOnly ? (
+							<p className="tx-form__hint fixed-expense-form__single-month-hint">
+								No se repetirá en los meses siguientes. Solo aparece en{" "}
+								{periodLabel}.
+							</p>
+						) : null}
 					</div>
 				) : null}
 				{initial?.onlyPeriodKey ? (
@@ -189,7 +183,8 @@ export function FixedExpenseForm({
 					<div>
 						<div className="settings-row__title">Pagado este mes</div>
 						<div className="settings-row__sub">
-							Al activar, registrarás el pago y crearás el movimiento
+							Marca el período como pagado. Si ya existe un movimiento
+							compatible, se vinculará sin crear otro.
 						</div>
 					</div>
 					<button

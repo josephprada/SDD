@@ -92,10 +92,15 @@ async function applyBalanceDeltas(
 	ctx: MutationCtx,
 	deltas: ReturnType<typeof getBalanceDeltas>,
 	userId: Id<"users">,
+	options?: { allowArchivedReversal?: boolean },
 ) {
 	for (const { accountId, delta } of deltas) {
 		const account = await requireAccountOwnership(ctx, userId, accountId);
-		if (account.archived && delta < 0) {
+		if (
+			!options?.allowArchivedReversal &&
+			account.archived &&
+			delta < 0
+		) {
 			throw new Error("Cannot debit archived account");
 		}
 		await ctx.db.patch(accountId, {
@@ -398,7 +403,9 @@ export const update = mutation({
 			accountId: existing.accountId,
 			toAccountId: existing.toAccountId,
 		});
-		await applyBalanceDeltas(ctx, invertDeltas(oldDeltas), userId);
+		await applyBalanceDeltas(ctx, invertDeltas(oldDeltas), userId, {
+			allowArchivedReversal: true,
+		});
 
 		const amount = await validateTransactionInput(ctx, userId, args);
 		const newDeltas = getBalanceDeltas({ ...args, amount });
@@ -499,7 +506,9 @@ export const remove = mutation({
 			accountId: transaction.accountId,
 			toAccountId: transaction.toAccountId,
 		});
-		await applyBalanceDeltas(ctx, invertDeltas(deltas), userId);
+		await applyBalanceDeltas(ctx, invertDeltas(deltas), userId, {
+			allowArchivedReversal: true,
+		});
 
 		await clearFixedExpensePaymentForDeletedTransaction(
 			ctx,

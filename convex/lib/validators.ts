@@ -232,3 +232,18 @@ export function validateTermMonths(term: number): number {
 	}
 	return term;
 }
+
+export function validatePaidInstallmentsCount(
+	paid: number,
+	termMonths: number,
+): number {
+	if (!Number.isInteger(paid) || paid < 0) {
+		throw new Error("Las cuotas pagadas deben ser un número entero mayor o igual a 0");
+	}
+	if (paid >= termMonths) {
+		throw new Error(
+			"Las cuotas ya pagadas deben ser menores que el plazo total del crédito",
+		);
+	}
+	return paid;
+}

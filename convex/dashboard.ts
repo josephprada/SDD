@@ -66,11 +66,11 @@ export const overview = query({
 			.withIndex("by_user_date", (q) => q.eq("userId", userId))
 			.collect();
 
-		const periodTransactions = transactions.filter(
-			(t) =>
-				t.date >= periodStart &&
-				t.date <= periodEnd &&
-				!t.isCreditFundMovement,
+		const allTransactions = transactions.filter((t) => !t.isCreditFundMovement);
+		const sorted = [...allTransactions].sort(compareTransactions);
+
+		const periodTransactions = sorted.filter(
+			(t) => t.date >= periodStart && t.date <= periodEnd,
 		);
 
 		let monthlyIncome = 0;
@@ -80,7 +80,6 @@ export const overview = query({
 			if (t.type === "expense") monthlyExpense += t.amount;
 		}
 
-		const sorted = [...periodTransactions].sort(compareTransactions);
 		const limit = Math.min(Math.max(recentLimit ?? 5, 1), 30);
 		const recentSlice = sorted.slice(0, limit);
 		const recentTransactions = await Promise.all(
@@ -93,7 +92,7 @@ export const overview = query({
 			monthlyExpense,
 			activeAccounts,
 			recentTransactions,
-			recentTotal: sorted.length,
+			recentTotal: allTransactions.length,
 			creditFundCards,
 		};
 	},

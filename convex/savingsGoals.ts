@@ -252,11 +252,21 @@ export const remove = mutation({
 			await ctx.db.delete(contribution._id);
 		}
 
-		if (goal.linkedFixedExpenseId) {
-			const fixedExpense = await ctx.db.get(goal.linkedFixedExpenseId);
-			if (fixedExpense && fixedExpense.userId === userId) {
-				await ctx.db.delete(goal.linkedFixedExpenseId);
-			}
+		const fixedExpenses = await ctx.db
+			.query("fixedExpenses")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+		const linkedFixedExpenseIds = new Set(
+			fixedExpenses
+				.filter(
+					(expense) =>
+						expense.linkedSavingsGoalId === goalId ||
+						expense._id === goal.linkedFixedExpenseId,
+				)
+				.map((expense) => expense._id),
+		);
+		for (const fixedExpenseId of linkedFixedExpenseIds) {
+			await ctx.db.delete(fixedExpenseId);
 		}
 
 		await ctx.db.delete(goalId);

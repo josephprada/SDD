@@ -14,7 +14,7 @@ import {
 	generateScheduleCuotaFija,
 	toMonthlyRate,
 } from "./lib/creditAmortization";
-import { dateKeyFromTimestamp, generateDueDates, markOverdueStatus } from "./lib/creditDates";
+import { dateKeyFromTimestamp, generateDueDates, markOverdueStatus, resolvePaymentDate } from "./lib/creditDates";
 import {
 	createCreditDisbursementCategory,
 	createCreditPaymentCategory,
@@ -33,6 +33,7 @@ import {
 	cancelPendingPayments,
 	generateManualScheduleSkeleton,
 	insertGeneratedPayments,
+	resolveInProgressCreditSchedule,
 	sumDestinationAllocated,
 } from "./lib/creditsHelpers";
 import {
@@ -43,6 +44,7 @@ import {
 	validateCreditNotes,
 	validateDayOfMonth,
 	validateInterestRate,
+	validatePaidInstallmentsCount,
 	validatePositiveCopAmount,
 	validateReminderOffsets,
 	validateTermMonths,
@@ -155,14 +157,18 @@ export const create = mutation({
 		rateType: rateTypeValidator,
 		interestRate: v.number(),
 		termMonths: v.number(),
-		startDate: v.number(),
+		startDate: v.optional(v.number()),
 		paymentDay: v.number(),
 		scheduleMode: scheduleModeValidator,
 		fixedInstallment: v.optional(v.number()),
 		insuranceMonthly: v.optional(v.number()),
-		disbursementAccountId: v.id("accounts"),
-		paymentAccountId: v.id("accounts"),
+		disbursementAccountId: v.optional(v.id("accounts")),
+		paymentAccountId: v.optional(v.id("accounts")),
 		registerDisbursementIncome: v.optional(v.boolean()),
+		alreadyInProgress: v.optional(v.boolean()),
+		paidInstallmentsCount: v.optional(v.number()),
+		trackRemainingOnly: v.optional(v.boolean()),
+		outstandingBalance: v.optional(v.number()),
 		fundExpenseCategoryIds: v.optional(v.array(v.id("categories"))),
 		newFundExpenseCategoryNames: v.optional(v.array(v.string())),
 		targetPayoffDate: v.optional(v.number()),
@@ -183,9 +189,21 @@ export const create = mutation({
 			args.reminderOffsets ?? [3, 0],
 		);
 		const now = Date.now();
+		const today = new Date();
+		const startDate =
+			args.startDate ??
+			resolvePaymentDate(
+				today.getFullYear(),
+				today.getMonth(),
+				today.getDate(),
+			).getTime();
 
-		await requireAccountOwnership(ctx, userId, args.disbursementAccountId);
-		await requireAccountOwnership(ctx, userId, args.paymentAccountId);
+		if (args.paymentAccountId) {
+			await requireAccountOwnership(ctx, userId, args.paymentAccountId);
+		}
+		if (args.disbursementAccountId) {
+			await requireAccountOwnership(ctx, userId, args.disbursementAccountId);
+		}
 
 		const monthlyRate = toMonthlyRate(args.rateType, interestRate);
 		const fixedInstallment =
@@ -199,6 +217,49 @@ export const create = mutation({
 						fixedInstallment: args.fixedInstallment,
 					});
 
+		const inProgress = args.alreadyInProgress === true;
+		const paidInstallmentsCount = inProgress
+			? validatePaidInstallmentsCount(
+					args.paidInstallmentsCount ?? 0,
+					termMonths,
+				)
+			: 0;
+		const trackRemainingOnly = inProgress
+			? (args.trackRemainingOnly ?? true)
+			: false;
+
+		if (
+			inProgress &&
+			args.scheduleMode === "manual" &&
+			args.outstandingBalance === undefined
+		) {
+			throw new Error(
+				"Indica el saldo capital pendiente para un crédito manual ya en marcha",
+			);
+		}
+
+		const outstandingBalanceOverride =
+			inProgress && args.outstandingBalance !== undefined
+				? validatePositiveCopAmount(args.outstandingBalance)
+				: undefined;
+
+		const initialOutstandingBalance = inProgress
+			? resolveInProgressCreditSchedule({
+					principal,
+					rateType: args.rateType,
+					interestRate,
+					termMonths,
+					startDate,
+					paymentDay,
+					scheduleMode: args.scheduleMode,
+					fixedInstallment,
+					insuranceMonthly: args.insuranceMonthly,
+					paidInstallmentsCount,
+					trackRemainingOnly,
+					outstandingBalanceOverride,
+				}).outstandingBalance
+			: principal;
+
 		const creditId = await ctx.db.insert("credits", {
 			userId,
 			name,
@@ -207,7 +268,7 @@ export const create = mutation({
 			rateType: args.rateType,
 			interestRate,
 			termMonths,
-			startDate: args.startDate,
+			startDate,
 			paymentDay,
 			scheduleMode: args.scheduleMode,
 			fixedInstallment,
@@ -216,7 +277,7 @@ export const create = mutation({
 			insuranceMonthly: args.insuranceMonthly,
 			disbursementAccountId: args.disbursementAccountId,
 			operatingAccountId: args.paymentAccountId,
-			outstandingBalance: principal,
+			outstandingBalance: initialOutstandingBalance,
 			reminderOffsets,
 			status: "active",
 			notes,
@@ -224,9 +285,31 @@ export const create = mutation({
 			updatedAt: now,
 		});
 
-		if (args.scheduleMode === "manual") {
+		if (inProgress) {
+			const resolved = resolveInProgressCreditSchedule({
+				principal,
+				rateType: args.rateType,
+				interestRate,
+				termMonths,
+				startDate,
+				paymentDay,
+				scheduleMode: args.scheduleMode,
+				fixedInstallment,
+				insuranceMonthly: args.insuranceMonthly,
+				paidInstallmentsCount,
+				trackRemainingOnly,
+				outstandingBalanceOverride,
+			});
+			await insertGeneratedPayments(
+				ctx,
+				creditId,
+				resolved.schedule,
+				resolved.isProjected,
+				{ markFirstPaidCount: resolved.markFirstPaidCount },
+			);
+		} else if (args.scheduleMode === "manual") {
 			const schedule = generateManualScheduleSkeleton({
-				startDate: args.startDate,
+				startDate,
 				paymentDay,
 				termMonths,
 				insuranceMonthly: args.insuranceMonthly,
@@ -238,7 +321,7 @@ export const create = mutation({
 				rateType: args.rateType,
 				interestRate,
 				termMonths,
-				startDate: args.startDate,
+				startDate,
 				paymentDay,
 				scheduleMode: args.scheduleMode,
 				fixedInstallment,
@@ -257,7 +340,7 @@ export const create = mutation({
 		let disbursementIncomeCategoryId: Id<"categories"> | undefined;
 		let disbursementTransactionId: Id<"transactions"> | undefined;
 
-		if (args.registerDisbursementIncome) {
+		if (args.registerDisbursementIncome && !inProgress && args.disbursementAccountId) {
 			disbursementIncomeCategoryId = await createCreditDisbursementCategory(
 				ctx,
 				userId,
@@ -270,7 +353,7 @@ export const create = mutation({
 				{
 					type: "income",
 					amount: principal,
-					date: args.startDate,
+					date: startDate,
 					accountId: args.disbursementAccountId,
 					categoryId: disbursementIncomeCategoryId,
 					creditId,

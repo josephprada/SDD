@@ -345,7 +345,7 @@ export function SavingsRoute() {
 			<ConfirmDialog
 				open={confirmDelete}
 				title="Eliminar meta de ahorro"
-				description="Se eliminarán los aportes registrados en esta meta. Si tiene un gasto fijo vinculado, también se eliminará. Los movimientos en tus cuentas no se borran."
+				description="Se eliminarán los aportes registrados en esta meta y todos los gastos fijos vinculados a ella. Los movimientos en tus cuentas no se borran."
 				confirmLabel="Eliminar"
 				variant="danger"
 				onConfirm={handleDelete}

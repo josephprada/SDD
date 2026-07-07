@@ -80,6 +80,7 @@ export function CapitalAbonoForm({
 					id="abono-recalc-effect"
 					label="¿Qué hace este abono con las cuotas?"
 					value={recalcEffect}
+					placeholder={false}
 					onChange={(v) => setRecalcEffect(v as AbonoRecalcEffect)}
 					className="credit-form-grid__full"
 				>

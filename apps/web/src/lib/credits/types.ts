@@ -100,9 +100,20 @@ export const DISBURSEMENT_ACCOUNT_LABEL = "Cuenta de desembolso";
 export const DISBURSEMENT_ACCOUNT_HINT =
 	"Cuenta donde recibes el monto del crédito. Opcionalmente puedes registrarlo como ingreso.";
 
-export const PAYMENT_ACCOUNT_LABEL = "Cuenta para pagar cuotas";
+export const HAS_DISBURSEMENT_LABEL = "Incluye desembolso en cuenta";
+export const HAS_DISBURSEMENT_HINT =
+	"Desactiva si el crédito financia un producto o servicio sin que el dinero pase por tu cuenta (moto, electrodoméstico, etc.).";
+
+export const CREDIT_PRINCIPAL_LABEL = "Monto del crédito (COP)";
+export const DISBURSED_PRINCIPAL_LABEL = "Monto desembolsado (COP)";
+export const CREDIT_START_DATE_LABEL = "Fecha de inicio del crédito (opcional)";
+export const DISBURSEMENT_START_DATE_LABEL = "Fecha del desembolso (opcional)";
+export const CREDIT_START_DATE_HINT =
+	"Si no la conoces, usamos la fecha de hoy para calcular el calendario de cuotas.";
+
+export const PAYMENT_ACCOUNT_LABEL = "Cuenta para pagar cuotas (opcional)";
 export const PAYMENT_ACCOUNT_HINT =
-	"Cuenta desde la que pagas las cuotas mensuales. Se usará por defecto al registrar pagos.";
+	"Cuenta por defecto al registrar pagos de cuota. Puedes elegirla al momento de cada pago si no la defines aquí.";
 
 export const FUND_EXPENSE_CATEGORY_HINT =
 	"Categorías para registrar en qué rubro del crédito gastas (obra, materiales, etc.). Aparecen en Movimientos y en la pestaña Destinos.";
@@ -115,6 +126,23 @@ export const TARGET_PAYOFF_HINT =
 
 export const DELETE_CREDIT_HINT =
 	"Borra el crédito, sus cuotas, abonos y rubros. Los movimientos ya registrados en Movimientos no se eliminan.";
+
+export const ALREADY_IN_PROGRESS_LABEL = "Este crédito ya está en marcha";
+export const ALREADY_IN_PROGRESS_HINT =
+	"Úsalo si el préstamo ya empezó y quieres registrar solo lo que falta por pagar.";
+
+export const PAID_INSTALLMENTS_LABEL = "Cuotas ya pagadas (opcional)";
+export const PAID_INSTALLMENTS_HINT =
+	"Si no lo sabes, déjalo vacío: se registrarán todas las cuotas pendientes desde ahora.";
+
+export const OUTSTANDING_BALANCE_LABEL = "Saldo capital pendiente (COP)";
+export const OUTSTANDING_BALANCE_HINT =
+	"Opcional en cuota fija o capital constante (se estima con la tasa). Obligatorio en modo manual.";
+
+export const TRACK_REMAINING_ONLY_LABEL =
+	"Solo gestionar cuotas restantes (desde la cuota actual)";
+export const TRACK_REMAINING_ONLY_HINT =
+	"Si está activo, no se crean las cuotas anteriores: solo las que faltan por pagar. Si lo desactivas, se generan todas y las ya pagadas quedan marcadas como pagadas.";
 
 /** @deprecated use DISBURSEMENT_ACCOUNT_LABEL */
 export const FUND_ACCOUNT_LABEL = DISBURSEMENT_ACCOUNT_LABEL;

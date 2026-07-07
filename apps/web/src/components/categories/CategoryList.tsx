@@ -5,10 +5,26 @@ import type { CategoryType } from "@app/lib/core/types";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { IconButton } from "@jp-ds";
 
+export type CategoryUsage = {
+	transactions: number;
+	fixedExpenses: number;
+	budgets: number;
+	credits: number;
+	savingsGoals: number;
+};
+
+const EMPTY_USAGE: CategoryUsage = {
+	transactions: 0,
+	fixedExpenses: 0,
+	budgets: 0,
+	credits: 0,
+	savingsGoals: 0,
+};
+
 type CategoryListProps = {
 	categories: Doc<"categories">[];
 	type: CategoryType;
-	counts: Record<string, number>;
+	usageCounts: Record<string, CategoryUsage>;
 	selectedId?: Id<"categories"> | null;
 	onTypeChange: (type: CategoryType) => void;
 	onCreate?: () => void;
@@ -36,17 +52,56 @@ function creditLinkedLabel(category: Doc<"categories">): string | null {
 	}
 }
 
-function categorySubtitle(category: Doc<"categories">, count: number): string {
+function pluralize(count: number, singular: string, plural: string): string {
+	return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function formatUsageParts(
+	usage: CategoryUsage,
+	category: Doc<"categories">,
+): string[] {
+	const parts: string[] = [];
+
+	if (usage.transactions > 0) {
+		parts.push(pluralize(usage.transactions, "movimiento", "movimientos"));
+	}
+	if (usage.fixedExpenses > 0) {
+		parts.push(pluralize(usage.fixedExpenses, "gasto fijo", "gastos fijos"));
+	}
+	if (usage.budgets > 0) {
+		parts.push(pluralize(usage.budgets, "presupuesto", "presupuestos"));
+	}
+	if (usage.credits > 0 && !category.linkedCreditId) {
+		parts.push(pluralize(usage.credits, "crédito", "créditos"));
+	}
+	if (usage.savingsGoals > 0) {
+		parts.push(
+			pluralize(usage.savingsGoals, "meta de ahorro", "metas de ahorro"),
+		);
+	}
+
+	return parts;
+}
+
+function categorySubtitle(category: Doc<"categories">, usage: CategoryUsage): string {
 	if (category.isSystem) return "Categoría del sistema";
+
 	const linked = creditLinkedLabel(category);
-	if (linked) return linked;
-	return `${count} ${count === 1 ? "movimiento" : "movimientos"}`;
+	const usageParts = formatUsageParts(usage, category);
+
+	if (linked && usageParts.length === 0) return linked;
+	if (linked && usageParts.length > 0) {
+		return `${linked} · ${usageParts.join(" · ")}`;
+	}
+	if (usageParts.length > 0) return usageParts.join(" · ");
+
+	return pluralize(0, "movimiento", "movimientos");
 }
 
 export function CategoryList({
 	categories,
 	type,
-	counts,
+	usageCounts,
 	selectedId,
 	onTypeChange,
 	onCreate,
@@ -83,7 +138,7 @@ export function CategoryList({
 			) : (
 				<ul className="category-list">
 					{filtered.map((cat) => {
-						const count = counts[cat._id] ?? 0;
+						const usage = usageCounts[cat._id] ?? EMPTY_USAGE;
 						const isSelected = selectedId === cat._id;
 						const canEdit = !cat.isSystem && onEdit;
 						const canArchive =
@@ -112,7 +167,7 @@ export function CategoryList({
 									<span className="category-list__body">
 										<span className="category-list__name">{cat.name}</span>
 										<span className="category-list__count">
-											{categorySubtitle(cat, count)}
+											{categorySubtitle(cat, usage)}
 										</span>
 									</span>
 								</button>

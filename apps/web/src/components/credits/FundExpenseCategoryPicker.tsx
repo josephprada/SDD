@@ -137,7 +137,6 @@ export function FundExpenseCategoryPicker({
 					value={pickExistingId}
 					onChange={setPickExistingId}
 				>
-					<option value="">— Seleccionar —</option>
 					{availableCategories
 						.filter((c) => !value.selectedIds.includes(c._id))
 						.map((c) => (

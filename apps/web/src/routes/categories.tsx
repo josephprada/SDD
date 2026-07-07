@@ -1,6 +1,7 @@
 import { ArchiveCategoryDialog } from "@app/components/categories/ArchiveCategoryDialog";
 import { CategoryForm } from "@app/components/categories/CategoryForm";
 import { CategoryList } from "@app/components/categories/CategoryList";
+import type { CategoryUsage } from "@app/components/categories/CategoryList";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { Modal } from "@app/components/ui/Modal";
 import { CoreIcon } from "@app/lib/core/icons";
@@ -11,7 +12,7 @@ import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import { Button, IconButton } from "@jp-ds";
 import { useMutation, useQuery } from "convex/react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 export function CategoriesRoute() {
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
@@ -20,7 +21,8 @@ export function CategoriesRoute() {
 			includeArchived: false,
 			includeCreditLinked: true,
 		}) ?? [];
-	const transactions = useQuery(api.transactions.list, {}) ?? [];
+	const usageCounts =
+		useQuery(api.categories.usageCounts, {}) ?? ({} as Record<string, CategoryUsage>);
 	const createCategory = useMutation(api.categories.create);
 	const updateCategory = useMutation(api.categories.update);
 	const archiveCategory = useMutation(api.categories.archive);
@@ -31,14 +33,6 @@ export function CategoriesRoute() {
 	const [archiving, setArchiving] = useState<Doc<"categories"> | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [serverError, setServerError] = useState("");
-
-	const counts = useMemo(() => {
-		const map: Record<string, number> = {};
-		for (const tx of transactions) {
-			map[tx.categoryId] = (map[tx.categoryId] ?? 0) + 1;
-		}
-		return map;
-	}, [transactions]);
 
 	const openCreate = () => {
 		setEditing(null);
@@ -153,7 +147,7 @@ export function CategoriesRoute() {
 				<CategoryList
 					categories={categories}
 					type={type}
-					counts={counts}
+					usageCounts={usageCounts}
 					selectedId={editing?._id ?? null}
 					onTypeChange={setType}
 					onCreate={openCreate}

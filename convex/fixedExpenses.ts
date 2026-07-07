@@ -7,17 +7,18 @@ import { getBalanceDeltas, invertDeltas } from "./lib/balance";
 import {
 	dateKeyFromTimestamp,
 	dueTimestampForPeriodKey,
-	dueTimestampsInRange,
 	nextDueTimestamp,
 	reminderDatesForMonth,
 } from "./lib/fixedExpenses";
 import {
+	findMatchingPaymentTransaction,
 	hasValidPaymentTransaction,
 	reconcileFixedExpensePayment,
 } from "./lib/fixedExpensePayments";
 import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./lib/period";
 import {
 	appliesToPeriodKey,
+	assertAppliesToPeriodKey,
 	validateOnlyPeriodKey,
 } from "./lib/fixedExpensePeriod";
 import {
@@ -144,6 +145,7 @@ export const listUpcomingForPeriod = query({
 		const now = Date.now();
 		const upcoming: UpcomingEntry[] = [];
 		let pendingTotal = 0;
+		const viewingPeriodKey = periodKeyFromTimestamp(periodStart);
 
 		for (const item of items) {
 			if (item.onlyPeriodKey) {
@@ -176,26 +178,25 @@ export const listUpcomingForPeriod = query({
 				continue;
 			}
 
-			const dues = dueTimestampsInRange(
+			if (!appliesToPeriodKey(item, viewingPeriodKey)) continue;
+
+			const dueTs = dueTimestampForPeriodKey(
 				item.dayOfMonth,
-				periodStart,
-				periodEnd,
+				viewingPeriodKey,
 			);
+			if (dueTs < periodStart || dueTs > periodEnd) continue;
 
-			for (const dueTs of dues) {
-				const periodKey = periodKeyFromTimestamp(dueTs);
-				if (await hasValidPaymentTransaction(ctx, item, periodKey)) continue;
+			const enriched = await enrichFixedExpense(ctx, item, viewingPeriodKey);
+			if (enriched.isPaidCurrentPeriod) continue;
 
-				pendingTotal += item.amount;
-				const enriched = await enrichFixedExpense(ctx, item);
-				upcoming.push({
-					...enriched,
-					dueDate: dueTs,
-					isOverdue: dueTs < now,
-					nextDueDate: dueTs,
-					isPaidCurrentPeriod: false,
-				});
-			}
+			pendingTotal += item.amount;
+			upcoming.push({
+				...enriched,
+				dueDate: dueTs,
+				isOverdue: dueTs < now,
+				nextDueDate: dueTs,
+				isPaidCurrentPeriod: false,
+			});
 		}
 
 		upcoming.sort((a, b) => a.dueDate - b.dueDate);
@@ -358,6 +359,63 @@ export const markPaid = mutation({
 			periodKey,
 			categoryId: item.categoryId,
 			notes: item.name,
+		});
+
+		return null;
+	},
+});
+
+export const acknowledgePaidForPeriod = mutation({
+	args: {
+		id: v.id("fixedExpenses"),
+		periodKey: v.optional(v.string()),
+		dueDate: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const userId = await requireUserId(ctx);
+		const item = await ctx.db.get(args.id);
+		if (!item || item.userId !== userId) {
+			throw new Error("Fixed expense not found");
+		}
+
+		const periodKey = resolveFixedExpensePaymentPeriodKey({
+			periodKey: args.periodKey,
+			dueDate: args.dueDate,
+			now: Date.now(),
+		});
+
+		if (item.lastPaidPeriodKey === periodKey) {
+			return null;
+		}
+
+		assertAppliesToPeriodKey(item, periodKey);
+
+		const matching = await findMatchingPaymentTransaction(
+			ctx,
+			item,
+			periodKey,
+		);
+		const now = Date.now();
+		const patch: Partial<Doc<"fixedExpenses">> = {
+			lastPaidPeriodKey: periodKey,
+			updatedAt: now,
+		};
+
+		if (matching) {
+			patch.lastPaidTransactionId = matching._id;
+			if (!matching.sourceFixedExpenseId) {
+				await ctx.db.patch(matching._id, {
+					sourceFixedExpenseId: item._id,
+					updatedAt: now,
+				});
+			}
+		}
+
+		await ctx.db.patch(args.id, patch);
+
+		await ensureSavingsContributionForPaidFixedExpense(ctx, {
+			userId,
+			fixedExpense: { ...item, ...patch },
 		});
 
 		return null;
