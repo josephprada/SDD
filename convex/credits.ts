@@ -22,6 +22,12 @@ import {
 	syncFundExpenseCategories,
 	unlinkFundExpenseCategory,
 } from "./lib/creditCategories";
+import {
+	createLinkedCreditFixedExpense,
+	deleteLinkedCreditFixedExpense,
+	resolveCreditInstallmentAmount,
+	syncLinkedCreditFixedExpense,
+} from "./lib/creditFixedExpense";
 import { executeSpendFromFund } from "./lib/creditFundSpend";
 import {
 	insertCreditLinkedTransaction,
@@ -33,17 +39,28 @@ import {
 	cancelPendingPayments,
 	generateManualScheduleSkeleton,
 	insertGeneratedPayments,
+	rebuildPendingSchedule,
 	resolveInProgressCreditSchedule,
 	sumDestinationAllocated,
 } from "./lib/creditsHelpers";
 import {
+	getMissingScheduleFields,
+	hasMinimumScheduleFields,
+	inferCreditProfile,
+	isDraftCredit,
+} from "./lib/creditProfile";
+import {
 	abonoRecalcEffectValidator,
+	creditProfileValidator,
+	informalAgreementValidator,
+	linkedAssetValidator,
 	rateTypeValidator,
 	scheduleModeValidator,
 	validateCreditName,
 	validateCreditNotes,
 	validateDayOfMonth,
 	validateInterestRate,
+	validateOptionalCreditLender,
 	validatePaidInstallmentsCount,
 	validatePositiveCopAmount,
 	validateReminderOffsets,
@@ -77,6 +94,8 @@ export const list = query({
 			results.push({
 				_id: credit._id,
 				name: credit.name,
+				creditProfile: inferCreditProfile(credit),
+				setupStatus: credit.setupStatus ?? "active",
 				lender: credit.lender,
 				principal: credit.principal,
 				outstandingBalance: credit.outstandingBalance,
@@ -121,6 +140,9 @@ export const get = query({
 
 		return {
 			...credit,
+			creditProfile: inferCreditProfile(credit),
+			setupStatus: credit.setupStatus ?? "active",
+			missingFields: getMissingScheduleFields(credit),
 			disbursementAccountName: disbursementAccount?.name,
 			operatingAccountName: operatingAccount?.name,
 			paymentAccountName: operatingAccount?.name,
@@ -152,14 +174,15 @@ export const get = query({
 export const create = mutation({
 	args: {
 		name: v.string(),
-		lender: v.string(),
-		principal: v.number(),
-		rateType: rateTypeValidator,
-		interestRate: v.number(),
-		termMonths: v.number(),
+		creditProfile: v.optional(creditProfileValidator),
+		lender: v.optional(v.string()),
+		principal: v.optional(v.number()),
+		rateType: v.optional(rateTypeValidator),
+		interestRate: v.optional(v.number()),
+		termMonths: v.optional(v.number()),
 		startDate: v.optional(v.number()),
-		paymentDay: v.number(),
-		scheduleMode: scheduleModeValidator,
+		paymentDay: v.optional(v.number()),
+		scheduleMode: v.optional(scheduleModeValidator),
 		fixedInstallment: v.optional(v.number()),
 		insuranceMonthly: v.optional(v.number()),
 		disbursementAccountId: v.optional(v.id("accounts")),
@@ -171,23 +194,24 @@ export const create = mutation({
 		outstandingBalance: v.optional(v.number()),
 		fundExpenseCategoryIds: v.optional(v.array(v.id("categories"))),
 		newFundExpenseCategoryNames: v.optional(v.array(v.string())),
+		linkedAsset: v.optional(linkedAssetValidator),
+		informalAgreement: v.optional(informalAgreementValidator),
 		targetPayoffDate: v.optional(v.number()),
 		defaultRecalcOnAbono: v.optional(abonoRecalcEffectValidator),
 		reminderOffsets: v.optional(v.array(v.number())),
 		notes: v.optional(v.string()),
+		createFixedExpense: v.optional(v.boolean()),
+		fixedExpenseMonthlyAmount: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
 		const name = validateCreditName(args.name);
-		const lender = validateCreditName(args.lender);
-		const principal = validatePositiveCopAmount(args.principal);
-		const interestRate = validateInterestRate(args.interestRate);
-		const termMonths = validateTermMonths(args.termMonths);
-		const paymentDay = validateDayOfMonth(args.paymentDay);
+		const lender = validateOptionalCreditLender(args.lender);
 		const notes = validateCreditNotes(args.notes);
 		const reminderOffsets = validateReminderOffsets(
 			args.reminderOffsets ?? [3, 0],
 		);
+		const creditProfile = args.creditProfile ?? "free_purpose";
 		const now = Date.now();
 		const today = new Date();
 		const startDate =
@@ -205,15 +229,94 @@ export const create = mutation({
 			await requireAccountOwnership(ctx, userId, args.disbursementAccountId);
 		}
 
-		const monthlyRate = toMonthlyRate(args.rateType, interestRate);
+		const draftCandidate = {
+			principal: args.principal,
+			rateType: args.rateType,
+			interestRate: args.interestRate,
+			termMonths: args.termMonths,
+			paymentDay: args.paymentDay,
+			scheduleMode: args.scheduleMode,
+		};
+		const canGenerateSchedule = hasMinimumScheduleFields(draftCandidate);
+
+		const principal = canGenerateSchedule
+			? validatePositiveCopAmount(args.principal!)
+			: (args.principal ?? 0);
+		const interestRate = canGenerateSchedule
+			? validateInterestRate(args.interestRate!)
+			: (args.interestRate ?? 0);
+		const termMonths = canGenerateSchedule
+			? validateTermMonths(args.termMonths!)
+			: (args.termMonths ?? 0);
+		const paymentDay = canGenerateSchedule
+			? validateDayOfMonth(args.paymentDay!)
+			: (args.paymentDay ?? 1);
+		const scheduleMode = args.scheduleMode ?? "cuota_fija";
+		const rateType = args.rateType ?? "MV";
+
+		if (!canGenerateSchedule) {
+			const creditId = await ctx.db.insert("credits", {
+				userId,
+				name,
+				creditProfile,
+				setupStatus: "draft",
+				lender,
+				principal,
+				rateType,
+				interestRate,
+				termMonths,
+				startDate,
+				paymentDay,
+				scheduleMode,
+				defaultRecalcOnAbono: args.defaultRecalcOnAbono ?? "shorten_term",
+				targetPayoffDate: args.targetPayoffDate,
+				insuranceMonthly: args.insuranceMonthly,
+				disbursementAccountId: args.disbursementAccountId,
+				operatingAccountId: args.paymentAccountId,
+				linkedAsset: args.linkedAsset,
+				informalAgreement: args.informalAgreement,
+				outstandingBalance: 0,
+				reminderOffsets,
+				status: "active",
+				notes,
+				createdAt: now,
+				updatedAt: now,
+			});
+
+			if (args.disbursementAccountId) {
+				await ctx.db.patch(args.disbursementAccountId, {
+					isCreditEscrow: true,
+					updatedAt: now,
+				});
+			}
+
+			const fundExpenseCategoryIds = await syncFundExpenseCategories(
+				ctx,
+				userId,
+				creditId,
+				args.fundExpenseCategoryIds ?? [],
+				args.newFundExpenseCategoryNames ?? [],
+				{ deleteNewWithCredit: true },
+			);
+			if (fundExpenseCategoryIds.length > 0) {
+				await ctx.db.patch(creditId, {
+					fundExpenseCategoryIds,
+					updatedAt: Date.now(),
+				});
+			}
+
+			return creditId;
+		}
+
+		const monthlyRate = toMonthlyRate(rateType, interestRate);
 		const fixedInstallment =
-			args.scheduleMode === "manual"
+			scheduleMode === "manual"
 				? args.fixedInstallment
 				: resolveFixedInstallmentForCredit({
 						principal,
 						monthlyRate,
 						termMonths,
-						scheduleMode: args.scheduleMode,
+						scheduleMode,
 						fixedInstallment: args.fixedInstallment,
 					});
 
@@ -230,7 +333,7 @@ export const create = mutation({
 
 		if (
 			inProgress &&
-			args.scheduleMode === "manual" &&
+			scheduleMode === "manual" &&
 			args.outstandingBalance === undefined
 		) {
 			throw new Error(
@@ -246,12 +349,12 @@ export const create = mutation({
 		const initialOutstandingBalance = inProgress
 			? resolveInProgressCreditSchedule({
 					principal,
-					rateType: args.rateType,
+					rateType,
 					interestRate,
 					termMonths,
 					startDate,
 					paymentDay,
-					scheduleMode: args.scheduleMode,
+					scheduleMode,
 					fixedInstallment,
 					insuranceMonthly: args.insuranceMonthly,
 					paidInstallmentsCount,
@@ -263,20 +366,24 @@ export const create = mutation({
 		const creditId = await ctx.db.insert("credits", {
 			userId,
 			name,
+			creditProfile,
+			setupStatus: "active",
 			lender,
 			principal,
-			rateType: args.rateType,
+			rateType,
 			interestRate,
 			termMonths,
 			startDate,
 			paymentDay,
-			scheduleMode: args.scheduleMode,
+			scheduleMode,
 			fixedInstallment,
 			defaultRecalcOnAbono: args.defaultRecalcOnAbono ?? "shorten_term",
 			targetPayoffDate: args.targetPayoffDate,
 			insuranceMonthly: args.insuranceMonthly,
 			disbursementAccountId: args.disbursementAccountId,
 			operatingAccountId: args.paymentAccountId,
+			linkedAsset: args.linkedAsset,
+			informalAgreement: args.informalAgreement,
 			outstandingBalance: initialOutstandingBalance,
 			reminderOffsets,
 			status: "active",
@@ -288,12 +395,12 @@ export const create = mutation({
 		if (inProgress) {
 			const resolved = resolveInProgressCreditSchedule({
 				principal,
-				rateType: args.rateType,
+				rateType,
 				interestRate,
 				termMonths,
 				startDate,
 				paymentDay,
-				scheduleMode: args.scheduleMode,
+				scheduleMode,
 				fixedInstallment,
 				insuranceMonthly: args.insuranceMonthly,
 				paidInstallmentsCount,
@@ -307,7 +414,7 @@ export const create = mutation({
 				resolved.isProjected,
 				{ markFirstPaidCount: resolved.markFirstPaidCount },
 			);
-		} else if (args.scheduleMode === "manual") {
+		} else if (scheduleMode === "manual") {
 			const schedule = generateManualScheduleSkeleton({
 				startDate,
 				paymentDay,
@@ -318,12 +425,12 @@ export const create = mutation({
 		} else {
 			const schedule = buildScheduleForCredit({
 				principal,
-				rateType: args.rateType,
+				rateType,
 				interestRate,
 				termMonths,
 				startDate,
 				paymentDay,
-				scheduleMode: args.scheduleMode,
+				scheduleMode,
 				fixedInstallment,
 				insuranceMonthly: args.insuranceMonthly,
 			});
@@ -384,6 +491,30 @@ export const create = mutation({
 			});
 		}
 
+		if (args.createFixedExpense) {
+			const creditDoc = await ctx.db.get(creditId);
+			if (!creditDoc?.paymentCategoryId) {
+				throw new Error(
+					"No se pudo crear el gasto fijo: falta la categoría de cuota",
+				);
+			}
+			const installmentAmount =
+				args.fixedExpenseMonthlyAmount !== undefined
+					? validatePositiveCopAmount(args.fixedExpenseMonthlyAmount)
+					: await resolveCreditInstallmentAmount(ctx, creditId, {
+							fixedInstallment,
+							scheduleMode,
+						});
+			await createLinkedCreditFixedExpense(
+				ctx,
+				userId,
+				creditId,
+				creditDoc,
+				creditDoc.paymentCategoryId,
+				installmentAmount,
+			);
+		}
+
 		return creditId;
 	},
 });
@@ -394,6 +525,22 @@ export const update = mutation({
 		name: v.optional(v.string()),
 		lender: v.optional(v.string()),
 		notes: v.optional(v.string()),
+		creditProfile: v.optional(creditProfileValidator),
+		principal: v.optional(v.number()),
+		rateType: v.optional(rateTypeValidator),
+		interestRate: v.optional(v.number()),
+		termMonths: v.optional(v.number()),
+		paymentDay: v.optional(v.number()),
+		scheduleMode: v.optional(scheduleModeValidator),
+		insuranceMonthly: v.optional(v.number()),
+		startDate: v.optional(v.number()),
+		outstandingBalance: v.optional(v.number()),
+		fixedInstallment: v.optional(v.number()),
+		clearFixedInstallment: v.optional(v.boolean()),
+		linkedAsset: v.optional(linkedAssetValidator),
+		informalAgreement: v.optional(informalAgreementValidator),
+		clearLinkedAsset: v.optional(v.boolean()),
+		clearInformalAgreement: v.optional(v.boolean()),
 		targetPayoffDate: v.optional(v.number()),
 		clearTargetPayoffDate: v.optional(v.boolean()),
 		defaultRecalcOnAbono: v.optional(abonoRecalcEffectValidator),
@@ -411,8 +558,56 @@ export const update = mutation({
 		const patch: Record<string, unknown> = { updatedAt: now };
 
 		if (args.name !== undefined) patch.name = validateCreditName(args.name);
-		if (args.lender !== undefined) patch.lender = validateCreditName(args.lender);
+		if (args.lender !== undefined) {
+			patch.lender = validateOptionalCreditLender(args.lender);
+		}
 		if (args.notes !== undefined) patch.notes = validateCreditNotes(args.notes);
+		if (args.creditProfile !== undefined) patch.creditProfile = args.creditProfile;
+		if (args.principal !== undefined) {
+			patch.principal =
+				args.principal > 0
+					? validatePositiveCopAmount(args.principal)
+					: 0;
+			patch.outstandingBalance =
+				credit.setupStatus === "draft" || credit.setupStatus === "ready"
+					? (args.principal > 0 ? args.principal : 0)
+					: credit.outstandingBalance;
+		}
+		if (args.rateType !== undefined) patch.rateType = args.rateType;
+		if (args.interestRate !== undefined) {
+			patch.interestRate = validateInterestRate(args.interestRate);
+		}
+		if (args.termMonths !== undefined) {
+			patch.termMonths =
+				args.termMonths > 0 ? validateTermMonths(args.termMonths) : 0;
+		}
+		if (args.paymentDay !== undefined) {
+			patch.paymentDay = validateDayOfMonth(args.paymentDay);
+		}
+		if (args.scheduleMode !== undefined) patch.scheduleMode = args.scheduleMode;
+		if (args.insuranceMonthly !== undefined) {
+			patch.insuranceMonthly = args.insuranceMonthly;
+		}
+		if (args.startDate !== undefined) patch.startDate = args.startDate;
+		if (args.outstandingBalance !== undefined) {
+			patch.outstandingBalance =
+				args.outstandingBalance > 0
+					? validatePositiveCopAmount(args.outstandingBalance)
+					: 0;
+		}
+		if (args.clearFixedInstallment) patch.fixedInstallment = undefined;
+		else if (args.fixedInstallment !== undefined) {
+			patch.fixedInstallment =
+				args.fixedInstallment > 0
+					? validatePositiveCopAmount(args.fixedInstallment)
+					: undefined;
+		}
+		if (args.clearLinkedAsset) patch.linkedAsset = undefined;
+		else if (args.linkedAsset !== undefined) patch.linkedAsset = args.linkedAsset;
+		if (args.clearInformalAgreement) patch.informalAgreement = undefined;
+		else if (args.informalAgreement !== undefined) {
+			patch.informalAgreement = args.informalAgreement;
+		}
 		if (args.clearTargetPayoffDate) {
 			patch.targetPayoffDate = undefined;
 		} else if (args.targetPayoffDate !== undefined) {
@@ -464,7 +659,63 @@ export const update = mutation({
 			patch.fundExpenseCategoryIds = allIds;
 		}
 
+		const scheduleFieldsChanged =
+			args.principal !== undefined ||
+			args.rateType !== undefined ||
+			args.interestRate !== undefined ||
+			args.termMonths !== undefined ||
+			args.paymentDay !== undefined ||
+			args.scheduleMode !== undefined ||
+			args.startDate !== undefined ||
+			args.insuranceMonthly !== undefined ||
+			args.outstandingBalance !== undefined ||
+			args.fixedInstallment !== undefined ||
+			args.clearFixedInstallment === true;
+
+		const merged = { ...credit, ...patch } as Doc<"credits">;
+		const payments = await ctx.db
+			.query("creditPayments")
+			.withIndex("by_credit", (q) => q.eq("creditId", args.creditId))
+			.collect();
+		const hasPayments = payments.some((p) => p.status !== "cancelled");
+		if (!hasPayments) {
+			patch.setupStatus = hasMinimumScheduleFields(merged) ? "ready" : "draft";
+		}
+
 		await ctx.db.patch(args.creditId, patch);
+
+		if (scheduleFieldsChanged && hasMinimumScheduleFields(merged)) {
+			const updated = { ...credit, ...patch } as Doc<"credits">;
+			const { regenerated } = await rebuildPendingSchedule(ctx, updated);
+			const schedulePatch: Record<string, unknown> = {
+				updatedAt: Date.now(),
+			};
+			if (regenerated > 0 || !hasPayments) {
+				schedulePatch.setupStatus = "active";
+				if (updated.status !== "paid_off") {
+					schedulePatch.status = "active";
+				}
+			}
+			await ctx.db.patch(args.creditId, schedulePatch);
+
+			if (regenerated > 0 && !credit.paymentCategoryId) {
+				const paymentCategoryId = await createCreditPaymentCategory(
+					ctx,
+					userId,
+					args.creditId,
+					(updated.name as string) ?? credit.name,
+				);
+				await ctx.db.patch(args.creditId, {
+					paymentCategoryId,
+					updatedAt: Date.now(),
+				});
+			}
+
+			const syncedCredit = await ctx.db.get(args.creditId);
+			if (syncedCredit) {
+				await syncLinkedCreditFixedExpense(ctx, args.creditId, syncedCredit);
+			}
+		}
 
 		if (args.clearDisbursementAccount && prevDisbursement) {
 			const other = await ctx.db
@@ -484,6 +735,52 @@ export const update = mutation({
 			}
 		}
 
+		return null;
+	},
+});
+
+export const updateSetupProfile = mutation({
+	args: {
+		creditId: v.id("credits"),
+		creditProfile: creditProfileValidator,
+		preserveIncompatibleData: v.boolean(),
+	},
+	handler: async (ctx, args) => {
+		const userId = await requireUserId(ctx);
+		const credit = await requireCreditOwnership(ctx, userId, args.creditId);
+		const now = Date.now();
+		const patch: Record<string, unknown> = {
+			creditProfile: args.creditProfile,
+			updatedAt: now,
+		};
+
+		if (!args.preserveIncompatibleData) {
+			if (
+				args.creditProfile === "tangible_product" ||
+				args.creditProfile === "intangible_service"
+			) {
+				patch.informalAgreement = undefined;
+			} else if (args.creditProfile === "p2p_agreement") {
+				patch.linkedAsset = undefined;
+			} else {
+				patch.linkedAsset = undefined;
+				patch.informalAgreement = undefined;
+			}
+		} else {
+			const metadata = {
+				...(typeof credit.profileMetadata === "object" &&
+				credit.profileMetadata !== null
+					? (credit.profileMetadata as Record<string, unknown>)
+					: {}),
+			};
+			if (credit.linkedAsset) metadata.linkedAsset = credit.linkedAsset;
+			if (credit.informalAgreement) {
+				metadata.informalAgreement = credit.informalAgreement;
+			}
+			patch.profileMetadata = metadata;
+		}
+
+		await ctx.db.patch(args.creditId, patch);
 		return null;
 	},
 });
@@ -523,6 +820,8 @@ export const remove = mutation({
 		}
 
 		await deleteCategoriesLinkedToCredit(ctx, creditId);
+
+		await deleteLinkedCreditFixedExpense(ctx, credit);
 
 		const goals = await ctx.db
 			.query("savingsGoals")
@@ -738,11 +1037,60 @@ export const updateManualRow = mutation({
 	},
 });
 
+export const updateManualRows = mutation({
+	args: {
+		paymentIds: v.array(v.id("creditPayments")),
+		totalAmount: v.number(),
+	},
+	handler: async (ctx, { paymentIds, totalAmount }) => {
+		const userId = await requireUserId(ctx);
+		if (paymentIds.length === 0) {
+			throw new Error("Selecciona al menos una cuota");
+		}
+
+		const total = validatePositiveCopAmount(totalAmount);
+		let creditId: Id<"credits"> | null = null;
+
+		for (const paymentId of paymentIds) {
+			const payment = await ctx.db.get(paymentId);
+			if (!payment) throw new Error("Payment not found");
+			const credit = await requireCreditOwnership(ctx, userId, payment.creditId);
+			if (credit.scheduleMode !== "manual") {
+				throw new Error("Only manual schedule rows can be edited");
+			}
+			if (payment.status === "paid" || payment.status === "cancelled") {
+				throw new Error("Cannot edit paid or cancelled payment");
+			}
+			if (creditId === null) {
+				creditId = credit._id;
+			} else if (creditId !== credit._id) {
+				throw new Error("All payments must belong to the same credit");
+			}
+
+			await ctx.db.patch(paymentId, {
+				principal: total,
+				interest: 0,
+				insuranceAmount: 0,
+				otherFees: 0,
+				totalDue: total,
+				isProjected: false,
+				updatedAt: Date.now(),
+			});
+		}
+
+		return { updated: paymentIds.length };
+	},
+});
+
 export const ensurePaymentSchedule = mutation({
 	args: { creditId: v.id("credits") },
 	handler: async (ctx, { creditId }) => {
 		const userId = await requireUserId(ctx);
 		const credit = await requireCreditOwnership(ctx, userId, creditId);
+
+		if (isDraftCredit(credit) || !hasMinimumScheduleFields(credit)) {
+			return { generated: 0, reason: "incomplete" as const };
+		}
 
 		if (credit.status === "paid_off" || credit.outstandingBalance <= 0) {
 			return { generated: 0, reason: "paid_off" as const };
@@ -768,6 +1116,26 @@ export const ensurePaymentSchedule = mutation({
 				return { generated: 0, reason: "empty" as const };
 			}
 			await insertGeneratedPayments(ctx, creditId, schedule, false);
+			await ctx.db.patch(creditId, {
+				setupStatus: "active",
+				outstandingBalance:
+					credit.outstandingBalance > 0
+						? credit.outstandingBalance
+						: credit.principal,
+				updatedAt: Date.now(),
+			});
+			if (!credit.paymentCategoryId) {
+				const paymentCategoryId = await createCreditPaymentCategory(
+					ctx,
+					userId,
+					creditId,
+					credit.name,
+				);
+				await ctx.db.patch(creditId, {
+					paymentCategoryId,
+					updatedAt: Date.now(),
+				});
+			}
 			return { generated: schedule.length, reason: "created" as const };
 		}
 
@@ -818,6 +1186,26 @@ export const ensurePaymentSchedule = mutation({
 		}
 
 		await insertGeneratedPayments(ctx, creditId, schedule, true);
+		await ctx.db.patch(creditId, {
+			setupStatus: "active",
+			outstandingBalance:
+				credit.outstandingBalance > 0
+					? credit.outstandingBalance
+					: credit.principal,
+			updatedAt: Date.now(),
+		});
+		if (!credit.paymentCategoryId) {
+			const paymentCategoryId = await createCreditPaymentCategory(
+				ctx,
+				userId,
+				creditId,
+				credit.name,
+			);
+			await ctx.db.patch(creditId, {
+				paymentCategoryId,
+				updatedAt: Date.now(),
+			});
+		}
 		return { generated: schedule.length, reason: "created" as const };
 	},
 });

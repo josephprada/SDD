@@ -1,4 +1,12 @@
 export type CreditStatus = "active" | "paid_off" | "defaulted";
+export type SetupStatus = "draft" | "ready" | "active";
+export type CreditProfile =
+	| "free_purpose"
+	| "housing_improvement"
+	| "debt_consolidation"
+	| "tangible_product"
+	| "intangible_service"
+	| "p2p_agreement";
 export type RateType = "EA" | "NAMV" | "MV";
 export type ScheduleMode = "cuota_fija" | "capital_constant" | "manual";
 export type AbonoRecalcEffect = "shorten_term" | "lower_installment";
@@ -89,6 +97,21 @@ export const CREDIT_STATUS_LABELS: Record<CreditStatus, string> = {
 	defaulted: "En mora",
 };
 
+export const SETUP_STATUS_LABELS: Record<SetupStatus, string> = {
+	draft: "Incompleto",
+	ready: "Listo para cuotas",
+	active: "Configurado",
+};
+
+export const CREDIT_PROFILE_LABELS: Record<CreditProfile, string> = {
+	free_purpose: "Libre destino",
+	housing_improvement: "Mejora de vivienda",
+	debt_consolidation: "Recaudo de cartera",
+	tangible_product: "Producto / bien tangible",
+	intangible_service: "Servicio intangible",
+	p2p_agreement: "Préstamo personal",
+};
+
 export type CreditTab =
 	| "payments"
 	| "abonos"
@@ -119,7 +142,12 @@ export const FUND_EXPENSE_CATEGORY_HINT =
 	"Categorías para registrar en qué rubro del crédito gastas (obra, materiales, etc.). Aparecen en Movimientos y en la pestaña Destinos.";
 
 export const CREDIT_SETTINGS_SUMMARY_HINT =
-	"Monto, tasa y cuotas se definen al crear el crédito. Aquí puedes actualizar nombre, cuentas vinculadas y preferencias de abonos.";
+	"Puedes editar monto, tasa, plazo y forma de cuotas en cualquier momento. Al guardar, las cuotas pendientes se recalculan; las ya pagadas no cambian.";
+
+export const CREATE_CREDIT_FIXED_EXPENSE_LABEL =
+	"Crear gasto fijo mensual para las cuotas";
+export const CREATE_CREDIT_FIXED_EXPENSE_HINT =
+	"Aparecerá en Presupuestos e Inicio como recordatorio mensual. Usa la categoría de cuota del crédito y el día de pago que indiques arriba.";
 
 export const TARGET_PAYOFF_HINT =
 	"Fecha meta en la que te gustaría terminar de pagar el crédito. Es referencia visual, no recalcula las cuotas sola.";

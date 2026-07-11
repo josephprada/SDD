@@ -1,5 +1,5 @@
 import { formatConvexError } from "@app/lib/convex/formatError";
-import { CreditForm } from "@app/components/credits/CreditForm";
+import { CreditCreateWizard } from "@app/components/credits/CreditCreateWizard";
 import { CreditList } from "@app/components/credits/CreditList";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { Modal } from "@app/components/ui/Modal";
@@ -82,7 +82,7 @@ export function CreditsRoute() {
 				}}
 				title="Nuevo crédito"
 			>
-				<CreditForm
+				<CreditCreateWizard
 					key={formKey}
 					accounts={accounts.map((a) => ({ _id: a._id, name: a.name }))}
 					expenseCategories={linkableExpenseCategories}

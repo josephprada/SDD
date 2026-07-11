@@ -1,4 +1,5 @@
 import { EmptyState } from "@app/components/ui/EmptyState";
+import { SETUP_STATUS_LABELS } from "@app/lib/credits/types";
 import { CoreIcon } from "@app/lib/core/icons";
 import { formatCOP } from "@app/lib/format/currency";
 import { formatShortDate } from "@app/lib/format/date";
@@ -34,10 +35,19 @@ export function CreditList({ items }: CreditListProps) {
 						<div className="credit-card__row">
 							<strong>{credit.name}</strong>
 							<span className="credit-card__balance">
-								{formatCOP(credit.principal)}
+								{credit.principal > 0
+									? formatCOP(credit.principal)
+									: "Sin monto"}
 							</span>
 						</div>
-						<span className="credit-card__lender">{credit.lender}</span>
+						{credit.setupStatus === "draft" ? (
+							<span className="credit-card__badge">
+								{SETUP_STATUS_LABELS.draft}
+							</span>
+						) : null}
+						{credit.lender ? (
+							<span className="credit-card__lender">{credit.lender}</span>
+						) : null}
 						{credit.nextPayment ? (
 							<span className="credit-card__lender">
 								Próxima cuota #{credit.nextPayment.installmentNumber} —{" "}

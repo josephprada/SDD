@@ -12,12 +12,16 @@ import {
 import {
 	abonoRecalcEffectValidator,
 	creditPaymentStatusValidator,
+	creditProfileValidator,
 	creditStatusValidator,
 	destinationStatusValidator,
+	informalAgreementValidator,
+	linkedAssetValidator,
 	rateTypeValidator,
 	savingsGoalStatusValidator,
 	savingsGoalSnapshotValidator,
 	scheduleModeValidator,
+	setupStatusValidator,
 } from "./lib/validators";
 
 const accountTypeValidator = v.union(
@@ -175,6 +179,7 @@ export default defineSchema({
 		lastPaidPeriodKey: v.optional(v.string()),
 		lastPaidTransactionId: v.optional(v.id("transactions")),
 		linkedSavingsGoalId: v.optional(v.id("savingsGoals")),
+		linkedCreditId: v.optional(v.id("credits")),
 		onlyPeriodKey: v.optional(v.string()),
 		notes: v.optional(v.string()),
 		createdAt: v.number(),
@@ -182,7 +187,8 @@ export default defineSchema({
 	})
 		.index("by_user", ["userId"])
 		.index("by_user_active", ["userId", "active"])
-		.index("by_paid_transaction", ["lastPaidTransactionId"]),
+		.index("by_paid_transaction", ["lastPaidTransactionId"])
+		.index("by_linked_credit", ["linkedCreditId"]),
 
 	pushSubscriptions: defineTable({
 		userId: v.id("users"),
@@ -218,6 +224,8 @@ export default defineSchema({
 	credits: defineTable({
 		userId: v.id("users"),
 		name: v.string(),
+		creditProfile: v.optional(creditProfileValidator),
+		setupStatus: v.optional(setupStatusValidator),
 		lender: v.string(),
 		principal: v.number(),
 		rateType: rateTypeValidator,
@@ -232,7 +240,11 @@ export default defineSchema({
 		insuranceMonthly: v.optional(v.number()),
 		disbursementAccountId: v.optional(v.id("accounts")),
 		operatingAccountId: v.optional(v.id("accounts")),
+		linkedAsset: v.optional(linkedAssetValidator),
+		informalAgreement: v.optional(informalAgreementValidator),
+		profileMetadata: v.optional(v.any()),
 		paymentCategoryId: v.optional(v.id("categories")),
+		linkedFixedExpenseId: v.optional(v.id("fixedExpenses")),
 		fundExpenseCategoryIds: v.optional(v.array(v.id("categories"))),
 		disbursementIncomeCategoryId: v.optional(v.id("categories")),
 		disbursementTransactionId: v.optional(v.id("transactions")),

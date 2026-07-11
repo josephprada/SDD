@@ -7,6 +7,8 @@ import {
 	type GeneratedPayment,
 	type ScheduleMode,
 } from "./creditAmortization";
+import { resolveFixedInstallmentForCredit } from "./creditRecalc";
+import { hasMinimumScheduleFields } from "./creditProfile";
 import { generateDueDates, markOverdueStatus } from "./creditDates";
 
 export async function insertGeneratedPayments(
@@ -291,6 +293,90 @@ export function resolveInProgressCreditSchedule(
 		isProjected: true,
 		markFirstPaidCount: paid,
 	};
+}
+
+/** Regenerates pending/overdue installments after credit settings change. Paid rows are kept. */
+export async function rebuildPendingSchedule(
+	ctx: MutationCtx,
+	credit: Doc<"credits">,
+): Promise<{ regenerated: number }> {
+	if (!hasMinimumScheduleFields(credit)) {
+		return { regenerated: 0 };
+	}
+
+	const all = await ctx.db
+		.query("creditPayments")
+		.withIndex("by_credit", (q) => q.eq("creditId", credit._id))
+		.collect();
+	const paidCount = all.filter((p) => p.status === "paid").length;
+
+	if (credit.termMonths > 0 && paidCount > credit.termMonths) {
+		throw new Error(
+			`El plazo no puede ser menor que las cuotas ya pagadas (${paidCount})`,
+		);
+	}
+
+	const remaining = credit.termMonths - paidCount;
+	await cancelPendingPayments(ctx, credit._id);
+
+	if (remaining <= 0) {
+		return { regenerated: 0 };
+	}
+
+	const allDueDates = generateDueDates(
+		credit.startDate,
+		credit.paymentDay,
+		credit.termMonths,
+	);
+	const dueDates = allDueDates.slice(paidCount);
+	const balance =
+		credit.outstandingBalance > 0
+			? credit.outstandingBalance
+			: credit.principal;
+
+	if (credit.scheduleMode === "manual") {
+		const schedule: GeneratedPayment[] = dueDates.map((dueDate, index) => ({
+			installmentNumber: paidCount + index + 1,
+			dueDate,
+			principal: 0,
+			interest: 0,
+			insuranceAmount: credit.insuranceMonthly ?? 0,
+			otherFees: 0,
+			totalDue: credit.insuranceMonthly ?? 0,
+		}));
+		await insertGeneratedPayments(ctx, credit._id, schedule, false);
+		return { regenerated: schedule.length };
+	}
+
+	const monthlyRate = toMonthlyRate(credit.rateType, credit.interestRate);
+	const fixedInstallment =
+		credit.fixedInstallment ??
+		resolveFixedInstallmentForCredit({
+			principal: balance,
+			monthlyRate,
+			termMonths: remaining,
+			scheduleMode: credit.scheduleMode,
+		});
+
+	const schedule = buildScheduleForCredit({
+		principal: credit.principal,
+		rateType: credit.rateType,
+		interestRate: credit.interestRate,
+		termMonths: credit.termMonths,
+		startDate: credit.startDate,
+		paymentDay: credit.paymentDay,
+		scheduleMode: credit.scheduleMode,
+		fixedInstallment,
+		insuranceMonthly: credit.insuranceMonthly,
+		outstandingBalance: balance,
+		dueDates,
+		startInstallmentNumber: paidCount + 1,
+		remainingTermMonths:
+			credit.scheduleMode === "capital_constant" ? remaining : undefined,
+	});
+
+	await insertGeneratedPayments(ctx, credit._id, schedule, true);
+	return { regenerated: schedule.length };
 }
 
 export async function getNextPendingPayment(

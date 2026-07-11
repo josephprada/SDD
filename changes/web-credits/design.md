@@ -55,14 +55,62 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 | D-31 | Errores Convex UI | **`formatConvexError`** — mensajes amigables en formularios | `apps/web/src/lib/convex/formatError.ts` |
 | D-32 | JP-DS Input fecha | Placeholder muted + icono calendario apagado si vacío | `packages/jp-ds/components/Input.tsx` |
 | D-33 | FormSelect / Modal | Placeholder «Seleccionar» muted; modal form flex sin recorte en móvil | Paridad visual JP-DS |
+| D-34 | Perfil adaptativo | **`creditProfile`** persistido; ortogonal a `scheduleMode` | UX por propósito, no por fórmula bancaria |
+| D-35 | Creación mínima | Solo **`name`** obligatorio; `setupStatus: draft` sin cuotas | Compatible con créditos ya en marcha parcialmente documentados |
+| D-36 | Wizard creación | **2 pasos**: `CreditProfilePicker` → formulario por perfil | Primer wizard multi-paso en dominio créditos |
+| D-37 | Cambio de perfil | Confirmación **conservar / eliminar** datos incompatibles | Cuotas pagadas y tx históricas siempre conservadas |
+| D-38 | Activación cuotas | Schedule solo en acción explícita si `setupStatus !== active` | Evita `ensureSchedule` en drafts |
 
-### Pendiente (iteración manual-first créditos)
+### Pendiente (iteración perfiles adaptativos v1.6)
 
 | # | Tema | Estado |
 |---|------|--------|
-| P-01 | Creación crédito minimal (solo nombre, prestamista, cuotas, día pago) | 🔲 Diseñado en sesión; no mergeado aún |
-| P-02 | `CreditInstallmentProgress` en detalle (sustituir card saldo deuda) | 🔲 |
-| P-03 | `fillSuggestedPayments` + Ajustes ampliados (monto, tasa, estimar cuotas) | 🔲 |
+| P-01 | Creación mínima (solo nombre) + wizard 2 pasos | 🔲 Documentado v1.6 |
+| P-02 | `CreditInstallmentProgress` en detalle | 🔲 |
+| P-03 | Ajustes ampliados (monto, tasa, perfil editable) | 🔲 Documentado v1.6 |
+| P-04 | `creditProfileRegistry.ts` + formularios por perfil | 🔲 |
+| P-05 | `CreditProfileChangeDialog` (conservar/eliminar) | 🔲 |
+| P-06 | Backend `setupStatus` + schema relajado + migración | 🔲 |
+
+---
+
+## Perfiles adaptativos (`creditProfileRegistry`)
+
+**Archivo:** `apps/web/src/lib/credits/creditProfileRegistry.ts`
+
+```typescript
+type CreditProfile =
+  | "free_purpose"
+  | "housing_improvement"
+  | "debt_consolidation"
+  | "tangible_product"
+  | "intangible_service"
+  | "p2p_agreement";
+
+type SetupStatus = "draft" | "ready" | "active";
+```
+
+### Defaults por perfil (sugerencias, no bloqueos)
+
+| Perfil | `hasDisbursement` sugerido | Rubros sugeridos | `scheduleMode` default | Campos extra |
+|--------|---------------------------|------------------|------------------------|--------------|
+| `free_purpose` | true | no | `cuota_fija` | — |
+| `housing_improvement` | true | sí (plantillas obra) | `manual` | seguros, meta pago |
+| `debt_consolidation` | true | sí (deudas liquidadas) | `cuota_fija` | — |
+| `tangible_product` | false | no | `cuota_fija` | producto, comercio, referencia |
+| `intangible_service` | false | no | `cuota_fija` | servicio, proveedor |
+| `p2p_agreement` | false | no | `manual` | contraparte, relación, notas |
+
+### Datos mínimos para generar cuotas
+
+`principal`, `rateType`, `interestRate`, `termMonths`, `paymentDay`, `scheduleMode` — validados en `ensurePaymentSchedule`, no en `create`.
+
+### Matriz cambio de perfil
+
+| Acción usuario | Backend |
+|----------------|---------|
+| Conservar | Datos incompatibles → `profileMetadata`; UI oculta hasta perfil compatible |
+| Eliminar | Limpia campos incompatibles (`linkedAsset`, categorías fondo huérfanas); **no** borra cuotas `paid`, abonos, destinos con historial, tx vinculadas |
 
 ---
 
@@ -70,8 +118,9 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 
 ```
 accounts (isCreditEscrow) ◄── disbursementAccountId ── credits
-         │                                              │
-         │         creditPayments ◄── amortización      │
+         │                         creditProfile            │
+         │                         setupStatus              │
+         │         creditPayments ◄── amortización (solo si active)
          │              │                               │
 transactions ◄─────────┼── creditCapitalAbonos          │
   creditId             │                               │
@@ -82,7 +131,7 @@ transactions ◄─────────┼── creditCapitalAbonos        
 savingsGoals ◄── linkedCreditId (abono)       │
 savingsContributions                          │
          │                                    │
-notifications.processDaily ──► credit_due     │
+notifications.processDaily ──► credit_due (skip draft)
 dashboard.overview (excl. escrow)             │
 credits.fundSummary ──────────────────────────┘
 ```
@@ -113,14 +162,16 @@ simulateAnnualAbonos(params): { payoffDate, monthsRemaining }
 
 | Export | Tipo | Descripción |
 |--------|------|-------------|
-| `list` | query | Activos + próxima cuota + saldo |
-| `get` | query | Detalle + resumen rubros + cuentas vinculadas |
-| `create` | mutation | Genera schedule según modo |
-| `update` | mutation | Params editables; no regenera pagadas |
+| `list` | query | Activos + drafts + próxima cuota + saldo |
+| `get` | query | Detalle + `creditProfile`, `setupStatus`, `missingFields[]` |
+| `create` | mutation | Mínimo `{ name }`; no genera schedule si draft |
+| `update` | mutation | Params editables incl. financieros y perfil |
+| `updateSetupProfile` | mutation | Cambio perfil + `preserveIncompatibleData: boolean` |
 | `remove` | mutation | Soft archive si tiene historial |
 | `fundSummary` | query | Saldo escrow vs asignado |
-| `simulatePayoff` | query | Proyección abonos |
-| `spendFromFund` | mutation | Wizard transfer+gasto+devolución |
+| `simulatePayoff` | query | Proyección abonos (skip draft) |
+| `ensurePaymentSchedule` | mutation | Genera cuotas si datos mínimos OK |
+| `spendFromFund` | mutation | Wizard transfer+gasto+devolución (legacy) |
 
 ### `convex/creditPayments.ts`
 
@@ -162,8 +213,8 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 
 | Path | Componente |
 |------|------------|
-| `/credits` | Lista créditos + CTA crear |
-| `/credits/:id` | Detalle tabs: Cuotas \| Abonos \| Destinos \| Movimientos |
+| `/credits` | Lista créditos + CTA crear (wizard 2 pasos) |
+| `/credits/:id` | Detalle tabs; banner si `setupStatus: draft` |
 | `/savings` | Lista metas |
 
 ### Tabs detalle crédito
@@ -178,11 +229,17 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 
 ```text
 components/credits/
+  CreditCreateWizard.tsx      # orquestador 2 pasos (NUEVO)
+  CreditProfilePicker.tsx     # paso 1 (NUEVO)
+  CreditProfileChangeDialog.tsx # cambio perfil (NUEVO)
   CreditList.tsx, CreditForm.tsx, CreditDetailHeader.tsx
   CreditPaymentTable.tsx, CapitalAbonoForm.tsx, PayoffSimulator.tsx
   DestinationList.tsx, DestinationChart.tsx
   CreditSettingsForm.tsx, FundExpenseCategoryPicker.tsx, FieldHelp.tsx, FormSelect.tsx
   CreditFundCard.tsx (dashboard `dash-credits`)
+lib/credits/
+  creditProfileRegistry.ts    # defaults por perfil (NUEVO)
+  types.ts
 components/savings/
   SavingsGoalList.tsx, SavingsGoalForm.tsx, ContributionList.tsx
 ```

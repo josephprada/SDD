@@ -1,28 +1,43 @@
 import {
+	CREDIT_PRINCIPAL_LABEL,
 	CREDIT_SETTINGS_SUMMARY_HINT,
+	CREDIT_START_DATE_HINT,
+	CREDIT_START_DATE_LABEL,
 	DELETE_CREDIT_HINT,
 	FUND_EXPENSE_CATEGORY_HINT,
 	FUND_ACCOUNT_HINT,
 	FUND_ACCOUNT_LABEL,
 	OPERATING_ACCOUNT_HINT,
 	OPERATING_ACCOUNT_LABEL,
+	OUTSTANDING_BALANCE_HINT,
+	OUTSTANDING_BALANCE_LABEL,
 	RATE_TYPE_OPTIONS,
 	RECALC_EFFECT_OPTIONS,
 	RECALC_EFFECT_LABELS,
-	SCHEDULE_MODE_LABELS,
+	SCHEDULE_MODE_OPTIONS,
 	TARGET_PAYOFF_HINT,
+	CREDIT_PROFILE_LABELS,
 	type AbonoRecalcEffect,
+	type CreditProfile,
 	type RateType,
+	type ScheduleMode,
 } from "@app/lib/credits/types";
+import { CreditProfilePicker } from "@app/components/credits/CreditProfilePicker";
+import {
+	getCreditProfileConfig,
+	getIncompatibleProfileDataLabels,
+} from "@app/lib/credits/creditProfileRegistry";
 import {
 	FundExpenseCategoryPicker,
 	type FundExpenseCategorySelection,
 } from "@app/components/credits/FundExpenseCategoryPicker";
+import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { FieldError } from "@app/components/ui/FieldError";
 import { FieldHelp } from "@app/components/ui/FieldHelp";
 import { FormSelect } from "@app/components/ui/FormSelect";
-import { formatCOP } from "@app/lib/format/currency";
-import { formatFullDate, toDateInputValue } from "@app/lib/format/date";
+import { Modal } from "@app/components/ui/Modal";
+import { formatCOP, formatCOPInput, parseCOPInput } from "@app/lib/format/currency";
+import { toDateInputValue } from "@app/lib/format/date";
 import type { Id } from "@convex/_generated/dataModel";
 import { Button, Input } from "@jp-ds";
 import { useMemo, useState } from "react";
@@ -31,6 +46,16 @@ export type CreditEditValues = {
 	name: string;
 	lender: string;
 	notes?: string;
+	principal: number;
+	outstandingBalance: number;
+	rateType: RateType;
+	interestRate: number;
+	termMonths: number;
+	paymentDay: number;
+	scheduleMode: ScheduleMode;
+	startDate: number;
+	insuranceMonthly?: number;
+	fixedInstallment?: number;
 	targetPayoffDate?: number;
 	defaultRecalcOnAbono: AbonoRecalcEffect;
 	disbursementAccountId?: Id<"accounts">;
@@ -41,6 +66,9 @@ export type CreditEditValues = {
 
 type CreditSettingsFormProps = {
 	credit: {
+		creditProfile: CreditProfile;
+		linkedAsset?: unknown;
+		informalAgreement?: unknown;
 		name: string;
 		lender: string;
 		notes?: string;
@@ -54,16 +82,26 @@ type CreditSettingsFormProps = {
 		rateType: RateType;
 		interestRate: number;
 		termMonths: number;
-		scheduleMode: string;
+		paymentDay: number;
+		scheduleMode: ScheduleMode;
 		startDate: number;
+		insuranceMonthly?: number;
+		fixedInstallment?: number;
+		paymentsSummary?: { paid: number };
 	};
 	accounts: Array<{ _id: Id<"accounts">; name: string }>;
 	expenseCategories: Array<{ _id: Id<"categories">; name: string }>;
 	onSave: (values: CreditEditValues) => Promise<void>;
+	onChangeProfile: (
+		profile: CreditProfile,
+		preserveIncompatibleData: boolean,
+	) => Promise<void>;
 	onDelete: () => Promise<void>;
 	loading?: boolean;
+	profileChangeLoading?: boolean;
 	deleteLoading?: boolean;
 	error?: string;
+	profileChangeError?: string;
 };
 
 export function CreditSettingsForm({
@@ -71,14 +109,59 @@ export function CreditSettingsForm({
 	accounts,
 	expenseCategories,
 	onSave,
+	onChangeProfile,
 	onDelete,
 	loading,
+	profileChangeLoading,
 	deleteLoading,
 	error,
+	profileChangeError,
 }: CreditSettingsFormProps) {
+	const paidCount = credit.paymentsSummary?.paid ?? 0;
+	const profileConfig = getCreditProfileConfig(credit.creditProfile);
+
+	const [profilePickerOpen, setProfilePickerOpen] = useState(false);
+	const [profileConfirmOpen, setProfileConfirmOpen] = useState(false);
+	const [pendingProfile, setPendingProfile] = useState<CreditProfile | null>(
+		null,
+	);
+	const [incompatibleLabels, setIncompatibleLabels] = useState<string[]>([]);
+
 	const [name, setName] = useState(credit.name);
 	const [lender, setLender] = useState(credit.lender);
 	const [notes, setNotes] = useState(credit.notes ?? "");
+	const [principalRaw, setPrincipalRaw] = useState(
+		credit.principal > 0 ? formatCOPInput(credit.principal) : "",
+	);
+	const [outstandingRaw, setOutstandingRaw] = useState(
+		credit.outstandingBalance > 0
+			? formatCOPInput(credit.outstandingBalance)
+			: "",
+	);
+	const [rateType, setRateType] = useState<RateType>(credit.rateType);
+	const [interestRate, setInterestRate] = useState(
+		credit.interestRate > 0 ? String(credit.interestRate) : "",
+	);
+	const [termMonths, setTermMonths] = useState(
+		credit.termMonths > 0 ? String(credit.termMonths) : "",
+	);
+	const [paymentDay, setPaymentDay] = useState(String(credit.paymentDay || 1));
+	const [scheduleMode, setScheduleMode] = useState<ScheduleMode>(
+		credit.scheduleMode,
+	);
+	const [startDate, setStartDate] = useState(
+		credit.startDate ? toDateInputValue(credit.startDate) : "",
+	);
+	const [insuranceRaw, setInsuranceRaw] = useState(
+		credit.insuranceMonthly && credit.insuranceMonthly > 0
+			? formatCOPInput(credit.insuranceMonthly)
+			: "",
+	);
+	const [fixedInstallmentRaw, setFixedInstallmentRaw] = useState(
+		credit.fixedInstallment && credit.fixedInstallment > 0
+			? formatCOPInput(credit.fixedInstallment)
+			: "",
+	);
 	const [targetDate, setTargetDate] = useState(
 		credit.targetPayoffDate
 			? toDateInputValue(credit.targetPayoffDate)
@@ -99,6 +182,29 @@ export function CreditSettingsForm({
 			newNames: [],
 		});
 	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [clientError, setClientError] = useState("");
+
+	const rateHint = useMemo(() => {
+		return (
+			RATE_TYPE_OPTIONS.find((o) => o.value === rateType)?.hint ??
+			"Selecciona un tipo para ver cómo debes ingresar el valor de la tasa."
+		);
+	}, [rateType]);
+
+	const scheduleHint = useMemo(() => {
+		return (
+			SCHEDULE_MODE_OPTIONS.find((o) => o.value === scheduleMode)?.hint ??
+			"Elige cómo se calculan o registran las cuotas de este crédito."
+		);
+	}, [scheduleMode]);
+
+	const rateValueLabel = useMemo(() => {
+		if (rateType === "MV") return "Valor de la tasa (% mensual)";
+		if (rateType === "EA" || rateType === "NAMV") {
+			return "Valor de la tasa (% anual)";
+		}
+		return "Valor de la tasa (%)";
+	}, [rateType]);
 
 	const recalcHint = useMemo(() => {
 		const selected = RECALC_EFFECT_OPTIONS.find(
@@ -117,12 +223,108 @@ export function CreditSettingsForm({
 		),
 	];
 
+	const applyProfileChange = async (
+		profile: CreditProfile,
+		preserveIncompatibleData: boolean,
+	) => {
+		await onChangeProfile(profile, preserveIncompatibleData);
+		setProfilePickerOpen(false);
+		setProfileConfirmOpen(false);
+		setPendingProfile(null);
+		setIncompatibleLabels([]);
+	};
+
+	const handleProfileSelect = (nextProfile: CreditProfile) => {
+		if (nextProfile === credit.creditProfile) {
+			setProfilePickerOpen(false);
+			return;
+		}
+
+		const incompatible = getIncompatibleProfileDataLabels(
+			{
+				linkedAsset: credit.linkedAsset,
+				informalAgreement: credit.informalAgreement,
+				fundExpenseCategoryCount: credit.fundExpenseCategories.length,
+			},
+			nextProfile,
+		);
+
+		if (incompatible.length === 0) {
+			void applyProfileChange(nextProfile, false);
+			return;
+		}
+
+		setPendingProfile(nextProfile);
+		setIncompatibleLabels(incompatible);
+		setProfilePickerOpen(false);
+		setProfileConfirmOpen(true);
+	};
+
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
+		setClientError("");
+
+		const principal = parseCOPInput(principalRaw);
+		const outstandingBalance = parseCOPInput(outstandingRaw);
+		const term = Number.parseInt(termMonths, 10);
+		const rate = Number.parseFloat(interestRate);
+		const day = Number.parseInt(paymentDay, 10);
+		const insuranceMonthly = insuranceRaw
+			? parseCOPInput(insuranceRaw) ?? undefined
+			: undefined;
+		const fixedInstallment = fixedInstallmentRaw
+			? parseCOPInput(fixedInstallmentRaw) ?? undefined
+			: undefined;
+
+		if (!name.trim()) {
+			setClientError("Indica un nombre para el crédito");
+			return;
+		}
+		if (principal === null || principal <= 0) {
+			setClientError("Indica un monto de crédito válido");
+			return;
+		}
+		if (outstandingBalance === null || outstandingBalance < 0) {
+			setClientError("Indica un saldo pendiente válido");
+			return;
+		}
+		if (!Number.isFinite(rate) || rate < 0) {
+			setClientError("Indica una tasa de interés válida");
+			return;
+		}
+		if (!Number.isFinite(term) || term <= 0) {
+			setClientError("Indica un plazo en meses válido");
+			return;
+		}
+		if (paidCount > 0 && term < paidCount) {
+			setClientError(
+				`El plazo no puede ser menor que las cuotas ya pagadas (${paidCount})`,
+			);
+			return;
+		}
+		if (!Number.isFinite(day) || day < 1 || day > 31) {
+			setClientError("El día de pago debe estar entre 1 y 31");
+			return;
+		}
+		if (!startDate) {
+			setClientError("Indica la fecha de inicio del crédito");
+			return;
+		}
+
 		await onSave({
 			name: name.trim(),
 			lender: lender.trim(),
 			notes: notes.trim() || undefined,
+			principal,
+			outstandingBalance: outstandingBalance > 0 ? outstandingBalance : principal,
+			rateType,
+			interestRate: rate,
+			termMonths: term,
+			paymentDay: day,
+			scheduleMode,
+			startDate: new Date(startDate).getTime(),
+			insuranceMonthly,
+			fixedInstallment,
 			targetPayoffDate: targetDate
 				? new Date(targetDate).getTime()
 				: undefined,
@@ -141,45 +343,26 @@ export function CreditSettingsForm({
 	return (
 		<div className="credit-tab-panel">
 			<section className="credit-panel-form glass">
-				<div className="field-label-row credit-form-grid__full">
-					<h3 className="section-title">Datos del crédito</h3>
-					<FieldHelp text={CREDIT_SETTINGS_SUMMARY_HINT} />
+				<div className="credit-form-profile-bar">
+					<div className="credit-form-profile-bar__meta">
+						<span className="credit-form-profile-bar__label">
+							Tipo de crédito
+						</span>
+						<span className="credit-form-profile-bar__value">
+							{CREDIT_PROFILE_LABELS[credit.creditProfile]}
+						</span>
+						<p className="tx-form__hint">{profileConfig.description}</p>
+					</div>
+					<Button
+						type="button"
+						variant="secondary"
+						disabled={profileChangeLoading}
+						onClick={() => setProfilePickerOpen(true)}
+					>
+						Cambiar
+					</Button>
 				</div>
-
-				<dl className="credit-readonly-grid">
-					<div>
-						<dt>Desembolso</dt>
-						<dd>{formatCOP(credit.principal)}</dd>
-					</div>
-					<div>
-						<dt>Saldo actual</dt>
-						<dd>{formatCOP(credit.outstandingBalance)}</dd>
-					</div>
-					<div>
-						<dt>Tasa</dt>
-						<dd>
-							{credit.interestRate}%{" "}
-							{RATE_TYPE_OPTIONS.find((o) => o.value === credit.rateType)
-								?.label ?? credit.rateType}
-						</dd>
-					</div>
-					<div>
-						<dt>Plazo</dt>
-						<dd>{credit.termMonths} meses</dd>
-					</div>
-					<div>
-						<dt>Forma de cuotas</dt>
-						<dd>
-							{SCHEDULE_MODE_LABELS[
-								credit.scheduleMode as keyof typeof SCHEDULE_MODE_LABELS
-							] ?? credit.scheduleMode}
-						</dd>
-					</div>
-					<div>
-						<dt>Inicio</dt>
-						<dd>{formatFullDate(credit.startDate)}</dd>
-					</div>
-				</dl>
+				<FieldError message={profileChangeError} />
 			</section>
 
 			<form
@@ -187,7 +370,19 @@ export function CreditSettingsForm({
 				onSubmit={handleSubmit}
 				noValidate
 			>
-				<h3 className="section-title">Editar configuración</h3>
+				<div className="field-label-row credit-form-grid__full">
+					<h3 className="section-title">Datos del crédito</h3>
+					<FieldHelp text={CREDIT_SETTINGS_SUMMARY_HINT} />
+				</div>
+
+				{paidCount > 0 ? (
+					<p className="tx-form__hint credit-form-grid__full">
+						Tienes {paidCount} cuota(s) pagada(s). Al guardar cambios
+						financieros se recalculan solo las cuotas pendientes (
+						{formatCOP(credit.outstandingBalance)} saldo actual).
+					</p>
+				) : null}
+
 				<div className="credit-form-grid credit-form-grid--single">
 					<Input
 						label="Nombre del crédito"
@@ -199,8 +394,119 @@ export function CreditSettingsForm({
 						label="Prestamista"
 						value={lender}
 						onChange={(e) => setLender(e.target.value)}
+					/>
+
+					<CurrencyInput
+						label={CREDIT_PRINCIPAL_LABEL}
+						value={principalRaw}
+						onChange={setPrincipalRaw}
 						required
 					/>
+
+					<CurrencyInput
+						label={OUTSTANDING_BALANCE_LABEL}
+						value={outstandingRaw}
+						onChange={setOutstandingRaw}
+						required
+					/>
+					<p className="tx-form__hint credit-form-grid__full">
+						{OUTSTANDING_BALANCE_HINT}
+					</p>
+
+					<FormSelect
+						id="edit-rate-type"
+						label="Tipo de tasa de interés"
+						value={rateType}
+						hint={rateHint}
+						placeholder={false}
+						onChange={(v) => setRateType(v as RateType)}
+					>
+						{RATE_TYPE_OPTIONS.map((opt) => (
+							<option key={opt.value} value={opt.value}>
+								{opt.label}
+							</option>
+						))}
+					</FormSelect>
+
+					<Input
+						label={rateValueLabel}
+						type="number"
+						min={0}
+						step="any"
+						value={interestRate}
+						onChange={(e) => setInterestRate(e.target.value)}
+						required
+					/>
+
+					<Input
+						label="Plazo (meses / cuotas)"
+						type="number"
+						min={1}
+						value={termMonths}
+						onChange={(e) => setTermMonths(e.target.value)}
+						required
+					/>
+
+					<Input
+						label="Día de pago mensual"
+						type="number"
+						min={1}
+						max={31}
+						value={paymentDay}
+						onChange={(e) => setPaymentDay(e.target.value)}
+						required
+					/>
+
+					<FormSelect
+						id="edit-schedule-mode"
+						label="Forma de cuotas"
+						value={scheduleMode}
+						hint={scheduleHint}
+						placeholder={false}
+						onChange={(v) => setScheduleMode(v as ScheduleMode)}
+					>
+						{SCHEDULE_MODE_OPTIONS.map((opt) => (
+							<option key={opt.value} value={opt.value}>
+								{opt.label}
+							</option>
+						))}
+					</FormSelect>
+
+					<div>
+						<div className="field-label-row">
+							<label className="jp-input-label" htmlFor="edit-start-date">
+								{CREDIT_START_DATE_LABEL}
+							</label>
+							<FieldHelp text={CREDIT_START_DATE_HINT} />
+						</div>
+						<Input
+							id="edit-start-date"
+							type="date"
+							value={startDate}
+							onChange={(e) => setStartDate(e.target.value)}
+							required
+						/>
+					</div>
+
+					<CurrencyInput
+						label="Seguro mensual (opcional)"
+						value={insuranceRaw}
+						onChange={setInsuranceRaw}
+					/>
+
+					{scheduleMode === "cuota_fija" ? (
+						<>
+							<CurrencyInput
+								label="Cuota fija acordada (opcional)"
+								value={fixedInstallmentRaw}
+								onChange={setFixedInstallmentRaw}
+							/>
+							<p className="tx-form__hint credit-form-grid__full">
+								Si la conoces, úsala; si no, se calcula con la tasa y el plazo.
+							</p>
+						</>
+					) : null}
+
 					<div>
 						<div className="field-label-row">
 							<label className="jp-input-label" htmlFor="edit-target-payoff">
@@ -215,6 +521,7 @@ export function CreditSettingsForm({
 							onChange={(e) => setTargetDate(e.target.value)}
 						/>
 					</div>
+
 					<FormSelect
 						id="edit-recalc-effect"
 						label="Preferencia en abonos extra"
@@ -273,7 +580,7 @@ export function CreditSettingsForm({
 						onChange={(e) => setNotes(e.target.value)}
 					/>
 
-					<FieldError message={error} />
+					<FieldError message={clientError || error} />
 
 					<div className="credit-panel-form__actions">
 						<Button type="submit" disabled={loading}>
@@ -319,6 +626,72 @@ export function CreditSettingsForm({
 					</div>
 				)}
 			</section>
+
+			<Modal
+				open={profilePickerOpen}
+				title="Cambiar tipo de crédito"
+				onClose={() => setProfilePickerOpen(false)}
+			>
+				<CreditProfilePicker onSelect={handleProfileSelect} />
+			</Modal>
+
+			<Modal
+				open={profileConfirmOpen}
+				title="Datos del perfil anterior"
+				onClose={() => {
+					setProfileConfirmOpen(false);
+					setPendingProfile(null);
+					setIncompatibleLabels([]);
+				}}
+			>
+				<div className="credit-profile-confirm">
+					<p className="tx-form__hint">
+						El tipo{" "}
+						<strong>
+							{pendingProfile
+								? CREDIT_PROFILE_LABELS[pendingProfile]
+								: ""}
+						</strong>{" "}
+						no usa: {incompatibleLabels.join(", ")}. ¿Qué hacemos con esa
+						información?
+					</p>
+					<div className="credit-profile-confirm__actions">
+						<Button
+							type="button"
+							variant="secondary"
+							disabled={profileChangeLoading}
+							onClick={() => {
+								setProfileConfirmOpen(false);
+								setProfilePickerOpen(true);
+							}}
+						>
+							Volver
+						</Button>
+						<Button
+							type="button"
+							variant="secondary"
+							disabled={profileChangeLoading || !pendingProfile}
+							onClick={() =>
+								pendingProfile &&
+								void applyProfileChange(pendingProfile, true)
+							}
+						>
+							{profileChangeLoading ? "Guardando…" : "Conservar en historial"}
+						</Button>
+						<Button
+							type="button"
+							variant="danger"
+							disabled={profileChangeLoading || !pendingProfile}
+							onClick={() =>
+								pendingProfile &&
+								void applyProfileChange(pendingProfile, false)
+							}
+						>
+							{profileChangeLoading ? "Guardando…" : "Eliminar datos"}
+						</Button>
+					</div>
+				</div>
+			</Modal>
 		</div>
 	);
 }

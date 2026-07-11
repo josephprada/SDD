@@ -1,3 +1,5 @@
+import type { CreditProfileConfig } from "@app/lib/credits/creditProfileRegistry";
+import { DEFAULT_RATE_TYPE } from "@app/lib/credits/creditProfileRegistry";
 import {
 	ALREADY_IN_PROGRESS_HINT,
 	ALREADY_IN_PROGRESS_LABEL,
@@ -17,15 +19,19 @@ import {
 	PAID_INSTALLMENTS_LABEL,
 	PAYMENT_ACCOUNT_HINT,
 	PAYMENT_ACCOUNT_LABEL,
+	CREATE_CREDIT_FIXED_EXPENSE_HINT,
+	CREATE_CREDIT_FIXED_EXPENSE_LABEL,
 	RATE_TYPE_OPTIONS,
 	SCHEDULE_MODE_OPTIONS,
 	TRACK_REMAINING_ONLY_HINT,
 	TRACK_REMAINING_ONLY_LABEL,
+	type CreditProfile,
 	type RateType,
 	type ScheduleMode,
 } from "@app/lib/credits/types";
 import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { FieldError } from "@app/components/ui/FieldError";
+import { FieldHelp } from "@app/components/ui/FieldHelp";
 import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import { FormSelect } from "@app/components/ui/FormSelect";
 import {
@@ -34,11 +40,12 @@ import {
 } from "@app/components/credits/FundExpenseCategoryPicker";
 import { parseCOPInput } from "@app/lib/format/currency";
 import type { Id } from "@convex/_generated/dataModel";
-import { Checkbox, Input } from "@jp-ds";
+import { Button, Checkbox, Input } from "@jp-ds";
 import { useMemo, useState } from "react";
 
 export type CreditFormValues = {
 	name: string;
+	creditProfile?: CreditProfile;
 	lender: string;
 	principal: number;
 	rateType: RateType;
@@ -58,9 +65,15 @@ export type CreditFormValues = {
 	fundExpenseCategoryIds: Id<"categories">[];
 	newFundExpenseCategoryNames: string[];
 	notes?: string;
+	createFixedExpense?: boolean;
+	fixedExpenseMonthlyAmount?: number;
 };
 
 type CreditFormProps = {
+	creditProfile?: CreditProfile;
+	profileConfig?: CreditProfileConfig;
+	profileLabel?: string;
+	onChangeProfile?: () => void;
 	accounts: Array<{ _id: Id<"accounts">; name: string }>;
 	expenseCategories: Array<{ _id: Id<"categories">; name: string }>;
 	onSubmit: (values: CreditFormValues) => Promise<void>;
@@ -70,6 +83,10 @@ type CreditFormProps = {
 };
 
 export function CreditForm({
+	creditProfile,
+	profileConfig,
+	profileLabel,
+	onChangeProfile,
 	accounts,
 	expenseCategories,
 	onSubmit,
@@ -80,22 +97,30 @@ export function CreditForm({
 	const [name, setName] = useState("");
 	const [lender, setLender] = useState("");
 	const [principalRaw, setPrincipalRaw] = useState("");
-	const [rateType, setRateType] = useState<RateType | "">("");
+	const [rateType, setRateType] = useState<RateType | "">(
+		profileConfig ? DEFAULT_RATE_TYPE : "",
+	);
 	const [interestRate, setInterestRate] = useState("");
 	const [termMonths, setTermMonths] = useState("");
 	const [startDate, setStartDate] = useState("");
 	const [paymentDay, setPaymentDay] = useState("");
-	const [scheduleMode, setScheduleMode] = useState<ScheduleMode | "">("");
+	const [scheduleMode, setScheduleMode] = useState<ScheduleMode | "">(
+		profileConfig?.defaultScheduleMode ?? "",
+	);
 	const [fixedInstallmentRaw, setFixedInstallmentRaw] = useState("");
 	const [alreadyInProgress, setAlreadyInProgress] = useState(false);
 	const [paidInstallmentsRaw, setPaidInstallmentsRaw] = useState("");
 	const [trackRemainingOnly, setTrackRemainingOnly] = useState(true);
 	const [outstandingBalanceRaw, setOutstandingBalanceRaw] = useState("");
-	const [hasDisbursement, setHasDisbursement] = useState(false);
+	const [hasDisbursement, setHasDisbursement] = useState(
+		profileConfig?.suggestDisbursement ?? false,
+	);
 	const [disbursementAccountId, setDisbursementAccountId] = useState("");
 	const [paymentAccountId, setPaymentAccountId] = useState("");
 	const [registerDisbursementIncome, setRegisterDisbursementIncome] =
 		useState(false);
+	const [createFixedExpense, setCreateFixedExpense] = useState(false);
+	const [fixedExpenseAmountRaw, setFixedExpenseAmountRaw] = useState("");
 	const [fundCategories, setFundCategories] =
 		useState<FundExpenseCategorySelection>({
 			selectedIds: [],
@@ -130,6 +155,33 @@ export function CreditForm({
 		return "Valor de la tasa (%)";
 	}, [rateType]);
 
+	const hasFinancialData = useMemo(() => {
+		const principal = principalRaw ? parseCOPInput(principalRaw) : null;
+		const term = termMonths ? Number.parseInt(termMonths, 10) : null;
+		const rate = interestRate ? Number.parseFloat(interestRate) : null;
+		const day = paymentDay ? Number.parseInt(paymentDay, 10) : null;
+		return (
+			principal !== null &&
+			principal > 0 &&
+			Boolean(rateType) &&
+			Boolean(scheduleMode) &&
+			rate !== null &&
+			rate >= 0 &&
+			term !== null &&
+			term > 0 &&
+			day !== null &&
+			day >= 1 &&
+			day <= 31
+		);
+	}, [
+		principalRaw,
+		rateType,
+		scheduleMode,
+		interestRate,
+		termMonths,
+		paymentDay,
+	]);
+
 	const handleHasDisbursementChange = (checked: boolean) => {
 		setHasDisbursement(checked);
 		if (!checked) {
@@ -150,50 +202,55 @@ export function CreditForm({
 	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
 		setClientError("");
-		const principal = parseCOPInput(principalRaw);
-		if (principal === null || principal <= 0) return;
-		if (!rateType || !scheduleMode) {
+		if (!name.trim()) {
+			setClientError("Indica un nombre para el crédito");
 			return;
 		}
 		if (hasDisbursement && !disbursementAccountId) {
 			setClientError("Selecciona la cuenta de desembolso");
 			return;
 		}
-		if (
-			hasDisbursement &&
-			fundCategories.selectedIds.length === 0 &&
-			fundCategories.newNames.length === 0
-		) {
-			setFundCategoryError("Agrega al menos una categoría para gastos del fondo");
-			return;
+		setFundCategoryError("");
+
+		const principal = principalRaw ? parseCOPInput(principalRaw) : null;
+		const term = termMonths ? Number.parseInt(termMonths, 10) : null;
+		const rate = interestRate ? Number.parseFloat(interestRate) : null;
+		const day = paymentDay ? Number.parseInt(paymentDay, 10) : null;
+
+		const hasFinancialData =
+			principal !== null &&
+			principal > 0 &&
+			rateType &&
+			scheduleMode &&
+			rate !== null &&
+			term !== null &&
+			day !== null;
+
+		if (hasFinancialData) {
+			if (principal === null || principal <= 0) return;
+			if (!rateType || !scheduleMode) return;
+			if (rate === null || rate < 0) return;
+			if (term === null || term <= 0) return;
+			if (day === null || day < 1 || day > 31) return;
 		}
-		if (!hasDisbursement) {
-			setFundCategoryError("");
-		}
-		const term = Number.parseInt(termMonths, 10);
-		const rate = Number.parseFloat(interestRate);
-		const day = Number.parseInt(paymentDay, 10);
-		if (!Number.isFinite(term) || term <= 0) return;
-		if (!Number.isFinite(rate) || rate < 0) return;
-		if (!Number.isFinite(day) || day < 1 || day > 31) return;
 
 		let paidInstallmentsCount: number | undefined;
 		let outstandingBalance: number | undefined;
 
-		if (alreadyInProgress && paidInstallmentsRaw.trim()) {
+		if (hasFinancialData && alreadyInProgress && paidInstallmentsRaw.trim()) {
 			const paid = Number.parseInt(paidInstallmentsRaw, 10);
 			if (!Number.isFinite(paid) || paid < 0) {
 				setClientError("Las cuotas pagadas deben ser un número válido");
 				return;
 			}
-			if (paid >= term) {
+			if (term !== null && paid >= term) {
 				setClientError("Las cuotas pagadas deben ser menores que el plazo total");
 				return;
 			}
 			paidInstallmentsCount = paid;
 		}
 
-		if (alreadyInProgress) {
+		if (hasFinancialData && alreadyInProgress) {
 			const parsedBalance = outstandingBalanceRaw
 				? parseCOPInput(outstandingBalanceRaw)
 				: null;
@@ -214,16 +271,36 @@ export function CreditForm({
 			? parseCOPInput(fixedInstallmentRaw) ?? undefined
 			: undefined;
 
+		let fixedExpenseMonthlyAmount: number | undefined;
+		if (hasFinancialData && createFixedExpense) {
+			if (scheduleMode === "manual") {
+				const parsedFixedExpenseAmount = fixedExpenseAmountRaw
+					? parseCOPInput(fixedExpenseAmountRaw)
+					: null;
+				if (parsedFixedExpenseAmount !== null && parsedFixedExpenseAmount > 0) {
+					fixedExpenseMonthlyAmount = parsedFixedExpenseAmount;
+				} else if (fixedInstallment && fixedInstallment > 0) {
+					fixedExpenseMonthlyAmount = fixedInstallment;
+				} else {
+					setClientError(
+						"Indica el valor mensual de la cuota para crear el gasto fijo",
+					);
+					return;
+				}
+			}
+		}
+
 		await onSubmit({
 			name: name.trim(),
+			creditProfile,
 			lender: lender.trim(),
-			principal,
-			rateType,
-			interestRate: rate,
-			termMonths: term,
+			principal: hasFinancialData ? principal! : 0,
+			rateType: hasFinancialData ? rateType! : DEFAULT_RATE_TYPE,
+			interestRate: hasFinancialData ? rate! : 0,
+			termMonths: hasFinancialData ? term! : 0,
 			startDate: startDate ? new Date(startDate).getTime() : undefined,
-			paymentDay: day,
-			scheduleMode,
+			paymentDay: hasFinancialData ? day! : 1,
+			scheduleMode: hasFinancialData ? scheduleMode! : (profileConfig?.defaultScheduleMode ?? "cuota_fija"),
 			fixedInstallment,
 			disbursementAccountId: hasDisbursement
 				? (disbursementAccountId as Id<"accounts">)
@@ -235,7 +312,7 @@ export function CreditForm({
 				hasDisbursement && !alreadyInProgress
 					? registerDisbursementIncome
 					: false,
-			alreadyInProgress,
+			alreadyInProgress: hasFinancialData ? alreadyInProgress : undefined,
 			paidInstallmentsCount,
 			trackRemainingOnly: alreadyInProgress ? trackRemainingOnly : undefined,
 			outstandingBalance,
@@ -246,12 +323,31 @@ export function CreditForm({
 				? fundCategories.newNames
 				: [],
 			notes: notes.trim() || undefined,
+			createFixedExpense: hasFinancialData ? createFixedExpense : undefined,
+			fixedExpenseMonthlyAmount,
 		});
 	};
 
 	return (
 		<form className="tx-form tx-form--modal" onSubmit={handleSubmit} noValidate>
 			<div className="tx-form__scroll brand-scroll credit-form-grid">
+				{profileLabel && onChangeProfile ? (
+					<div className="credit-form-profile-bar">
+						<div className="credit-form-profile-bar__meta">
+							<span className="credit-form-profile-bar__label">Tipo</span>
+							<span className="credit-form-profile-bar__value">
+								{profileLabel}
+							</span>
+						</div>
+						<Button
+							type="button"
+							variant="secondary"
+							onClick={onChangeProfile}
+						>
+							Cambiar
+						</Button>
+					</div>
+				) : null}
 				<Input
 					label="Nombre del crédito"
 					value={name}
@@ -262,14 +358,12 @@ export function CreditForm({
 					label="Prestamista (banco o entidad)"
 					value={lender}
 					onChange={(e) => setLender(e.target.value)}
-					required
 				/>
 
 				<CurrencyInput
 					label={hasDisbursement ? DISBURSED_PRINCIPAL_LABEL : CREDIT_PRINCIPAL_LABEL}
 					value={principalRaw}
 					onChange={setPrincipalRaw}
-					required
 				/>
 
 				<div>
@@ -292,13 +386,11 @@ export function CreditForm({
 					label={rateValueLabel}
 					value={interestRate}
 					onChange={(e) => setInterestRate(e.target.value)}
-					required
 				/>
 				<Input
 					label="Plazo (meses)"
 					value={termMonths}
 					onChange={(e) => setTermMonths(e.target.value)}
-					required
 				/>
 				<div className="credit-form-grid__full">
 					<Input
@@ -317,7 +409,6 @@ export function CreditForm({
 					label="Día de pago de la cuota (1–31)"
 					value={paymentDay}
 					onChange={(e) => setPaymentDay(e.target.value)}
-					required
 				/>
 
 				<div className="credit-form-grid__full">
@@ -489,6 +580,31 @@ export function CreditForm({
 						))}
 					</FormSelect>
 				</div>
+
+				{hasFinancialData ? (
+					<>
+						<div className="credit-form-grid__full credit-form-check">
+							<div className="field-label-row">
+								<Checkbox
+									label={CREATE_CREDIT_FIXED_EXPENSE_LABEL}
+									checked={createFixedExpense}
+									onChange={setCreateFixedExpense}
+								/>
+								<FieldHelp text={CREATE_CREDIT_FIXED_EXPENSE_HINT} />
+							</div>
+						</div>
+						{createFixedExpense &&
+						scheduleMode === "manual" &&
+						!fixedInstallmentRaw ? (
+							<CurrencyInput
+								label="Valor mensual de la cuota (COP)"
+								value={fixedExpenseAmountRaw}
+								onChange={setFixedExpenseAmountRaw}
+								className="credit-form-grid__full"
+							/>
+						) : null}
+					</>
+				) : null}
 
 				<Input
 					label="Notas"

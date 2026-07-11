@@ -158,6 +158,39 @@ export const creditStatusValidator = v.union(
 	v.literal("defaulted"),
 );
 
+export const creditProfileValidator = v.union(
+	v.literal("free_purpose"),
+	v.literal("housing_improvement"),
+	v.literal("debt_consolidation"),
+	v.literal("tangible_product"),
+	v.literal("intangible_service"),
+	v.literal("p2p_agreement"),
+);
+
+export const setupStatusValidator = v.union(
+	v.literal("draft"),
+	v.literal("ready"),
+	v.literal("active"),
+);
+
+export const linkedAssetValidator = v.object({
+	kind: v.union(
+		v.literal("vehicle"),
+		v.literal("goods"),
+		v.literal("service"),
+		v.literal("other"),
+	),
+	label: v.string(),
+	vendor: v.optional(v.string()),
+	identifier: v.optional(v.string()),
+});
+
+export const informalAgreementValidator = v.object({
+	counterpartyName: v.optional(v.string()),
+	relationship: v.optional(v.string()),
+	notes: v.optional(v.string()),
+});
+
 export const creditPaymentStatusValidator = v.union(
 	v.literal("pending"),
 	v.literal("paid"),
@@ -215,6 +248,15 @@ export function validateCreditNotes(notes?: string): string | undefined {
 	const trimmed = notes.trim();
 	if (trimmed.length > MAX_CREDIT_NOTES_LENGTH) {
 		throw new Error("Notes must be at most 500 characters");
+	}
+	return trimmed;
+}
+
+export function validateOptionalCreditLender(lender?: string): string {
+	if (!lender?.trim()) return "";
+	const trimmed = lender.trim();
+	if (trimmed.length > MAX_CREDIT_NAME_LENGTH) {
+		throw new Error("Lender name must be at most 80 characters");
 	}
 	return trimmed;
 }

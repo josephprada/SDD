@@ -171,9 +171,62 @@
 - [x] T061 `formatConvexError` en créditos, presupuestos, gastos fijos
 - [x] T062 JP-DS Input/FormSelect + Modal + `core.css` (métricas, overflow, tooltips)
 - [x] T063 Documentar decisiones D-23–D-33 en `design.md`
-- [ ] T064 Refactor manual-first créditos (P-01–P-03 en design.md)
+- [ ] T064 Refactor manual-first créditos — **supersedido por Phase 12 (perfiles v1.6)**
 
-**Checkpoint**: Build OK; manual-first créditos queda para siguiente iteración.
+**Checkpoint**: Build OK; perfiles adaptativos en Phase 12.
+
+---
+
+## Phase 12: Perfiles adaptativos v1.6 (2026-07-11)
+
+**Goal**: Wizard 2 pasos, creación mínima (solo nombre), `creditProfile` editable, cambio de perfil con confirmación.
+
+**Spec/design**: `spec.md` v1.6, `design.md` D-34–D-38, `data-model.md`, `contracts/credits-api.md`
+
+### 12A — Documentación (este bloque)
+
+- [x] T065 Actualizar `spec.md` — clarifications, FR-042–051, US1/US1b, SC-010–013
+- [x] T066 Actualizar `design.md` — registry, matriz perfil, componentes nuevos
+- [x] T067 Actualizar `data-model.md` + `contracts/credits-api.md`
+
+### 12B — Schema + backend
+
+- [x] T068 Extender `convex/schema.ts` — `creditProfile`, `setupStatus`, metadata
+- [x] T069 Extender `convex/lib/validators.ts` — validators + `validateOptionalCreditLender`
+- [ ] T070 Migración/backfill créditos existentes → `setupStatus: active`, inferir `creditProfile`
+- [x] T071 Refactor `credits.create` — solo `name` obligatorio; no schedule si `draft`
+- [x] T072 `credits.updateSetupProfile` — conservar/eliminar datos incompatibles
+- [x] T073 Guard `ensurePaymentSchedule` — skip `draft`/incompleto
+- [x] T074 `credits.get` — `missingFields[]`
+- [x] T075 Ampliar `credits.update` — campos financieros editables + `setupStatus` derivado
+
+### 12C — Frontend wizard + registry
+
+- [x] T076 Crear `creditProfileRegistry.ts`
+- [x] T077 Extender `types.ts` — `CreditProfile`, labels
+- [x] T078 Crear `CreditProfilePicker.tsx`
+- [x] T079 Crear `CreditCreateWizard.tsx`
+- [x] T080 Refactor `CreditForm.tsx` — campos opcionales; defaults por perfil
+- [x] T081 Wire `credits.tsx` — modal usa wizard
+- [x] T082 Estilos wizard en `credits-savings.css`
+
+### 12D — Edición + detalle incompleto
+
+- [ ] T083 Crear `CreditProfileChangeDialog.tsx`
+- [ ] T084 Extender `CreditSettingsForm.tsx` — selector perfil + financieros editables
+- [x] T085 `credit-detail.tsx` — guard `ensureSchedule` en draft
+- [x] T086 `CreditList.tsx` — badge «Incompleto»
+- [ ] T085 `credit-detail.tsx` — banner draft; guard `ensureSchedule`; pasar perfil a update
+- [ ] T086 `CreditList.tsx` — badge «Incompleto»; tolerar principal/lender vacíos
+- [ ] T087 `CreditPaymentTable.tsx` — empty state + CTA completar/generar tabla
+- [ ] T088 `CreditFundCard.tsx` / `home.tsx` — skip o placeholder créditos draft
+
+### 12E — QA
+
+- [ ] T089 Ampliar `quickstart.md` — draft solo nombre, tangible_product, P2P con desembolso, cambio perfil
+- [ ] T090 `bun run build` + `bun run lint` + tests amortización sin regresión
+
+**Checkpoint**: SC-010–013; wizard operativo; créditos legacy migrados.
 
 ---
 
@@ -193,6 +246,10 @@ Phase 6 US4 Escrow + wizard
 Phase 8 Modos + reminders
     ↓
 Phase 9 Polish
+    ↓
+Phase 10–11 UX iterations
+    ↓
+Phase 12 Perfiles adaptativos v1.6
 ```
 
 ## Parallel Opportunities
@@ -207,4 +264,4 @@ Phase 9 Polish
 
 **Mínimo usable**: Phases 1–5 (crédito + abonos + rubros).  
 **Flujo usuario completo**: + Phase 6 (escrow) + Phase 7 (metas).  
-**Total**: 64 tareas · 11 fases (+ P-01–P-03 pendientes)
+**Total**: 90 tareas · 12 fases (T065–T067 doc ✅; T068–T090 implementación pendiente)

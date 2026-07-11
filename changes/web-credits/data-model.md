@@ -7,27 +7,59 @@
 | Field | Type | Required | Default | Notes |
 |-------|------|----------|---------|-------|
 | `userId` | `Id<"users">` | Yes | — | Owner |
-| `name` | `string` | Yes | — | Max 80; ej. «Remodelación vivienda» |
-| `lender` | `string` | Yes | — | Texto libre; cualquier prestamista |
-| `principal` | `number` | Yes | — | COP entero > 0; monto desembolsado |
-| `rateType` | `"EA" \| "NAMV" \| "MV"` | Yes | — | Cómo se expresa la tasa |
-| `interestRate` | `number` | Yes | — | % según rateType (ej. 1.08 si MV) |
-| `termMonths` | `number` | Yes | — | Plazo original en meses |
-| `startDate` | `number` | Yes | — | Timestamp inicio / desembolso |
-| `paymentDay` | `number` | Yes | — | 1–31; clamp mes corto |
-| `scheduleMode` | `"cuota_fija" \| "capital_constant" \| "manual"` | Yes | `cuota_fija` | Modo de tabla |
+| `name` | `string` | Yes | — | Max 80; **único campo obligatorio en create** |
+| `creditProfile` | `CreditProfile` | Yes | `free_purpose` | Perfil adaptativo UX |
+| `setupStatus` | `"draft" \| "ready" \| "active"` | Yes | `draft` | Estado de completitud |
+| `lender` | `string` | No | `""` | Texto libre; cualquier prestamista |
+| `principal` | `number` | No | `0` | COP entero; requerido para generar cuotas |
+| `rateType` | `"EA" \| "NAMV" \| "MV"` | No | `MV` | Cómo se expresa la tasa |
+| `interestRate` | `number` | No | `0` | % según rateType |
+| `termMonths` | `number` | No | `0` | Plazo original en meses |
+| `startDate` | `number` | No | `createdAt` | Timestamp inicio / desembolso |
+| `paymentDay` | `number` | No | `1` | 1–31; clamp mes corto |
+| `scheduleMode` | `"cuota_fija" \| "capital_constant" \| "manual"` | No | `cuota_fija` | Modo de tabla |
 | `fixedInstallment` | `number` | No | — | Cuota conocida (capital+interés) |
 | `defaultRecalcOnAbono` | `"shorten_term" \| "lower_installment"` | Yes | `shorten_term` | Efecto abono extraordinario |
 | `targetPayoffDate` | `number` | No | — | Meta aspiracional |
 | `insuranceMonthly` | `number` | No | — | Seguro fijo mensual opcional |
-| `disbursementAccountId` | `Id<"accounts">` | No | — | Cuenta escrow del desembolso |
+| `disbursementAccountId` | `Id<"accounts">` | No | — | Cuenta escrow; opcional en **todos** los perfiles |
 | `operatingAccountId` | `Id<"accounts">` | No | — | Cuenta operativa pasarela |
-| `outstandingBalance` | `number` | Yes | — | Saldo deuda; denormalizado |
+| `linkedAsset` | `object` | No | — | `{ kind, label, vendor?, identifier? }` — perfil `tangible_product` / `intangible_service` |
+| `informalAgreement` | `object` | No | — | `{ counterpartyName?, relationship?, notes? }` — perfil `p2p_agreement` |
+| `profileMetadata` | `object` | No | — | Datos conservados al cambiar perfil (campos ocultos) |
+| `outstandingBalance` | `number` | No | `0` | Saldo deuda; denormalizado |
 | `reminderOffsets` | `number[]` | Yes | `[3, 0]` | Días antes vencimiento cuota |
-| `status` | `"active" \| "paid_off" \| "defaulted"` | Yes | `active` | |
+| `status` | `"active" \| "paid_off" \| "defaulted"` | Yes | `active` | Lifecycle de deuda (independiente de `setupStatus`) |
 | `notes` | `string` | No | — | Max 500 |
 | `createdAt` | `number` | Yes | — | |
 | `updatedAt` | `number` | Yes | — | |
+
+**CreditProfile** (union):
+
+```typescript
+type CreditProfile =
+  | "free_purpose"
+  | "housing_improvement"
+  | "debt_consolidation"
+  | "tangible_product"
+  | "intangible_service"
+  | "p2p_agreement";
+```
+
+**State transitions (`setupStatus`)**:
+
+| From | To | Trigger |
+|------|-----|---------|
+| — | `draft` | `create` con solo nombre |
+| `draft` | `ready` | Campos mínimos financieros completos |
+| `ready` | `active` | `ensurePaymentSchedule` exitoso |
+| `active` | `ready` | Cancelación de cuotas pending (edge) |
+
+**Migración créditos existentes (pre-v1.6)**:
+
+- `setupStatus: "active"`
+- `creditProfile`: `housing_improvement` si tiene rubros/escrow de obra; `tangible_product` si sin desembolso y nombre sugiere producto; else `free_purpose`
+- Campos financieros actuales se mantienen obligatorios en filas existentes
 
 **Indexes**
 

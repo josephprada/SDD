@@ -16,6 +16,7 @@ import {
 	RECALC_EFFECT_LABELS,
 	type CreditTab,
 } from "@app/lib/credits/types";
+import { usesDestinationsTab } from "@app/lib/credits/creditProfileRegistry";
 import { formatCOP } from "@app/lib/format/currency";
 import { formatFullDate } from "@app/lib/format/date";
 import { CoreIcon } from "@app/lib/core/icons";
@@ -36,17 +37,20 @@ type CreditAbono = FunctionReturnType<
 	typeof api.creditCapitalAbonos.list
 >[number];
 
-const TABS: Array<{ id: CreditTab; label: string }> = [
+const ALL_TABS: Array<{ id: CreditTab; label: string; iconOnly?: boolean }> = [
 	{ id: "payments", label: "Cuotas" },
 	{ id: "abonos", label: "Abonos" },
 	{ id: "destinations", label: "Destinos" },
-	{ id: "settings", label: "Ajustes" },
+	{ id: "settings", label: "Ajustes", iconOnly: true },
 ];
 
-const VALID_TABS = new Set<CreditTab>(TABS.map((t) => t.id));
+const VALID_TABS = new Set<CreditTab>(ALL_TABS.map((t) => t.id));
 
-function resolveTab(raw: string | null): CreditTab {
-	if (raw === "fund") return "destinations";
+function resolveTab(raw: string | null, allowDestinations: boolean): CreditTab {
+	if (raw === "fund") {
+		return allowDestinations ? "destinations" : "payments";
+	}
+	if (raw === "destinations" && !allowDestinations) return "payments";
 	if (raw && VALID_TABS.has(raw as CreditTab)) return raw as CreditTab;
 	return "payments";
 }
@@ -58,15 +62,21 @@ export function CreditDetailRoute() {
 	const { id } = useParams<{ id: string }>();
 	const creditId = id as Id<"credits">;
 	const [searchParams, setSearchParams] = useSearchParams();
-	const tab = resolveTab(searchParams.get("tab"));
 
 	const credit = useQuery(api.credits.get, { creditId });
+	const showDestinationsTab = credit
+		? usesDestinationsTab(credit.creditProfile)
+		: true;
+	const tab = resolveTab(searchParams.get("tab"), showDestinationsTab);
 	const payments = useQuery(api.creditPayments.listByCredit, { creditId });
 	const abonos = useQuery(api.creditCapitalAbonos.list, { creditId });
 	const savingsGoals = useQuery(api.savingsGoals.list, {});
 	const linkedGoals =
 		savingsGoals?.filter((g) => g.linkedCreditId === creditId) ?? [];
-	const destinations = useQuery(api.creditDestinations.list, { creditId });
+	const destinations = useQuery(
+		api.creditDestinations.list,
+		credit && usesDestinationsTab(credit.creditProfile) ? { creditId } : "skip",
+	);
 	const fundSummary = useQuery(api.credits.fundSummary, { creditId });
 	const categories = useQuery(api.categories.list, {
 		type: "expense",
@@ -88,9 +98,11 @@ export function CreditDetailRoute() {
 	const updateDestination = useMutation(api.creditDestinations.update);
 	const removeDestination = useMutation(api.creditDestinations.remove);
 	const updateCredit = useMutation(api.credits.update);
+	const updateSetupProfile = useMutation(api.credits.updateSetupProfile);
 	const removeCredit = useMutation(api.credits.remove);
 	const ensureSchedule = useMutation(api.credits.ensurePaymentSchedule);
 	const updateManualRow = useMutation(api.credits.updateManualRow);
+	const updateManualRows = useMutation(api.credits.updateManualRows);
 
 	const [payingId, setPayingId] = useState<string | null>(null);
 	const [paymentModal, setPaymentModal] = useState(false);
@@ -109,25 +121,38 @@ export function CreditDetailRoute() {
 	const [abonoSavingsGoalId, setAbonoSavingsGoalId] =
 		useState<Id<"savingsGoals"> | null>(null);
 	const [confirmDeleteAbono, setConfirmDeleteAbono] = useState(false);
-	const [editingPayment, setEditingPayment] = useState<CreditPayment | null>(
-		null,
-	);
+	const [manualBatchPayments, setManualBatchPayments] = useState<
+		CreditPayment[]
+	>([]);
+	const [manualSelectedIds, setManualSelectedIds] = useState<
+		Id<"creditPayments">[]
+	>([]);
 	const [loading, setLoading] = useState(false);
 	const [deleteLoading, setDeleteLoading] = useState(false);
 	const [generatingSchedule, setGeneratingSchedule] = useState(false);
 	const [settingsError, setSettingsError] = useState("");
+	const [profileChangeError, setProfileChangeError] = useState("");
+	const [profileChangeLoading, setProfileChangeLoading] = useState(false);
 	const [error, setError] = useState("");
 	const scheduleRequested = useRef(false);
 
 	useEffect(() => {
+		if (!credit) return;
 		const raw = searchParams.get("tab");
-		if (raw === "fund" || (raw && !VALID_TABS.has(raw as CreditTab))) {
-			setSearchParams(
-				{ tab: raw === "fund" ? "destinations" : "payments" },
-				{ replace: true },
-			);
+		const allowDestinations = usesDestinationsTab(credit.creditProfile);
+		const wantsDestinations = raw === "fund" || raw === "destinations";
+		if (wantsDestinations && !allowDestinations) {
+			setSearchParams({ tab: "payments" }, { replace: true });
+			return;
 		}
-	}, [searchParams, setSearchParams]);
+		if (raw === "fund") {
+			setSearchParams({ tab: "destinations" }, { replace: true });
+			return;
+		}
+		if (raw && !VALID_TABS.has(raw as CreditTab)) {
+			setSearchParams({ tab: "payments" }, { replace: true });
+		}
+	}, [credit, searchParams, setSearchParams]);
 
 	useEffect(() => {
 		if (
@@ -138,6 +163,9 @@ export function CreditDetailRoute() {
 			return;
 		}
 		if (payments.length === 0 && credit.status === "active") {
+			if (credit.setupStatus === "draft" || credit.setupStatus === "ready") {
+				return;
+			}
 			scheduleRequested.current = true;
 			setGeneratingSchedule(true);
 			void ensureSchedule({ creditId })
@@ -154,12 +182,16 @@ export function CreditDetailRoute() {
 		credit === undefined ||
 		payments === undefined ||
 		abonos === undefined ||
-		destinations === undefined ||
+		(showDestinationsTab && destinations === undefined) ||
 		accounts === undefined ||
 		fundSummary === undefined
 	) {
 		return null;
 	}
+
+	const visibleTabs = ALL_TABS.filter(
+		(item) => item.id !== "destinations" || showDestinationsTab,
+	);
 
 	const hasFund = Boolean(fundSummary.disbursementAccountId);
 
@@ -295,14 +327,19 @@ export function CreditDetailRoute() {
 			</div>
 
 			<nav className="credit-tabs" aria-label="Secciones del crédito">
-				{TABS.map((t) => (
+				{visibleTabs.map((t) => (
 					<button
 						key={t.id}
 						type="button"
-						className={`credit-tab${tab === t.id ? " credit-tab--active" : ""}`}
+						className={`credit-tab${tab === t.id ? " credit-tab--active" : ""}${t.iconOnly ? " credit-tab--icon" : ""}`}
+						aria-label={t.iconOnly ? t.label : undefined}
 						onClick={() => setTab(t.id)}
 					>
-						{t.label}
+						{t.iconOnly ? (
+							<CoreIcon name="settings" size={18} aria-hidden />
+						) : (
+							t.label
+						)}
 					</button>
 				))}
 			</nav>
@@ -311,15 +348,6 @@ export function CreditDetailRoute() {
 				<>
 					<div className="credits-header">
 						<h2 className="section-title">Cuotas</h2>
-						<Button
-							onClick={() => {
-								setPaymentModalPaymentId(null);
-								setPaymentModal(true);
-								setError("");
-							}}
-						>
-							Registrar pago
-						</Button>
 					</div>
 					<CreditPaymentTable
 					payments={payments}
@@ -346,10 +374,14 @@ export function CreditDetailRoute() {
 							setGeneratingSchedule(false);
 						}
 					}}
-					onEditManual={(payment) => {
-						setEditingPayment(payment);
+					onEditManual={(editablePayments, initialSelectedIds) => {
+						setManualBatchPayments(editablePayments);
+						setManualSelectedIds(initialSelectedIds);
 						setManualModal(true);
 					}}
+					onViewTransaction={(transactionId) =>
+						openEditTransaction(transactionId)
+					}
 					onRegisterPayment={(payment) => {
 						setPaymentModalPaymentId(payment._id);
 						setPaymentModal(true);
@@ -411,39 +443,47 @@ export function CreditDetailRoute() {
 				open={manualModal}
 				onClose={() => {
 					setManualModal(false);
-					setEditingPayment(null);
+					setManualBatchPayments([]);
+					setManualSelectedIds([]);
 					setError("");
 				}}
 				title={
-					editingPayment
-						? editingPayment.totalDue > 0
-							? `Editar cuota #${editingPayment.installmentNumber}`
-							: `Cuota #${editingPayment.installmentNumber}`
-						: "Valor de cuota"
+					manualSelectedIds.length > 1
+						? `Valor de ${manualSelectedIds.length} cuotas`
+						: manualBatchPayments.find((p) => p._id === manualSelectedIds[0])
+							? `Cuota #${manualBatchPayments.find((p) => p._id === manualSelectedIds[0])!.installmentNumber}`
+							: "Valor de cuota"
 				}
 			>
-				{editingPayment ? (
+				{manualSelectedIds.length > 0 ? (
 					<ManualPaymentForm
-						key={editingPayment._id}
-						installmentNumber={editingPayment.installmentNumber}
-						dueDate={editingPayment.dueDate}
-						initialTotal={editingPayment.totalDue}
+						key={manualSelectedIds.join("-")}
+						paymentIds={manualSelectedIds}
 						error={error}
 						loading={loading}
 						onCancel={() => {
 							setManualModal(false);
-							setEditingPayment(null);
+							setManualBatchPayments([]);
+							setManualSelectedIds([]);
 						}}
 						onSubmit={async (values) => {
 							setLoading(true);
 							setError("");
 							try {
-								await updateManualRow({
-									paymentId: editingPayment._id,
-									totalAmount: values.totalAmount,
-								});
+								if (values.paymentIds.length === 1) {
+									await updateManualRow({
+										paymentId: values.paymentIds[0],
+										totalAmount: values.totalAmount,
+									});
+								} else {
+									await updateManualRows({
+										paymentIds: values.paymentIds,
+										totalAmount: values.totalAmount,
+									});
+								}
 								setManualModal(false);
-								setEditingPayment(null);
+								setManualBatchPayments([]);
+								setManualSelectedIds([]);
 							} catch (e) {
 								setError(
 									e instanceof Error
@@ -638,7 +678,7 @@ export function CreditDetailRoute() {
 				</div>
 			) : null}
 
-			{tab === "destinations" ? (
+			{tab === "destinations" && showDestinationsTab && destinations ? (
 				<div>
 					<div className="credits-header">
 						<div>
@@ -727,8 +767,34 @@ export function CreditDetailRoute() {
 					accounts={accounts.map((a) => ({ _id: a._id, name: a.name }))}
 					expenseCategories={linkableExpenseCategories}
 					error={settingsError}
+					profileChangeError={profileChangeError}
 					loading={loading}
+					profileChangeLoading={profileChangeLoading}
 					deleteLoading={deleteLoading}
+					onChangeProfile={async (profile, preserveIncompatibleData) => {
+						setProfileChangeLoading(true);
+						setProfileChangeError("");
+						try {
+							await updateSetupProfile({
+								creditId,
+								creditProfile: profile,
+								preserveIncompatibleData,
+							});
+							showToast({
+								title: "Tipo actualizado",
+								body: "El tipo de crédito se cambió correctamente.",
+							});
+						} catch (e) {
+							setProfileChangeError(
+								e instanceof Error
+									? e.message
+									: "Error al cambiar el tipo",
+							);
+							throw e;
+						} finally {
+							setProfileChangeLoading(false);
+						}
+					}}
 					onSave={async (values) => {
 						setLoading(true);
 						setSettingsError("");
@@ -740,6 +806,17 @@ export function CreditDetailRoute() {
 								name: values.name,
 								lender: values.lender,
 								notes: values.notes,
+								principal: values.principal,
+								outstandingBalance: values.outstandingBalance,
+								rateType: values.rateType,
+								interestRate: values.interestRate,
+								termMonths: values.termMonths,
+								paymentDay: values.paymentDay,
+								scheduleMode: values.scheduleMode,
+								startDate: values.startDate,
+								insuranceMonthly: values.insuranceMonthly,
+								fixedInstallment: values.fixedInstallment,
+								clearFixedInstallment: !values.fixedInstallment,
 								targetPayoffDate: values.targetPayoffDate,
 								clearTargetPayoffDate:
 									Boolean(credit.targetPayoffDate) &&

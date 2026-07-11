@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-05
 
-**Status**: In progress (v1.5 — iteración UX post-planificación)
+**Status**: In progress (v1.6 — perfiles adaptativos y creación flexible)
 
 **Change**: web-credits (Change 5)
 
@@ -29,6 +29,33 @@ Ajustes acordados en sesión que **refinan** el plan v1.4 sin cambiar el alcance
 
 ---
 
+## Iteración planificada (2026-07-11)
+
+Perfiles adaptativos de crédito: wizard de 2 pasos, creación mínima y edición flexible.
+
+| Área | v1.5 | v1.6 (planificado) |
+|------|------|---------------------|
+| Creación | Formulario único; campos financieros obligatorios | **Wizard 2 pasos** (perfil → formulario); solo **nombre** obligatorio |
+| Tipo de crédito | Implícito (`hasDisbursement`, flags UI) | **`creditProfile`** persistido y editable |
+| Completitud | Crédito activo con cuotas al crear | **`setupStatus`**: `draft` → `ready` → `active` |
+| Desembolso | Condicionado a toggle en create | **Opcional en cualquier perfil** (incl. P2P) |
+| Edición | Financieros solo lectura en Ajustes | **Todo editable**; cambio de perfil con confirmación |
+| Producto financiado | Toggle «sin desembolso» genérico | Perfil **`tangible_product`** (vehículo, electro, bien tangible) |
+
+---
+
+## Clarifications
+
+### Session 2026-07-11
+
+- Q: ¿Qué mínimo exige la app para guardar un crédito? → A: **Solo nombre**; el resto opcional y completable después.
+- Q: ¿Cuenta de desembolso en préstamos P2P? → A: **Permitida si el usuario la desea**; nunca obligatoria.
+- Q: ¿Vehículo vs electro vs leasing? → A: **Un solo perfil** `tangible_product` (producto/bien tangible financiado).
+- Q: ¿Pasos del wizard? → A: **2 pasos**: selección de perfil → formulario adaptado.
+- Q: ¿Perfil editable después? → A: **Sí, todo editable**; al cambiar perfil, **confirmación** para conservar o eliminar datos que dejan de aplicar; si conserva, reaparecen cuando el perfil vuelva a ser compatible.
+
+---
+
 ## Resumen
 
 | Pilar | Descripción |
@@ -41,9 +68,9 @@ Ajustes acordados en sesión que **refinan** el plan v1.4 sin cambiar el alcance
 | **Cuotas y alertas** | Seguimiento, seguros opcionales, recordatorios |
 | **Metas de ahorro** | Objetivos, aportes, progreso |
 
-**Dentro:** modos de amortización, abonos, simulador, rubros, **cuenta escrow + asistente de gasto**, crédito manual VIS, metas, `/credits`, `/savings`.
+**Dentro:** perfiles adaptativos (`creditProfile`), wizard 2 pasos, creación mínima (solo nombre), modos de amortización, abonos, simulador, rubros, **cuenta escrow opcional**, crédito manual VIS, metas, `/credits`, `/savings`.
 
-**Fuera:** UVR indexada, revolving, sync bancario, refinanciación como nueva operación, DIAN.
+**Fuera:** UVR indexada, revolving, sync bancario, refinanciación como nueva operación, leasing como producto separado, DIAN.
 
 ---
 
@@ -56,6 +83,36 @@ Ajustes acordados en sesión que **refinan** el plan v1.4 sin cambiar el alcance
 - **Destino / rubro**: en qué **gastaste o planeas gastar** el dinero que te prestaron — no es un pago al banco, es trazabilidad del uso del desembolso de $40M.
 
 Ejemplo: de $40.000.000 desembolsados, $1.500.000 fueron a **construcción de escaleras**; quedan $38.500.000 por asignar o ejecutar en otros rubros.
+
+### Perfil adaptativo (`creditProfile`) vs. modo de tabla (`scheduleMode`)
+
+Dos ejes **independientes**:
+
+| Eje | Campo | Qué define |
+|-----|-------|------------|
+| **Propósito / UX** | `creditProfile` | Formulario, defaults sugeridos, campos visibles, pestañas |
+| **Amortización** | `scheduleMode` | Cómo se calculan o registran las cuotas |
+
+**Perfiles v1.6** (7 valores):
+
+| Grupo UX | `creditProfile` | Ejemplos |
+|----------|-----------------|----------|
+| Dinero en cuenta | `free_purpose` | Libre destino, consumo |
+| Dinero en cuenta | `housing_improvement` | VIS, mejora locativa, obra |
+| Dinero en cuenta | `debt_consolidation` | Recaudo / compra de cartera |
+| Compra financiada | `tangible_product` | Vehículo, electrodoméstico, bien tangible |
+| Compra financiada | `intangible_service` | Curso, software, servicio |
+| Acuerdo personal | `p2p_agreement` | Préstamo familiar, informal |
+
+Los perfiles **sugieren** defaults (desembolso, rubros, `scheduleMode`) pero **no obligan** al usuario.
+
+**Estado de configuración** (`setupStatus`):
+
+| Valor | Significado |
+|-------|-------------|
+| `draft` | Solo nombre (y opcionalmente perfil); sin cuotas |
+| `ready` | Datos suficientes para generar tabla; cuotas aún no generadas |
+| `active` | Tabla generada o crédito operativo |
 
 ### Modos de tabla (`scheduleMode`)
 
@@ -105,21 +162,37 @@ Meta de ahorro $500k/mes para abono anual: sale de **nómina**, no del escrow de
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Registrar crédito según su tipo (Priority: P1)
+### User Story 1 - Registrar crédito según su perfil (Priority: P1)
 
-Como usuario, quiero registrar mi crédito como lo muestra mi banco (VIS, libre inversión, etc.), no forzado a una sola fórmula.
+Como usuario, quiero elegir el tipo de crédito (libre destino, vivienda, producto financiado, etc.) y ver un formulario adaptado a mi caso, pudiendo guardar con solo un nombre y completar después.
 
-**Independent Test A**: Modo `cuota_fija`, $20M, 18% NAMV, 36 meses → cuota constante generada.
+**Independent Test A**: Wizard paso 1 → `housing_improvement`; paso 2 → solo nombre → crédito `draft` en lista con badge «Incompleto».
 
-**Independent Test B**: Modo `manual`, cargar filas del extracto Banco Agrario → primera cuota total $625.958, saldo $40M.
+**Independent Test B**: Perfil `tangible_product`, moto financiada sin desembolso en cuenta → crédito activo con cuotas; sin pestaña Fondo.
+
+**Independent Test C**: Modo `manual`, extracto Banco Agrario → primera cuota total $625.958, saldo $40M.
 
 **Acceptance Scenarios**:
 
-1. **Given** modo `cuota_fija`, **When** ingreso monto + tasa + plazo, **Then** tabla con cuota fija y desglose capital/interés.
-2. **Given** modo `manual`, **When** ingreso filas del extracto (o importo CSV), **Then** tabla refleja valores del banco sin recalcular filas pasadas.
-3. **Given** modo `capital_constant`, **When** genero tabla, **Then** capital mensual es uniforme y VR cuota decrece mes a mes.
-4. **Given** `insuranceMonthly` o seguro por fila, **When** veo detalle, **Then** VR cuota = capital + interés + seguros (+ otros).
-5. **Given** crédito VIS $40M / 120 meses, **When** guardo `targetPayoffDate` a ~5 años, **Then** la UI muestra la meta de pago anticipado.
+1. **Given** wizard paso 1, **When** selecciono un perfil, **Then** paso 2 muestra campos sugeridos para ese perfil (no obligatorios salvo nombre).
+2. **Given** solo nombre ingresado, **When** guardo, **Then** crédito persiste con `setupStatus: draft` sin generar cuotas.
+3. **Given** crédito `draft`, **When** completo monto + tasa + plazo + día pago + `scheduleMode` y activo tabla, **Then** `setupStatus: active` y cuotas generadas.
+4. **Given** perfil `tangible_product`, **When** creo crédito, **Then** desembolso desactivado por defecto pero editable; campos opcionales de producto/comercio visibles.
+5. **Given** perfil `p2p_agreement`, **When** activo cuenta desembolso, **Then** puedo vincular escrow igual que en libre destino.
+6. **Given** modo `cuota_fija` con datos completos, **When** genero tabla, **Then** cuota fija con desglose capital/interés.
+7. **Given** modo `manual`, **When** ingreso filas del extracto, **Then** tabla refleja valores del banco sin recalcular filas `paid`.
+8. **Given** crédito ya en marcha, **When** registro con cuotas pagadas opcionales, **Then** solo cuotas restantes según flags existentes.
+
+### User Story 1b - Editar perfil y configuración (Priority: P1)
+
+Como usuario, quiero cambiar el tipo de crédito y todos sus campos después de crearlo, con control sobre qué pasa con datos que ya no aplican.
+
+**Acceptance Scenarios**:
+
+1. **Given** crédito existente, **When** cambio `creditProfile` en Ajustes, **Then** UI muestra confirmación: conservar o eliminar datos incompatibles.
+2. **Given** confirmación «conservar», **When** el nuevo perfil vuelve a ser compatible, **Then** datos ocultos reaparecen.
+3. **Given** confirmación «eliminar», **When** guardo, **Then** se limpian campos incompatibles; cuotas pagadas, abonos y transacciones históricas **no** se borran.
+4. **Given** crédito `draft`, **When** edito monto/tasa/plazo en Ajustes, **Then** cambios persisten sin regenerar cuotas hasta acción explícita.
 
 ---
 
@@ -224,14 +297,31 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - Eliminar rubro: soft-delete o archivar; no altera cuotas ni abonos.
 - Desembolso mal registrado como ingreso en nómina: wizard de setup debe evitarlo; documentar corrección manual.
 - Cuenta meta sin vincular: crédito funciona; fondo aislado es opcional pero recomendado.
+- Crédito `draft` sin cuotas: listado muestra badge; detalle no auto-genera tabla.
+- Cambio de perfil con rubros existentes: conservar destinos aunque perfil no muestre pestaña Destinos.
+- Cambio de perfil con cuotas pagadas: nunca cancelar cuotas `paid`.
+- Perfil `tangible_product` con desembolso activado manualmente: comportamiento igual a `free_purpose` con escrow.
 
 ---
 
 ## Requirements *(mandatory)*
 
+### Perfiles adaptativos y wizard
+
+- **FR-042**: MUST persistir `creditProfile` en `credits` con valores: `free_purpose`, `housing_improvement`, `debt_consolidation`, `tangible_product`, `intangible_service`, `p2p_agreement`.
+- **FR-043**: Wizard de creación MUST tener **2 pasos**: selector de perfil → formulario adaptado.
+- **FR-044**: `credits.create` MUST aceptar payload con **solo `name`** obligatorio; resto opcional.
+- **FR-045**: Crédito creado sin datos financieros completos MUST quedar `setupStatus: draft` **sin** generar `creditPayments`.
+- **FR-046**: Generación de cuotas MUST ser acción explícita (`ensurePaymentSchedule` / «Generar tabla») cuando `setupStatus !== active`.
+- **FR-047**: Perfil MUST ser editable post-create vía `credits.update` o `credits.updateSetupProfile`.
+- **FR-048**: Cambio de `creditProfile` MUST mostrar confirmación: conservar datos incompatibles vs eliminarlos.
+- **FR-049**: `disbursementAccountId` MAY configurarse en **cualquier** perfil; nunca obligatorio por perfil.
+- **FR-050**: Perfiles MUST sugerir defaults (copy, campos visibles, `scheduleMode` default) sin bloquear al usuario.
+- **FR-051**: `credits.get` SHOULD devolver `missingFields[]` para guiar completitud en UI.
+
 ### Créditos — configuración
 
-- **FR-001**: CRUD con `scheduleMode` (`cuota_fija` \| `capital_constant` \| `manual`), `rateType`, tasa, plazo, día de pago.
+- **FR-001**: CRUD con `scheduleMode` (`cuota_fija` \| `capital_constant` \| `manual`), `rateType`, tasa, plazo, día de pago — todos **opcionales en create**; requeridos solo para generar cuotas.
 - **FR-002**: `creditPayments` MUST incluir `principal`, `interest`, `insuranceAmount?`, `otherFees?`, `totalDue`.
 - **FR-003**: Modo `cuota_fija` MUST generar interés sobre saldo insoluto; conversión EA/NAMV/MV según proposal.
 - **FR-004**: Modo `manual` MUST permitir crear/editar filas sin sobrescribir cuotas `paid`.
@@ -258,7 +348,7 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 
 ### Fondo aislado e integración transacciones
 
-- **FR-019**: MUST vincular `disbursementAccountId` (cuenta meta) al crédito.
+- **FR-019**: MAY vincular `disbursementAccountId` (cuenta meta) al crédito; opcional en todos los perfiles.
 - **FR-020**: MAY vincular `operatingAccountId` (nómina/ahorros pasarela).
 - **FR-021**: Transacciones del fondo MUST soportar `creditId`, `creditDestinationId?`, `isCreditFundMovement`.
 - **FR-022**: Gasto desde fondo MUST registrarse vía modal Movimientos con `creditFundContext`; **un solo movimiento** tipo `expense` con `creditDestinationId`. Mutation `spendFromFund` (wizard multi-tx) queda como **legacy opcional** no expuesta en UI v1.5.
@@ -289,7 +379,8 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 
 ### Key Entities
 
-- **Credit**, **CreditPayment**, **CreditCapitalAbono**, **CreditDestination**, **SavingsGoal**, **SavingsContribution**.
+- **Credit** (+ `creditProfile`, `setupStatus`, `linkedAsset?`, `informalAgreement?`, `profileMetadata?`)
+- **CreditPayment**, **CreditCapitalAbono**, **CreditDestination**, **SavingsGoal**, **SavingsContribution**.
 
 ---
 
@@ -304,6 +395,10 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - **SC-007**: Cuotas pagadas intactas tras 3 abonos consecutivos.
 - **SC-008**: Meta de ahorro + navegación sin regresión.
 - **SC-009**: 0 fugas de datos entre usuarios.
+- **SC-010**: Crear crédito con solo nombre → aparece en lista como incompleto; no hay cuotas hasta completar.
+- **SC-011**: Wizard 2 pasos: perfil `housing_improvement` muestra sugerencias de rubros/seguros sin obligarlos.
+- **SC-012**: Cambio de perfil con «conservar» → datos reaparecen al volver a perfil compatible.
+- **SC-013**: Perfil `tangible_product` (moto/electro) operativo sin desembolso ni pestaña Fondo.
 
 ---
 
@@ -318,6 +413,9 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - Seguros: monto fijo mensual (`insuranceMonthly`) o por fila; no modelamos pólizas detalladas.
 - Recálculo usa tasa y modo vigentes del crédito; no replica al 100% algoritmos propietarios del banco — modo `manual` para ajuste fino.
 - Zona horaria `America/Bogota`.
+- Perfil adaptativo ≠ modo de amortización; un VIS puede ser `manual`, un libre destino `cuota_fija`.
+- Créditos existentes pre-v1.6: backfill `creditProfile` por heurística (`disbursementAccountId` → perfil con fondo; resto → `free_purpose`); `setupStatus: active`.
+- Datos mínimos para generar cuotas: `principal`, `rateType`, `interestRate`, `termMonths`, `paymentDay`, `scheduleMode`.
 
 ---
 
