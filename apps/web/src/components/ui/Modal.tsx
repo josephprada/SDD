@@ -28,6 +28,14 @@ export function Modal({
 	genieDuration,
 }: ModalProps) {
 	const modalRef = useRef<HTMLDivElement>(null);
+	const frozenContentRef = useRef({ title, children });
+
+	if (open) {
+		frozenContentRef.current = { title, children };
+	}
+
+	const displayTitle = open ? title : frozenContentRef.current.title;
+	const displayChildren = open ? children : frozenContentRef.current.children;
 	const {
 		mounted,
 		closing,
@@ -119,7 +127,7 @@ export function Modal({
 					ref={modalRef}
 					role="dialog"
 					aria-modal="true"
-					aria-label={title}
+					aria-label={displayTitle}
 					className={`modal glass ${surfaceAnimClass} ${surfaceExtraClass}`.trim()}
 					onAnimationEnd={(event) => {
 						if (event.target !== event.currentTarget) return;
@@ -127,12 +135,12 @@ export function Modal({
 					}}
 				>
 					<header className="modal__header">
-						<h2 className="modal__title">{title}</h2>
+						<h2 className="modal__title">{displayTitle}</h2>
 						<IconButton aria-label="Cerrar" onClick={onClose}>
 							<CoreIcon name="plus" size={20} className="modal__close-icon" />
 						</IconButton>
 					</header>
-					<div className="modal__body">{children}</div>
+					<div className="modal__body">{displayChildren}</div>
 				</div>
 			</div>
 		</OverlayPortal>

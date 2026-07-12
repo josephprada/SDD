@@ -46,6 +46,7 @@ import type * as lib_fixedExpenseTransaction from "../lib/fixedExpenseTransactio
 import type * as lib_fixedExpenses from "../lib/fixedExpenses.js";
 import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_period from "../lib/period.js";
+import type * as lib_personalFinance from "../lib/personalFinance.js";
 import type * as lib_preferences from "../lib/preferences.js";
 import type * as lib_reports from "../lib/reports.js";
 import type * as lib_savingsGoalAbono from "../lib/savingsGoalAbono.js";
@@ -109,6 +110,7 @@ declare const fullApi: ApiFromModules<{
   "lib/fixedExpenses": typeof lib_fixedExpenses;
   "lib/notifications": typeof lib_notifications;
   "lib/period": typeof lib_period;
+  "lib/personalFinance": typeof lib_personalFinance;
   "lib/preferences": typeof lib_preferences;
   "lib/reports": typeof lib_reports;
   "lib/savingsGoalAbono": typeof lib_savingsGoalAbono;

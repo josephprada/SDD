@@ -249,6 +249,7 @@ export default defineSchema({
 		disbursementIncomeCategoryId: v.optional(v.id("categories")),
 		disbursementTransactionId: v.optional(v.id("transactions")),
 		outstandingBalance: v.number(),
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 		reminderOffsets: v.array(v.number()),
 		status: creditStatusValidator,
 		notes: v.optional(v.string()),

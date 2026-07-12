@@ -860,6 +860,8 @@ export function CreditDetailRoute() {
 								fundExpenseCategoryIds: values.fundExpenseCategoryIds,
 								newFundExpenseCategoryNames:
 									values.newFundExpenseCategoryNames,
+								excludeFromPersonalFinance:
+									values.excludeFromPersonalFinance,
 							});
 							showToast({
 								title: "Guardado exitosamente!",

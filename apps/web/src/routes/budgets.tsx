@@ -62,6 +62,22 @@ export function BudgetsRoute() {
 	);
 
 	const expenseCategories = useMemo(() => categories ?? [], [categories]);
+	const fixedExpenseCategories = useMemo(() => {
+		const base = categories ?? [];
+		if (!editFixed) return base;
+		if (base.some((category) => category._id === editFixed.categoryId)) {
+			return base;
+		}
+		return [
+			...base,
+			{
+				_id: editFixed.categoryId as Id<"categories">,
+				name: editFixed.categoryName,
+				icon: editFixed.categoryIcon,
+				color: editFixed.categoryColor,
+			},
+		];
+	}, [categories, editFixed]);
 	const isViewingCurrentMonth =
 		periodKey === periodKeyFromDate(new Date());
 
@@ -128,6 +144,12 @@ export function BudgetsRoute() {
 				await updateFixed({
 					id: editFixed._id as Id<"fixedExpenses">,
 					...payload,
+					...(singleMonthOnly && periodKey
+						? { onlyPeriodKey: periodKey }
+						: {}),
+					...(!singleMonthOnly && editFixed.onlyPeriodKey
+						? { clearOnlyPeriodKey: true }
+						: {}),
 				});
 				fixedId = editFixed._id as Id<"fixedExpenses">;
 			} else {
@@ -358,7 +380,7 @@ export function BudgetsRoute() {
 				title={editFixed ? "Editar gasto fijo" : "Nuevo gasto fijo"}
 			>
 				<FixedExpenseForm
-					categories={expenseCategories}
+					categories={fixedExpenseCategories}
 					periodKey={periodKey}
 					initial={
 						editFixed

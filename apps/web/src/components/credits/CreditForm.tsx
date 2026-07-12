@@ -21,6 +21,8 @@ import {
 	PAYMENT_ACCOUNT_LABEL,
 	CREATE_CREDIT_FIXED_EXPENSE_HINT,
 	CREATE_CREDIT_FIXED_EXPENSE_LABEL,
+	EXCLUDE_FROM_PERSONAL_FINANCE_HINT,
+	EXCLUDE_FROM_PERSONAL_FINANCE_LABEL,
 	RATE_TYPE_OPTIONS,
 	SCHEDULE_MODE_OPTIONS,
 	TRACK_REMAINING_ONLY_HINT,
@@ -67,6 +69,7 @@ export type CreditFormValues = {
 	notes?: string;
 	createFixedExpense?: boolean;
 	fixedExpenseMonthlyAmount?: number;
+	excludeFromPersonalFinance?: boolean;
 };
 
 type CreditFormProps = {
@@ -120,6 +123,8 @@ export function CreditForm({
 	const [registerDisbursementIncome, setRegisterDisbursementIncome] =
 		useState(false);
 	const [createFixedExpense, setCreateFixedExpense] = useState(true);
+	const [excludeFromPersonalFinance, setExcludeFromPersonalFinance] =
+		useState(true);
 	const [fixedExpenseAmountRaw, setFixedExpenseAmountRaw] = useState("");
 	const [fundCategories, setFundCategories] =
 		useState<FundExpenseCategorySelection>({
@@ -325,6 +330,7 @@ export function CreditForm({
 			notes: notes.trim() || undefined,
 			createFixedExpense: hasFinancialData ? createFixedExpense : undefined,
 			fixedExpenseMonthlyAmount,
+			excludeFromPersonalFinance,
 		});
 	};
 
@@ -605,6 +611,17 @@ export function CreditForm({
 						) : null}
 					</>
 				) : null}
+
+				<div className="credit-form-grid__full credit-form-check">
+					<div className="field-label-row">
+						<Checkbox
+							label={EXCLUDE_FROM_PERSONAL_FINANCE_LABEL}
+							checked={excludeFromPersonalFinance}
+							onChange={setExcludeFromPersonalFinance}
+						/>
+						<FieldHelp text={EXCLUDE_FROM_PERSONAL_FINANCE_HINT} />
+					</div>
+				</div>
 
 				<Input
 					label="Notas"

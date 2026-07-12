@@ -3,6 +3,10 @@ import { query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
 import { compareAccounts } from "./lib/accounts";
 import { compareTransactions } from "./lib/transactions";
+import {
+	countsForPersonalFinance,
+	excludedPersonalFinanceCreditIds,
+} from "./lib/personalFinance";
 import { enrichTransaction } from "./transactions";
 
 export const overview = query({
@@ -66,7 +70,10 @@ export const overview = query({
 			.withIndex("by_user_date", (q) => q.eq("userId", userId))
 			.collect();
 
-		const allTransactions = transactions.filter((t) => !t.isCreditFundMovement);
+		const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
+		const allTransactions = transactions.filter((t) =>
+			countsForPersonalFinance(t, excludedCreditIds),
+		);
 		const sorted = [...allTransactions].sort(compareTransactions);
 
 		const periodTransactions = sorted.filter(

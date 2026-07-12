@@ -6,6 +6,10 @@ import { requireUserId } from "./lib/auth";
 import { groupingValidator } from "./lib/preferences";
 import { aggregateTransactions } from "./lib/reports";
 import {
+	countsForPersonalFinance,
+	excludedPersonalFinanceCreditIds,
+} from "./lib/personalFinance";
+import {
 	periodKeyForClosedPeriod,
 	periodRangeForGrouping,
 	type GroupingId,
@@ -29,6 +33,11 @@ async function loadReportData(
 		.withIndex("by_user_date", (q) => q.eq("userId", userId))
 		.collect();
 
+	const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
+	const personalTransactions = transactions.filter((t) =>
+		countsForPersonalFinance(t, excludedCreditIds),
+	);
+
 	const categories = await ctx.db
 		.query("categories")
 		.withIndex("by_user", (q) => q.eq("userId", userId))
@@ -36,7 +45,7 @@ async function loadReportData(
 
 	const catMap = new Map(categories.map((c) => [c._id, c]));
 
-	return aggregateTransactions(transactions, catMap, filters, grouping);
+	return aggregateTransactions(personalTransactions, catMap, filters, grouping);
 }
 
 export const summary = query({

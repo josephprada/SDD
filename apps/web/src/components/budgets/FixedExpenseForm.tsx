@@ -61,6 +61,9 @@ export function FixedExpenseForm({
 	onDelete,
 }: FixedExpenseFormProps) {
 	const isCreate = !initial;
+	const canEditSingleMonth =
+		Boolean(periodKey) &&
+		(isCreate || !initial?.onlyPeriodKey || initial.onlyPeriodKey === periodKey);
 	const [name, setName] = useState(initial?.name ?? "");
 	const [amountStr, setAmountStr] = useState(
 		initial?.amount ? formatCOPInput(initial.amount) : "",
@@ -82,7 +85,7 @@ export function FixedExpenseForm({
 		initial?.isPaidCurrentPeriod ?? false,
 	);
 	const [singleMonthOnly, setSingleMonthOnly] = useState(
-		Boolean(initial?.onlyPeriodKey),
+		Boolean(initial?.onlyPeriodKey && initial.onlyPeriodKey === periodKey),
 	);
 	const [error, setError] = useState("");
 	const periodLabel = periodKey ? periodLabelFromKey(periodKey) : "";
@@ -122,7 +125,7 @@ export function FixedExpenseForm({
 			pushReminders,
 			notes: notes.trim() || undefined,
 			markAsPaid,
-			singleMonthOnly: isCreate && singleMonthOnly,
+			singleMonthOnly: canEditSingleMonth ? singleMonthOnly : false,
 		});
 	};
 
@@ -147,7 +150,7 @@ export function FixedExpenseForm({
 					onChange={setDayOfMonth}
 					maxLength={2}
 				/>
-				{isCreate && periodKey ? (
+				{canEditSingleMonth ? (
 					<div className="fixed-expense-form__checks">
 						<Checkbox
 							label={`Solo para ${periodLabel}`}
@@ -162,7 +165,7 @@ export function FixedExpenseForm({
 						) : null}
 					</div>
 				) : null}
-				{initial?.onlyPeriodKey ? (
+				{initial?.onlyPeriodKey && initial.onlyPeriodKey !== periodKey ? (
 					<p className="tx-form__hint">
 						Este gasto aplica solo a{" "}
 						<strong>{periodLabelFromKey(initial.onlyPeriodKey)}</strong>.

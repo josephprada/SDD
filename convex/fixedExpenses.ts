@@ -274,6 +274,8 @@ export const update = mutation({
 		pushReminders: v.optional(v.boolean()),
 		active: v.optional(v.boolean()),
 		notes: v.optional(v.string()),
+		onlyPeriodKey: v.optional(v.string()),
+		clearOnlyPeriodKey: v.optional(v.boolean()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
@@ -308,6 +310,11 @@ export const update = mutation({
 		if (args.active !== undefined) patch.active = args.active;
 		if (args.notes !== undefined) {
 			patch.notes = args.notes.trim().slice(0, 200) || undefined;
+		}
+		if (args.clearOnlyPeriodKey) {
+			patch.onlyPeriodKey = undefined;
+		} else if (args.onlyPeriodKey !== undefined) {
+			patch.onlyPeriodKey = validateOnlyPeriodKey(args.onlyPeriodKey);
 		}
 
 		await ctx.db.patch(args.id, patch);

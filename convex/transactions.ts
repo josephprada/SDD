@@ -23,6 +23,10 @@ import {
 	revertCreditPaymentForTransaction,
 } from "./lib/creditPaymentRegistration";
 import { executeSpendFromFund } from "./lib/creditFundSpend";
+import {
+	countsForPersonalFinance,
+	excludedPersonalFinanceCreditIds,
+} from "./lib/personalFinance";
 import { revertSavingsContributionForTransaction } from "./lib/savingsGoalFixedExpense";
 import {
 	transactionTypeValidator,
@@ -177,9 +181,12 @@ export const list = query({
 			.withIndex("by_user", (q) => q.eq("userId", userId))
 			.collect();
 
+		const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
 		const includeCredit = args.includeCreditMovements ?? false;
 		if (!includeCredit && !args.creditId) {
-			transactions = transactions.filter((t) => !t.isCreditFundMovement);
+			transactions = transactions.filter((t) =>
+				countsForPersonalFinance(t, excludedCreditIds),
+			);
 		}
 		if (args.creditId) {
 			transactions = transactions.filter((t) => t.creditId === args.creditId);

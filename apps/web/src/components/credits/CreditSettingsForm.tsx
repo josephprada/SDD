@@ -14,6 +14,8 @@ import {
 	RATE_TYPE_OPTIONS,
 	RECALC_EFFECT_OPTIONS,
 	RECALC_EFFECT_LABELS,
+	EXCLUDE_FROM_PERSONAL_FINANCE_HINT,
+	EXCLUDE_FROM_PERSONAL_FINANCE_LABEL,
 	SCHEDULE_MODE_OPTIONS,
 	TARGET_PAYOFF_HINT,
 	CREDIT_PROFILE_LABELS,
@@ -39,7 +41,7 @@ import { Modal } from "@app/components/ui/Modal";
 import { formatCOP, formatCOPInput, parseCOPInput } from "@app/lib/format/currency";
 import { toDateInputValue } from "@app/lib/format/date";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button, Input } from "@jp-ds";
+import { Button, Checkbox, Input } from "@jp-ds";
 import { useMemo, useState } from "react";
 
 export type CreditEditValues = {
@@ -62,6 +64,7 @@ export type CreditEditValues = {
 	operatingAccountId?: Id<"accounts">;
 	fundExpenseCategoryIds: Id<"categories">[];
 	newFundExpenseCategoryNames: string[];
+	excludeFromPersonalFinance: boolean;
 };
 
 type CreditSettingsFormProps = {
@@ -88,6 +91,7 @@ type CreditSettingsFormProps = {
 		insuranceMonthly?: number;
 		fixedInstallment?: number;
 		paymentsSummary?: { paid: number };
+		excludeFromPersonalFinance?: boolean;
 	};
 	accounts: Array<{ _id: Id<"accounts">; name: string }>;
 	expenseCategories: Array<{ _id: Id<"categories">; name: string }>;
@@ -181,6 +185,9 @@ export function CreditSettingsForm({
 			selectedIds: credit.fundExpenseCategories.map((c) => c._id),
 			newNames: [],
 		});
+	const [excludeFromPersonalFinance, setExcludeFromPersonalFinance] = useState(
+		credit.excludeFromPersonalFinance ?? false,
+	);
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [clientError, setClientError] = useState("");
 
@@ -337,6 +344,7 @@ export function CreditSettingsForm({
 				: undefined,
 			fundExpenseCategoryIds: fundCategories.selectedIds,
 			newFundExpenseCategoryNames: fundCategories.newNames,
+			excludeFromPersonalFinance,
 		});
 	};
 
@@ -566,6 +574,17 @@ export function CreditSettingsForm({
 							</option>
 						))}
 					</FormSelect>
+
+					<div className="credit-form-grid__full credit-form-check">
+						<div className="field-label-row">
+							<Checkbox
+								label={EXCLUDE_FROM_PERSONAL_FINANCE_LABEL}
+								checked={excludeFromPersonalFinance}
+								onChange={setExcludeFromPersonalFinance}
+							/>
+							<FieldHelp text={EXCLUDE_FROM_PERSONAL_FINANCE_HINT} />
+						</div>
+					</div>
 
 					<FundExpenseCategoryPicker
 						hint={FUND_EXPENSE_CATEGORY_HINT}

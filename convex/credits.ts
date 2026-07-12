@@ -206,6 +206,7 @@ export const create = mutation({
 		notes: v.optional(v.string()),
 		createFixedExpense: v.optional(v.boolean()),
 		fixedExpenseMonthlyAmount: v.optional(v.number()),
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
@@ -216,6 +217,7 @@ export const create = mutation({
 			args.reminderOffsets ?? [3, 0],
 		);
 		const creditProfile = args.creditProfile ?? "free_purpose";
+		const excludeFromPersonalFinance = args.excludeFromPersonalFinance ?? true;
 		const now = Date.now();
 		const today = new Date();
 		const startDate =
@@ -280,6 +282,7 @@ export const create = mutation({
 				linkedAsset: args.linkedAsset,
 				informalAgreement: args.informalAgreement,
 				outstandingBalance: 0,
+				excludeFromPersonalFinance,
 				reminderOffsets,
 				status: "active",
 				notes,
@@ -389,6 +392,7 @@ export const create = mutation({
 			linkedAsset: args.linkedAsset,
 			informalAgreement: args.informalAgreement,
 			outstandingBalance: initialOutstandingBalance,
+			excludeFromPersonalFinance,
 			reminderOffsets,
 			status: "active",
 			notes,
@@ -554,12 +558,17 @@ export const update = mutation({
 		clearOperatingAccount: v.optional(v.boolean()),
 		fundExpenseCategoryIds: v.optional(v.array(v.id("categories"))),
 		newFundExpenseCategoryNames: v.optional(v.array(v.string())),
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
 		const credit = await requireCreditOwnership(ctx, userId, args.creditId);
 		const now = Date.now();
 		const patch: Record<string, unknown> = { updatedAt: now };
+
+		if (args.excludeFromPersonalFinance !== undefined) {
+			patch.excludeFromPersonalFinance = args.excludeFromPersonalFinance;
+		}
 
 		if (args.name !== undefined) patch.name = validateCreditName(args.name);
 		if (args.lender !== undefined) {
