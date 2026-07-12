@@ -2,7 +2,7 @@ import { FieldError } from "@app/components/ui/FieldError";
 import { FieldHelp } from "@app/components/ui/FieldHelp";
 import { FormSelect } from "@app/components/ui/FormSelect";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button, Input } from "@jp-ds";
+import { Button } from "@jp-ds";
 import { useMemo, useState } from "react";
 
 export type FundExpenseCategorySelection = {
@@ -28,7 +28,6 @@ export function FundExpenseCategoryPicker({
 	error,
 }: FundExpenseCategoryPickerProps) {
 	const [pickExistingId, setPickExistingId] = useState("");
-	const [newName, setNewName] = useState("");
 
 	const selectedCategories = useMemo(() => {
 		const fromExisting = value.selectedIds
@@ -50,23 +49,6 @@ export function FundExpenseCategoryPicker({
 			selectedIds: [...value.selectedIds, id],
 		});
 		setPickExistingId("");
-	};
-
-	const addNew = () => {
-		const trimmed = newName.trim();
-		if (!trimmed) return;
-		if (
-			value.newNames.some(
-				(name) => name.toLowerCase() === trimmed.toLowerCase(),
-			)
-		) {
-			return;
-		}
-		onChange({
-			...value,
-			newNames: [...value.newNames, trimmed],
-		});
-		setNewName("");
 	};
 
 	const removeExisting = (id: Id<"categories">) => {
@@ -152,23 +134,6 @@ export function FundExpenseCategoryPicker({
 					disabled={!pickExistingId}
 				>
 					Agregar
-				</Button>
-			</div>
-
-			<div className="fund-category-picker__row">
-				<Input
-					label="Crear categoría nueva"
-					value={newName}
-					onChange={(e) => setNewName(e.target.value)}
-					placeholder="Ej. Obra, Materiales…"
-				/>
-				<Button
-					type="button"
-					variant="secondary"
-					onClick={addNew}
-					disabled={!newName.trim()}
-				>
-					Crear
 				</Button>
 			</div>
 

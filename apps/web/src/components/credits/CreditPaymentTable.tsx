@@ -50,6 +50,12 @@ function formatPaymentTotal(payment: Payment, scheduleMode: ScheduleMode): strin
 	return formatCOP(payment.totalDue);
 }
 
+function canEditPaymentAmount(mode: ScheduleMode): boolean {
+	return (
+		mode === "manual" || mode === "cuota_fija" || mode === "capital_constant"
+	);
+}
+
 function isSelectable(payment: Payment): boolean {
 	return payment.status !== "cancelled";
 }
@@ -86,9 +92,9 @@ export function CreditPaymentTable({
 		[payments],
 	);
 
-	const editableManualPayments = useMemo(
+	const editablePayments = useMemo(
 		() =>
-			scheduleMode === "manual"
+			canEditPaymentAmount(scheduleMode)
 				? payments.filter((p) => isPendingLike(p))
 				: [],
 		[payments, scheduleMode],
@@ -102,8 +108,8 @@ export function CreditPaymentTable({
 	const singleSelected =
 		selectedPayments.length === 1 ? selectedPayments[0] : null;
 
-	const canEditManual =
-		scheduleMode === "manual" &&
+	const canEditAmount =
+		canEditPaymentAmount(scheduleMode) &&
 		selectedPayments.length > 0 &&
 		selectedPayments.every(isPendingLike);
 
@@ -117,9 +123,10 @@ export function CreditPaymentTable({
 		singleSelected.status === "paid" &&
 		Boolean(onMarkUnpaid);
 
-	const manualEditLabel =
-		selectedPayments.some((p) => isManualAmountMissing(p)) ||
-		selectedPayments.every((p) => isManualAmountMissing(p))
+	const editAmountLabel =
+		scheduleMode === "manual" &&
+		(selectedPayments.some((p) => isManualAmountMissing(p)) ||
+			selectedPayments.every((p) => isManualAmountMissing(p)))
 			? "Ingresar valor"
 			: "Editar valor";
 
@@ -152,9 +159,9 @@ export function CreditPaymentTable({
 		clearSelection();
 	};
 
-	const handleEditManual = () => {
-		if (!canEditManual || !onEditManual) return;
-		onEditManual(editableManualPayments, [...selectedIds]);
+	const handleEditAmount = () => {
+		if (!canEditAmount || !onEditManual) return;
+		onEditManual(editablePayments, [...selectedIds]);
 	};
 
 	const handleRowClick = (payment: Payment) => {
@@ -239,17 +246,17 @@ export function CreditPaymentTable({
 					{selectedIds.size > 0
 						? `${selectedIds.size} seleccionada(s)`
 						: onViewTransaction
-							? "Marca cuotas para actuar · clic en pagada = ver movimiento"
+							? "Marca cuotas · toca una pagada para ver movimiento"
 							: "Selecciona cuotas para actuar"}
 				</span>
 				<div className="payment-table-toolbar__actions">
-					{onEditManual && scheduleMode === "manual" ? (
+					{onEditManual && canEditPaymentAmount(scheduleMode) ? (
 						<Button
 							variant="secondary"
-							disabled={!canEditManual}
-							onClick={handleEditManual}
+							disabled={!canEditAmount}
+							onClick={handleEditAmount}
 						>
-							{manualEditLabel}
+							{editAmountLabel}
 						</Button>
 					) : null}
 					{onRegisterPayment ? (

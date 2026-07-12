@@ -560,7 +560,7 @@ packages/jp-ds/
    - Gastos fijos con recordatorios
    - Gráficos visuales (barras, tortas, líneas, tendencias) con filtros
    - Export CSV/PDF; notificaciones push + in-app
-6. **Change 5: web-credits — Créditos, Préstamos y Ahorros/Metas** ← *siguiente*
+6. ✅ **Change 5: web-credits — Créditos, Préstamos y Ahorros/Metas** (completado 2026-07-12, merge `testing`)
    - Amortización flexible (cuota fija, capital constante, tabla manual/extracto)
    - **Abonos a capital** con recálculo (acortar plazo o bajar cuota)
    - **Destinos/rubros** del desembolso (trazabilidad del uso del capital)

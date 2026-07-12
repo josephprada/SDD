@@ -3,6 +3,7 @@ import type { ReportExportPayload } from "@app/lib/export/reportExportTypes";
 import { exportReportPdf } from "@app/lib/export/pdfExport";
 import { reportPdfFilename } from "@app/lib/export/reportExportUtils";
 import { formatPeriodLabel } from "@app/lib/period";
+import { CoreIcon } from "@app/lib/core/icons";
 import { useToastStore } from "@app/stores/toast";
 import type { GroupingId } from "@jp-ds/index";
 import { Button } from "@jp-ds";
@@ -65,9 +66,11 @@ export function ReportExportActions({
 	return (
 		<div className="report-export-actions">
 			<Button type="button" variant="secondary" onClick={onCsv}>
+				<CoreIcon name="file-spreadsheet" size={16} aria-hidden />
 				Exportar CSV
 			</Button>
 			<Button type="button" variant="secondary" disabled={busy} onClick={onPdf}>
+				<CoreIcon name="file-text" size={16} aria-hidden />
 				{busy ? "Generando…" : "Exportar PDF"}
 			</Button>
 		</div>

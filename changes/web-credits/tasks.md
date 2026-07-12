@@ -230,7 +230,27 @@
 
 ---
 
-## Dependency Graph
+## Phase 13: Cierre UX + reportes + motion (2026-07-12) ✅
+
+**Goal**: Pulir detalle crédito, reportes cross-module, animación genie modales. **Change cerrado.**
+
+- [x] T091 Barra progreso cuotas; ocultar cuotas pendientes en móvil
+- [x] T092 Quitar PayoffSimulator de tab Abonos
+- [x] T093 Destinos condicional por perfil; tab Ajustes icono engranaje
+- [x] T094 FundExpenseCategoryPicker sin crear categorías; gasto fijo default on
+- [x] T095 CreditPaymentTable toolbar, editar valor, abono recalc shorten_term
+- [x] T096 ReportCreditsSection + ReportSavingsSection + export CSV/PDF
+- [x] T097 Reportes: filtros + export en card; masonry compromisos
+- [x] T098 Motion genie: bloom in, genie out, reduced-motion, ConfirmDialog mobile
+- [x] T099 Spec/design/tasks actualizados — v1.7 completado
+
+**Checkpoint**: SC-014–016; merge a `testing`.
+
+---
+
+## Change 5 cerrado ✅ (2026-07-12)
+
+Rama `feat/web-credits` → merge en `testing`. Siguiente: **Change 6 web-tax-dian**.
 
 ```text
 Phase 1–2 (lib + schema)
@@ -264,4 +284,8 @@ Phase 12 Perfiles adaptativos v1.6
 
 **Mínimo usable**: Phases 1–5 (crédito + abonos + rubros).  
 **Flujo usuario completo**: + Phase 6 (escrow) + Phase 7 (metas).  
-**Total**: 90 tareas · 12 fases (T065–T067 doc ✅; T068–T090 implementación pendiente)
+**Total**: 99 tareas · 13 fases — **Change cerrado 2026-07-12**
+
+---
+
+## Dependency Graph

@@ -141,6 +141,37 @@ export function recalcShortenTerm(params: {
 	return rows;
 }
 
+/** shorten_term + capital_constant: keep monthly principal, fewer months. */
+export function recalcShortenTermCapitalConstant(params: {
+	outstandingBalance: number;
+	monthlyRate: number;
+	monthlyPrincipal: number;
+	insuranceMonthly: number;
+	dueDates: number[];
+	startInstallmentNumber: number;
+}): GeneratedPayment[] {
+	let balance = params.outstandingBalance;
+	const rows: GeneratedPayment[] = [];
+	const insurance = params.insuranceMonthly;
+	const monthlyPrincipal = Math.max(1, params.monthlyPrincipal);
+
+	for (let i = 0; i < params.dueDates.length && balance > 0; i++) {
+		const principal = Math.min(monthlyPrincipal, balance);
+		const interest = Math.round(balance * params.monthlyRate);
+		rows.push({
+			installmentNumber: params.startInstallmentNumber + i,
+			dueDate: params.dueDates[i],
+			principal,
+			interest,
+			insuranceAmount: insurance,
+			otherFees: 0,
+			totalDue: principal + interest + insurance,
+		});
+		balance -= principal;
+	}
+	return rows;
+}
+
 export type PayoffSimulationResult = {
 	projectedPayoffDate: number;
 	monthsRemaining: number;

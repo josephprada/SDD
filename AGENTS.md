@@ -61,9 +61,9 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change en curso: web-credits 🚧 (2026-07-05)
+## Change en curso: web-credits ✅ (cerrado 2026-07-12)
 
-Rama: `feat/web-credits` — créditos, abonos, rubros, fondo escrow, metas ahorro.
+Rama: `feat/web-credits` — merge en `testing`.
 
 | Artefacto | Ruta |
 |-----------|------|

@@ -529,11 +529,52 @@
 	font-size: var(--text-sm);
 }
 
+.report-filters__row--controls {
+	align-items: end;
+	justify-content: space-between;
+	gap: var(--space-4);
+}
+
+.report-filters__fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-3);
+	flex: 1;
+	min-width: 0;
+}
+
+.report-filters__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	margin-left: auto;
+}
+
 .report-export-actions {
 	display: flex;
 	gap: var(--space-2);
-	margin-bottom: var(--space-4);
 	flex-wrap: wrap;
+}
+
+@media (max-width: 639px) {
+	.report-filters__row--controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.report-filters__actions {
+		margin-left: 0;
+		width: 100%;
+	}
+
+	.report-export-actions {
+		width: 100%;
+	}
+
+	.report-export-actions .jp-btn {
+		flex: 1;
+		min-width: 0;
+	}
 }
 
 .report-export-panel {
@@ -632,7 +673,9 @@
 }
 
 .report-budgets,
-.report-fixed-expenses {
+.report-fixed-expenses,
+.report-credits,
+.report-savings {
 	padding: var(--space-4);
 	border-radius: var(--radius-lg);
 }
@@ -654,7 +697,9 @@
 }
 
 .report-budgets__summary,
-.report-fixed-expenses__summary {
+.report-fixed-expenses__summary,
+.report-credits__summary,
+.report-savings__summary {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: var(--space-3);
@@ -665,12 +710,16 @@
 	background: color-mix(in srgb, var(--color-surface-2) 60%, transparent);
 }
 
-.report-fixed-expenses__summary {
+.report-fixed-expenses__summary,
+.report-credits__summary,
+.report-savings__summary {
 	grid-template-columns: repeat(3, 1fr);
 }
 
 .report-budgets__summary-label,
-.report-fixed-expenses__summary-label {
+.report-fixed-expenses__summary-label,
+.report-credits__summary-label,
+.report-savings__summary-label {
 	display: block;
 	font-size: var(--text-xs);
 	color: var(--color-text-muted);
@@ -678,7 +727,9 @@
 }
 
 .report-budgets__list,
-.report-fixed-expenses__list {
+.report-fixed-expenses__list,
+.report-credits__list,
+.report-savings__list {
 	list-style: none;
 	padding: 0;
 	margin: 0;
@@ -688,7 +739,9 @@
 }
 
 .report-budget-item,
-.report-fixed-expense-item {
+.report-fixed-expense-item,
+.report-credit-item,
+.report-savings-item {
 	padding: var(--space-3);
 	border-radius: var(--radius-md);
 	border: 1px solid var(--color-glass-border);
@@ -696,7 +749,9 @@
 }
 
 .report-budget-item__head,
-.report-fixed-expense-item__head {
+.report-fixed-expense-item__head,
+.report-credit-item__head,
+.report-savings-item__head {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
@@ -774,6 +829,53 @@
 
 .report-fixed-expense-item__status--paid {
 	color: var(--color-accent);
+}
+
+.report-credit-item__title {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.report-credit-item__name {
+	font-weight: var(--font-semibold);
+	color: var(--color-text-primary);
+	text-decoration: none;
+}
+
+.report-credit-item__name:hover {
+	color: var(--color-accent);
+}
+
+.report-credit-item__lender {
+	font-size: var(--text-xs);
+	color: var(--color-text-muted);
+}
+
+.report-credit-item__meta {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-1);
+	font-size: var(--text-xs);
+	color: var(--color-text-secondary);
+}
+
+.report-savings-item__name {
+	min-width: 0;
+}
+
+.report-savings-item__pct {
+	font-size: var(--text-sm);
+	font-weight: var(--font-bold);
+	color: var(--color-accent);
+	flex-shrink: 0;
+}
+
+.report-savings-item__meta {
+	margin: var(--space-2) 0 0;
+	font-size: var(--text-xs);
+	color: var(--color-text-secondary);
 }
 
 .chart-panel__title {
@@ -906,9 +1008,18 @@
 	}
 
 	.report-commitments {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		align-items: start;
+		display: block;
+		columns: 2;
+		column-gap: var(--space-4);
+	}
+
+	.report-commitments > * {
+		break-inside: avoid;
+		margin-bottom: var(--space-4);
+	}
+
+	.report-commitments > :last-child {
+		margin-bottom: 0;
 	}
 }
 

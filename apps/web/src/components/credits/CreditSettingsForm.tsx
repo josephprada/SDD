@@ -632,7 +632,9 @@ export function CreditSettingsForm({
 				title="Cambiar tipo de crédito"
 				onClose={() => setProfilePickerOpen(false)}
 			>
-				<CreditProfilePicker onSelect={handleProfileSelect} />
+				<div className="modal-form__scroll brand-scroll">
+					<CreditProfilePicker onSelect={handleProfileSelect} />
+				</div>
 			</Modal>
 
 			<Modal
@@ -644,7 +646,8 @@ export function CreditSettingsForm({
 					setIncompatibleLabels([]);
 				}}
 			>
-				<div className="credit-profile-confirm">
+				<div className="modal-form">
+					<div className="credit-profile-confirm">
 					<p className="tx-form__hint">
 						El tipo{" "}
 						<strong>
@@ -690,6 +693,7 @@ export function CreditSettingsForm({
 							{profileChangeLoading ? "Guardando…" : "Eliminar datos"}
 						</Button>
 					</div>
+				</div>
 				</div>
 			</Modal>
 		</div>

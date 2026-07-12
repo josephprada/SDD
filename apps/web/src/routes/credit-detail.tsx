@@ -5,7 +5,6 @@ import { CreditPaymentTable } from "@app/components/credits/CreditPaymentTable";
 import { DestinationChart } from "@app/components/credits/DestinationChart";
 import { DestinationForm } from "@app/components/credits/DestinationForm";
 import { DestinationList } from "@app/components/credits/DestinationList";
-import { PayoffSimulator } from "@app/components/credits/PayoffSimulator";
 import { Modal } from "@app/components/ui/Modal";
 import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
 import { ManualPaymentForm } from "@app/components/credits/ManualPaymentForm";
@@ -195,6 +194,19 @@ export function CreditDetailRoute() {
 
 	const hasFund = Boolean(fundSummary.disbursementAccountId);
 
+	const paidInstallments = credit.paymentsSummary.paid;
+	const totalInstallments =
+		credit.termMonths > 0
+			? credit.termMonths
+			: paidInstallments + credit.paymentsSummary.pending;
+	const payoffProgressPct =
+		totalInstallments > 0
+			? Math.min(
+					100,
+					Math.round((paidInstallments / totalInstallments) * 100),
+				)
+			: 0;
+
 	const setTab = (next: CreditTab) => {
 		setSearchParams({ tab: next });
 	};
@@ -280,11 +292,33 @@ export function CreditDetailRoute() {
 				</div>
 			</header>
 
-			<div className="credit-summary">
-				<div className="credit-summary__item">
-					<span className="credit-summary__label">Saldo deuda</span>
-					<strong>{formatCOP(credit.outstandingBalance)}</strong>
+			<section
+				className="credit-payoff-progress glass"
+				aria-label="Progreso de cuotas pagadas"
+			>
+				<div className="credit-payoff-progress__header">
+					<span className="credit-summary__label">Progreso del crédito</span>
+					<strong>
+						{paidInstallments} de {totalInstallments} cuotas ·{" "}
+						{payoffProgressPct}%
+					</strong>
 				</div>
+				<div
+					className="credit-payoff-progress__bar"
+					role="progressbar"
+					aria-valuenow={payoffProgressPct}
+					aria-valuemin={0}
+					aria-valuemax={100}
+					aria-label={`${payoffProgressPct}% de cuotas pagadas`}
+				>
+					<div
+						className="credit-payoff-progress__fill"
+						style={{ width: `${payoffProgressPct}%` }}
+					/>
+				</div>
+			</section>
+
+			<div className="credit-summary">
 				{hasFund ? (
 					<>
 						<div className="credit-summary__item">
@@ -316,13 +350,9 @@ export function CreditDetailRoute() {
 						<strong>{formatFullDate(credit.targetPayoffDate)}</strong>
 					</div>
 				) : null}
-				<div className="credit-summary__item">
-					<span className="credit-summary__label">Cuotas</span>
-					<strong>
-						{credit.paymentsSummary.paid} pagadas ·{" "}
-						{credit.paymentsSummary.pending} pendientes ·{" "}
-						{credit.termMonths} total
-					</strong>
+				<div className="credit-summary__item credit-summary__item--hide-mobile">
+					<span className="credit-summary__label">Cuotas pendientes</span>
+					<strong>{credit.paymentsSummary.pending}</strong>
 				</div>
 			</div>
 
@@ -512,7 +542,6 @@ export function CreditDetailRoute() {
 							Registrar abono
 						</Button>
 					</div>
-					<PayoffSimulator creditId={creditId} />
 					{linkedGoals.length > 0 ? (
 						<div>
 							<h3 className="section-title">Ahorro para abonos</h3>

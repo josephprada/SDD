@@ -60,17 +60,27 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 | D-36 | Wizard creación | **2 pasos**: `CreditProfilePicker` → formulario por perfil | Primer wizard multi-paso en dominio créditos |
 | D-37 | Cambio de perfil | Confirmación **conservar / eliminar** datos incompatibles | Cuotas pagadas y tx históricas siempre conservadas |
 | D-38 | Activación cuotas | Schedule solo en acción explícita si `setupStatus !== active` | Evita `ensureSchedule` en drafts |
+| D-39 | Progreso cuotas UI | **Barra % pagadas** en detalle; card cuotas pendientes oculta en móvil | Sustituye card «Saldo deuda» |
+| D-40 | Tab Destinos | **`usesDestinationsTab(profile)`** — oculto en `tangible_product`, `intangible_service` | Menos ruido en perfiles sin rubros |
+| D-41 | Simulador abonos | **`PayoffSimulator` no montado** en tab Abonos v1.7 | Query backend conservada |
+| D-42 | Categorías fondo create | **Solo existentes** en `FundExpenseCategoryPicker` | Sin `newNames` en UI |
+| D-43 | Gasto fijo create | **`createFixedExpense` default `true`** | Opt-out explícito |
+| D-44 | Edición cuotas | **`creditPaymentEdit.ts`** + batch UI en `CreditPaymentTable` | manual + cuota_fija + capital_constant |
+| D-45 | Reportes cross-module | **`ReportCreditsSection`**, **`ReportSavingsSection`** + export CSV/PDF | Estado actual, no filtrado por período |
+| D-46 | Motion genie modales | **`useGenieOverlay`**, bloom in / genie out, `genie-modal.css`, SVG warp | `ConfirmDialog` sin `.modal` en móvil |
 
-### Pendiente (iteración perfiles adaptativos v1.6)
+### Cierre v1.7 (2026-07-12) ✅
+
+Change **web-credits** cerrado. Pendientes v1.6 migrados o absorbidos en iteración UX.
 
 | # | Tema | Estado |
 |---|------|--------|
-| P-01 | Creación mínima (solo nombre) + wizard 2 pasos | 🔲 Documentado v1.6 |
-| P-02 | `CreditInstallmentProgress` en detalle | 🔲 |
-| P-03 | Ajustes ampliados (monto, tasa, perfil editable) | 🔲 Documentado v1.6 |
-| P-04 | `creditProfileRegistry.ts` + formularios por perfil | 🔲 |
-| P-05 | `CreditProfileChangeDialog` (conservar/eliminar) | 🔲 |
-| P-06 | Backend `setupStatus` + schema relajado + migración | 🔲 |
+| P-01 | Creación mínima + wizard 2 pasos | ✅ |
+| P-02 | Barra progreso cuotas (sustituye installment card planificada) | ✅ |
+| P-03 | Ajustes ampliados + cambio perfil | ✅ |
+| P-04 | `creditProfileRegistry.ts` | ✅ |
+| P-05 | Cambio perfil (modales en `CreditSettingsForm`) | ✅ |
+| P-06 | Backend `setupStatus` + recalc abonos | ✅ |
 
 ---
 
@@ -219,29 +229,32 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 
 ### Tabs detalle crédito
 
-1. **Cuotas** — `CreditPaymentTable`, marcar pagada
-2. **Abonos** — `CapitalAbonoList`, form + simulador
-3. **Destinos** — `DestinationList` (spentTotal + progreso), torta, form rubro (clic para editar)
-4. **Fondo** — gastos del crédito (`listFundMovements`); clic → editar transacción
-5. **Ajustes** — `CreditSettingsForm` con `FieldHelp`
+1. **Cuotas** — `CreditPaymentTable`, toolbar acciones, checks, editar valor, marcar pagada
+2. **Abonos** — lista + form (sin simulador UI v1.7)
+3. **Destinos** — condicional por perfil (`usesDestinationsTab`)
+4. **Ajustes** — icono engranaje; `CreditSettingsForm` + cambio perfil
 
 ### Componentes clave
 
 ```text
 components/credits/
-  CreditCreateWizard.tsx      # orquestador 2 pasos (NUEVO)
-  CreditProfilePicker.tsx     # paso 1 (NUEVO)
-  CreditProfileChangeDialog.tsx # cambio perfil (NUEVO)
-  CreditList.tsx, CreditForm.tsx, CreditDetailHeader.tsx
-  CreditPaymentTable.tsx, CapitalAbonoForm.tsx, PayoffSimulator.tsx
+  CreditCreateWizard.tsx, CreditProfilePicker.tsx
+  CreditList.tsx, CreditForm.tsx
+  CreditPaymentTable.tsx, CapitalAbonoForm.tsx
   DestinationList.tsx, DestinationChart.tsx
-  CreditSettingsForm.tsx, FundExpenseCategoryPicker.tsx, FieldHelp.tsx, FormSelect.tsx
-  CreditFundCard.tsx (dashboard `dash-credits`)
+  CreditSettingsForm.tsx, FundExpenseCategoryPicker.tsx
+components/reports/
+  ReportCreditsSection.tsx, ReportSavingsSection.tsx
+components/ui/
+  Modal.tsx, ConfirmDialog.tsx, GenieModalSvgDefs.tsx
+lib/motion/
+  genieModal.ts, useGenieOverlay.ts, useGenieModalOrigin.ts
+lib/core/
+  genieOrigin.ts
 lib/credits/
-  creditProfileRegistry.ts    # defaults por perfil (NUEVO)
-  types.ts
-components/savings/
-  SavingsGoalList.tsx, SavingsGoalForm.tsx, ContributionList.tsx
+  creditProfileRegistry.ts, types.ts
+styles/
+  genie-modal.css, credits-savings.css, budgets-reports.css
 ```
 
 ### Nav

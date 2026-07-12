@@ -1,5 +1,6 @@
 import { CoreIcon } from "@app/lib/core/icons";
-import { useOverlayAnimation } from "@app/lib/core/useOverlayAnimation";
+import type { GenieOriginRect } from "@app/lib/motion/genieModal";
+import { useGenieOverlay } from "@app/lib/motion/useGenieOverlay";
 import { IconButton } from "@jp-ds";
 import { type ReactNode, useEffect, useRef } from "react";
 import { OverlayPortal } from "./OverlayPortal";
@@ -9,11 +10,37 @@ type ModalProps = {
 	title: string;
 	onClose: () => void;
 	children: ReactNode;
+	/** Rect del botón/trigger. Si se omite, se usa el activeElement al abrir. */
+	genieOrigin?: GenieOriginRect | null;
+	/** 0–1. Intensidad de la deformación genie. Default: 1 */
+	genieIntensity?: number;
+	/** ms. Default: 420 */
+	genieDuration?: number;
 };
 
-export function Modal({ open, title, onClose, children }: ModalProps) {
-	const { mounted, closing, handleAnimationEnd } = useOverlayAnimation(open);
+export function Modal({
+	open,
+	title,
+	onClose,
+	children,
+	genieOrigin = null,
+	genieIntensity = 1,
+	genieDuration,
+}: ModalProps) {
 	const modalRef = useRef<HTMLDivElement>(null);
+	const {
+		mounted,
+		closing,
+		handleAnimationEnd,
+		surfaceAnimClass,
+		surfaceExtraClass,
+	} = useGenieOverlay({
+		open,
+		surfaceRef: modalRef,
+		genieOrigin,
+		genieIntensity,
+		genieDuration,
+	});
 
 	useEffect(() => {
 		if (!mounted) return;
@@ -93,7 +120,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
 					role="dialog"
 					aria-modal="true"
 					aria-label={title}
-					className={`modal glass${closing ? " modal--sheet-out" : " modal--sheet-in"}`}
+					className={`modal glass ${surfaceAnimClass} ${surfaceExtraClass}`.trim()}
 					onAnimationEnd={(event) => {
 						if (event.target !== event.currentTarget) return;
 						handleAnimationEnd();

@@ -53,7 +53,7 @@ export function ManualPaymentForm({
 				<p className="tx-form__hint credit-form-grid__full">
 					{paymentIds.length > 1
 						? `Ingresa el valor según tu extracto. Se aplicará a las ${paymentIds.length} cuotas que seleccionaste en la tabla.`
-						: "Ingresa el valor de la cuota según tu extracto."}
+						: "Ingresa el valor de la cuota según tu extracto bancario."}
 				</p>
 				<CurrencyInput
 					label="Valor de la cuota (COP)"

@@ -242,6 +242,46 @@
 	margin-bottom: var(--space-4);
 }
 
+.credit-payoff-progress {
+	padding: var(--space-3) var(--space-4);
+	border-radius: var(--radius-md);
+	border: 1px solid var(--color-border);
+	margin-bottom: var(--space-4);
+}
+
+.credit-payoff-progress__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: var(--space-3);
+	margin-bottom: var(--space-2);
+}
+
+.credit-payoff-progress__header strong {
+	font-size: var(--text-sm);
+	color: var(--color-text-primary);
+}
+
+.credit-payoff-progress__bar {
+	height: 10px;
+	border-radius: var(--radius-full);
+	background: var(--color-border);
+	overflow: hidden;
+}
+
+.credit-payoff-progress__fill {
+	height: 100%;
+	background: var(--color-accent);
+	border-radius: var(--radius-full);
+	transition: width var(--motion-duration-normal) var(--motion-ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.credit-payoff-progress__fill {
+		transition: none;
+	}
+}
+
 .credit-summary__item {
 	padding: var(--space-3);
 	border-radius: var(--radius-md);
@@ -254,6 +294,12 @@
 	font-size: var(--text-xs);
 	color: var(--color-text-secondary);
 	margin-bottom: var(--space-1);
+}
+
+@media (max-width: 639px) {
+	.credit-summary__item--hide-mobile {
+		display: none;
+	}
 }
 
 /* Formularios créditos / ahorros */
@@ -467,8 +513,9 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-3);
-	padding: var(--space-4);
+	padding: var(--space-3) var(--space-4);
 	border-radius: var(--radius-lg);
+	min-width: 0;
 }
 
 @media (min-width: 640px) {
@@ -476,19 +523,40 @@
 		flex-direction: row;
 		align-items: center;
 		justify-content: space-between;
+		padding: var(--space-4);
 	}
 }
 
 .payment-table-toolbar__count {
 	font-size: var(--text-sm);
 	color: var(--color-text-secondary);
-	white-space: nowrap;
+	line-height: 1.45;
+	min-width: 0;
+}
+
+@media (min-width: 640px) {
+	.payment-table-toolbar__count {
+		white-space: nowrap;
+	}
 }
 
 .payment-table-toolbar__actions {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--space-2);
+	min-width: 0;
+}
+
+@media (max-width: 639px) {
+	.payment-table-toolbar__actions {
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.payment-table-toolbar__actions .jp-btn {
+		width: 100%;
+		justify-content: center;
+	}
 }
 
 .payment-table__row--selected {

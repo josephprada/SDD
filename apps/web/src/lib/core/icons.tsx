@@ -15,6 +15,8 @@ import {
 	CloudUpload,
 	Edit3,
 	Ellipsis,
+	FileSpreadsheet,
+	FileText,
 	House,
 	Image,
 	Landmark,
@@ -43,6 +45,8 @@ export type CoreIconName =
 	| "tag"
 	| "settings"
 	| "ellipsis"
+	| "file-spreadsheet"
+	| "file-text"
 	| "plus"
 	| "minus"
 	| "trash"
@@ -78,6 +82,8 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	tag: Tag,
 	settings: Settings,
 	ellipsis: Ellipsis,
+	"file-spreadsheet": FileSpreadsheet,
+	"file-text": FileText,
 	plus: Plus,
 	minus: Minus,
 	trash: Trash2,

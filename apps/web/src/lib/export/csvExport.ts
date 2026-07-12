@@ -1,11 +1,15 @@
 import type { BudgetItem, FixedExpenseItem } from "@app/lib/budgets/types";
+import { CREDIT_STATUS_LABELS } from "@app/lib/credits/types";
 import { TRANSACTION_TYPE_LABELS } from "@app/lib/core/icons";
 import { formatFullDate } from "@app/lib/format/date";
 import type { ReportExportPayload } from "@app/lib/export/reportExportTypes";
 import {
 	budgetCategoriesLabel,
+	computeCreditsExportSummary,
+	computeSavingsExportSummary,
 	formatReminderOffsets,
 	groupingLabel,
+	SAVINGS_STATUS_LABELS,
 	thresholdLabel,
 } from "@app/lib/export/reportExportUtils";
 
@@ -78,8 +82,19 @@ function buildTimeSeriesRows(payload: ReportExportPayload): string[] {
 }
 
 function buildBudgetRows(budgets: BudgetItem[]): string[] {
+	const totalBudget = budgets.reduce((sum, item) => sum + item.amount, 0);
+	const totalSpent = budgets.reduce((sum, item) => sum + item.spent, 0);
 	const rows: string[] = [
 		sectionTitle("PRESUPUESTOS"),
+		csvRow(["Alcance", "Mes seleccionado"]),
+		blankLine(),
+		sectionTitle("PRESUPUESTOS — RESUMEN"),
+		csvRow(["Concepto", "Valor"]),
+		csvRow(["Presupuestado", totalBudget]),
+		csvRow(["Gastado", totalSpent]),
+		csvRow(["Restante", totalBudget - totalSpent]),
+		blankLine(),
+		sectionTitle("PRESUPUESTOS — DETALLE"),
 		csvRow([
 			"Categorías",
 			"Monto presupuestado",
@@ -110,9 +125,6 @@ function buildBudgetRows(budgets: BudgetItem[]): string[] {
 		);
 	}
 
-	const totalBudget = budgets.reduce((sum, item) => sum + item.amount, 0);
-	const totalSpent = budgets.reduce((sum, item) => sum + item.spent, 0);
-
 	rows.push(
 		csvRow([
 			"TOTAL",
@@ -129,8 +141,22 @@ function buildBudgetRows(budgets: BudgetItem[]): string[] {
 }
 
 function buildFixedExpenseRows(fixedExpenses: FixedExpenseItem[]): string[] {
+	const totalAmount = fixedExpenses.reduce((sum, item) => sum + item.amount, 0);
+	const pendingAmount = fixedExpenses
+		.filter((item) => !item.isPaidCurrentPeriod)
+		.reduce((sum, item) => sum + item.amount, 0);
+	const paidCount = fixedExpenses.filter((item) => item.isPaidCurrentPeriod).length;
 	const rows: string[] = [
 		sectionTitle("GASTOS FIJOS"),
+		csvRow(["Alcance", "Mes seleccionado"]),
+		blankLine(),
+		sectionTitle("GASTOS FIJOS — RESUMEN"),
+		csvRow(["Concepto", "Valor"]),
+		csvRow(["Comprometido", totalAmount]),
+		csvRow(["Pendiente", pendingAmount]),
+		csvRow(["Pagados", `${paidCount}/${fixedExpenses.length}`]),
+		blankLine(),
+		sectionTitle("GASTOS FIJOS — DETALLE"),
 		csvRow([
 			"Nombre",
 			"Monto",
@@ -167,12 +193,6 @@ function buildFixedExpenseRows(fixedExpenses: FixedExpenseItem[]): string[] {
 		);
 	}
 
-	const totalAmount = fixedExpenses.reduce((sum, item) => sum + item.amount, 0);
-	const pendingAmount = fixedExpenses
-		.filter((item) => !item.isPaidCurrentPeriod)
-		.reduce((sum, item) => sum + item.amount, 0);
-	const paidCount = fixedExpenses.filter((item) => item.isPaidCurrentPeriod).length;
-
 	rows.push(
 		csvRow([
 			"TOTAL",
@@ -181,6 +201,131 @@ function buildFixedExpenseRows(fixedExpenses: FixedExpenseItem[]): string[] {
 			"",
 			"",
 			`${paidCount}/${fixedExpenses.length} pagados · Pendiente ${pendingAmount}`,
+			"",
+			"",
+			"",
+			"",
+		]),
+	);
+
+	return rows;
+}
+
+function buildCreditRows(payload: ReportExportPayload): string[] {
+	const summary = computeCreditsExportSummary(payload.credits);
+	const rows: string[] = [
+		sectionTitle("CRÉDITOS"),
+		csvRow(["Alcance", "Estado actual (no filtrado por período)"]),
+		blankLine(),
+		sectionTitle("CRÉDITOS — RESUMEN"),
+		csvRow(["Concepto", "Valor"]),
+		csvRow(["Deuda total", summary.totalOutstanding]),
+		csvRow(["Créditos activos", summary.activeCount]),
+		csvRow(["Con cuota pendiente", summary.withNextPayment]),
+		blankLine(),
+		sectionTitle("CRÉDITOS — DETALLE"),
+		csvRow([
+			"Nombre",
+			"Acreedor",
+			"Desembolso",
+			"Saldo pendiente",
+			"Estado",
+			"Próxima cuota",
+			"Vencimiento",
+			"Monto cuota",
+		]),
+	];
+
+	if (summary.activeCredits.length === 0) {
+		rows.push(csvRow(["Sin créditos activos"]));
+		return rows;
+	}
+
+	for (const credit of summary.activeCredits) {
+		rows.push(
+			csvRow([
+				credit.name,
+				credit.lender ?? "",
+				credit.principal,
+				credit.outstandingBalance,
+				CREDIT_STATUS_LABELS[credit.status],
+				credit.nextPayment?.installmentNumber ?? "",
+				credit.nextPayment ? formatFullDate(credit.nextPayment.dueDate) : "",
+				credit.nextPayment?.totalDue ?? "",
+			]),
+		);
+	}
+
+	rows.push(
+		csvRow([
+			"TOTAL DEUDA",
+			"",
+			"",
+			summary.totalOutstanding,
+			"",
+			"",
+			"",
+			"",
+		]),
+	);
+
+	return rows;
+}
+
+function buildSavingsRows(payload: ReportExportPayload): string[] {
+	const summary = computeSavingsExportSummary(payload.savingsGoals);
+	const rows: string[] = [
+		sectionTitle("AHORROS"),
+		csvRow(["Alcance", "Estado actual (no filtrado por período)"]),
+		blankLine(),
+		sectionTitle("AHORROS — RESUMEN"),
+		csvRow(["Concepto", "Valor"]),
+		csvRow(["Ahorrado (metas activas)", summary.totalSaved]),
+		csvRow(["Meta activa", summary.totalTarget]),
+		csvRow(["Metas completadas", summary.completedCount]),
+		blankLine(),
+		sectionTitle("AHORROS — DETALLE"),
+		csvRow([
+			"Meta",
+			"Ahorrado",
+			"Objetivo",
+			"Progreso %",
+			"Restante",
+			"Estado",
+			"Cuenta",
+			"Vinculada a crédito",
+			"Fecha meta",
+		]),
+	];
+
+	if (payload.savingsGoals.length === 0) {
+		rows.push(csvRow(["Sin metas de ahorro"]));
+		return rows;
+	}
+
+	for (const goal of payload.savingsGoals) {
+		rows.push(
+			csvRow([
+				goal.name,
+				goal.currentAmount,
+				goal.targetAmount,
+				Math.round(goal.percent * 100),
+				goal.remaining,
+				SAVINGS_STATUS_LABELS[goal.status],
+				goal.accountName ?? "",
+				goal.linkedCreditId ? "Sí" : "No",
+				goal.deadline ? formatFullDate(goal.deadline) : "",
+			]),
+		);
+	}
+
+	rows.push(
+		csvRow([
+			"TOTAL ACTIVO",
+			summary.totalSaved,
+			summary.totalTarget,
+			"",
+			"",
 			"",
 			"",
 			"",
@@ -276,6 +421,10 @@ export function exportReportCsv(payload: ReportExportPayload, filename: string):
 		csvRow(["Generado", generatedAt]),
 		csvRow(["Período", payload.periodLabel]),
 		csvRow(["Clave de mes (presupuestos/gastos fijos)", payload.periodKey]),
+		csvRow([
+			"Módulos incluidos",
+			"Resumen financiero, presupuestos, gastos fijos, créditos y ahorros",
+		]),
 		csvRow(["Desde", formatFullDate(payload.dateFrom)]),
 		csvRow(["Hasta", formatFullDate(payload.dateTo)]),
 		csvRow(["Agrupación", groupingLabel(payload.grouping)]),
@@ -308,6 +457,10 @@ export function exportReportCsv(payload: ReportExportPayload, filename: string):
 		...buildBudgetRows(payload.budgets),
 		blankLine(),
 		...buildFixedExpenseRows(payload.fixedExpenses),
+		blankLine(),
+		...buildCreditRows(payload),
+		blankLine(),
+		...buildSavingsRows(payload),
 	];
 
 	downloadBlob(lines.join("\n"), filename, "text/csv;charset=utf-8");

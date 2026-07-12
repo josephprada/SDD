@@ -33,6 +33,7 @@ import type * as lib_creditCategories from "../lib/creditCategories.js";
 import type * as lib_creditDates from "../lib/creditDates.js";
 import type * as lib_creditFixedExpense from "../lib/creditFixedExpense.js";
 import type * as lib_creditFundSpend from "../lib/creditFundSpend.js";
+import type * as lib_creditPaymentEdit from "../lib/creditPaymentEdit.js";
 import type * as lib_creditPaymentRegistration from "../lib/creditPaymentRegistration.js";
 import type * as lib_creditProfile from "../lib/creditProfile.js";
 import type * as lib_creditRecalc from "../lib/creditRecalc.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   "lib/creditDates": typeof lib_creditDates;
   "lib/creditFixedExpense": typeof lib_creditFixedExpense;
   "lib/creditFundSpend": typeof lib_creditFundSpend;
+  "lib/creditPaymentEdit": typeof lib_creditPaymentEdit;
   "lib/creditPaymentRegistration": typeof lib_creditPaymentRegistration;
   "lib/creditProfile": typeof lib_creditProfile;
   "lib/creditRecalc": typeof lib_creditRecalc;

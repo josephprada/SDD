@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-05
 
-**Status**: In progress (v1.6 — perfiles adaptativos y creación flexible)
+**Status**: ✅ Completado (v1.7 — cierre UX, reportes y motion genie, 2026-07-12)
 
 **Change**: web-credits (Change 5)
 
@@ -44,6 +44,31 @@ Perfiles adaptativos de crédito: wizard de 2 pasos, creación mínima y edició
 
 ---
 
+## Iteración de cierre (2026-07-12)
+
+Ajustes UX, reportes transversales y sistema de motion para modales. **Change cerrado.**
+
+| Área | Decisión |
+|------|----------|
+| **Resumen detalle crédito** | Card «Saldo deuda» eliminada → **barra de progreso** (% cuotas pagadas). Card «Cuotas pendientes» solo muestra el número; **oculta en móvil** (&lt;640px) para ganar espacio. |
+| **Abonos** | **Simulador de pago anticipado** (`PayoffSimulator`) **retirado** de la pestaña Abonos (componente conservado; no expuesto en UI v1.7). |
+| **Destinos** | Pestaña **oculta** para perfiles `tangible_product` e `intangible_service` (`usesDestinationsTab`). |
+| **Crear crédito** | Checkbox **«Crear gasto fijo mensual» marcado por defecto**. Picker de categorías fondo: **solo categorías existentes** (sin crear nuevas). |
+| **Ajustes crédito** | Cambio de **tipo de perfil** con modal picker + confirmación conservar/eliminar datos. Modal picker con **padding/scroll** (`modal-form__scroll`). Categorías fondo: sin crear nuevas. |
+| **Tabla cuotas** | Barra de acciones **siempre visible** (botones deshabilitados si no aplica). Checks + **Editar valor** (manual, cuota fija, capital constante). Clic en fila **pagada** abre movimiento. Toolbar **responsive** en móvil (botones apilados). |
+| **Abonos recalc** | `shorten_term` mantiene **cuota**, reduce solo plazo (`creditRecalc` + `applyAbonoRecalc`). |
+| **Reportes** | Secciones **Créditos** y **Ahorros** (estado actual). Export **CSV/PDF** incluye presupuestos, gastos fijos, créditos y ahorros. Botones export **dentro de la card de filtros** con iconos. Layout **masonry** (2 columnas desktop) en compromisos. |
+| **Modales — motion genie** | Efecto **genie al cerrar** (embudo hacia origen). **Entrada orgánica** (bloom circular + blur + settle elástico). Hook `useGenieModalOrigin`, `useGenieOverlay`, `applyGenieModalVars`. Origen auto desde `activeElement` o explícito. **`prefers-reduced-motion`**: fade+scale. **ConfirmDialog** sin clase `.modal` en móvil (evita altura 100svh). FAB captura origen vía `genieOrigin.ts`. |
+
+### Clarifications — Session 2026-07-12
+
+- Q: ¿Simulador en Abonos? → A: **Retirado de UI** en v1.7; proyección diferida.
+- Q: ¿Categorías nuevas desde crédito? → A: **No**; solo selección de existentes en create/ajustes.
+- Q: ¿Gasto fijo al crear? → A: **Opt-in por defecto activo** (checkbox marcado).
+- Q: ¿Animación modal? → A: **Genie out** + **bloom in**; intensidad vía `genieIntensity` (0–1).
+
+---
+
 ## Clarifications
 
 ### Session 2026-07-11
@@ -62,15 +87,15 @@ Perfiles adaptativos de crédito: wizard de 2 pasos, creación mínima y edició
 |-------|-------------|
 | **Créditos flexibles** | Cuota fija, capital constante o tabla manual (extracto bancario) |
 | **Abonos a capital** | Pagos extra que recalculan el futuro (acortar plazo o bajar cuota) |
-| **Simulación** | Proyectar abonos anuales hacia fecha meta de pago |
+| **Simulación** | *(Retirada de UI v1.7)* Proyección abonos — componente `PayoffSimulator` no expuesto |
 | **Fondo aislado** | Cuenta meta vinculada; no mezcla nómina ni dashboard personal |
 | **Destinos / rubros** | En qué se invierte el capital desembolsado ($40M → escaleras $1,5M) |
 | **Cuotas y alertas** | Seguimiento, seguros opcionales, recordatorios |
 | **Metas de ahorro** | Objetivos, aportes, progreso |
 
-**Dentro:** perfiles adaptativos (`creditProfile`), wizard 2 pasos, creación mínima (solo nombre), modos de amortización, abonos, simulador, rubros, **cuenta escrow opcional**, crédito manual VIS, metas, `/credits`, `/savings`.
+**Dentro:** perfiles adaptativos (`creditProfile`), wizard 2 pasos, creación mínima (solo nombre), modos de amortización, abonos, rubros, **cuenta escrow opcional**, crédito manual VIS, metas, `/credits`, `/savings`, **reportes créditos/ahorros**, **motion genie modales**.
 
-**Fuera:** UVR indexada, revolving, sync bancario, refinanciación como nueva operación, leasing como producto separado, DIAN.
+**Fuera:** UVR indexada, revolving, sync bancario, refinanciación como nueva operación, leasing como producto separado, DIAN, simulador abonos en UI (v1.7).
 
 ---
 
@@ -399,6 +424,9 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - **SC-011**: Wizard 2 pasos: perfil `housing_improvement` muestra sugerencias de rubros/seguros sin obligarlos.
 - **SC-012**: Cambio de perfil con «conservar» → datos reaparecen al volver a perfil compatible.
 - **SC-013**: Perfil `tangible_product` (moto/electro) operativo sin desembolso ni pestaña Fondo.
+- **SC-014**: Detalle crédito muestra barra de progreso de cuotas; resumen móvil sin card cuotas pendientes redundante.
+- **SC-015**: Reportes incluyen créditos/ahorros en UI y export CSV/PDF.
+- **SC-016**: Modales con cierre genie desde origen del trigger; entrada bloom; reduced-motion respetado.
 
 ---
 

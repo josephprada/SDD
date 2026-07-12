@@ -28,12 +28,16 @@ import {
 	resolveCreditInstallmentAmount,
 	syncLinkedCreditFixedExpense,
 } from "./lib/creditFixedExpense";
+import {
+	applyPaymentTotalOverride,
+	canEditPendingPaymentAmount,
+} from "./lib/creditPaymentEdit";
 import { executeSpendFromFund } from "./lib/creditFundSpend";
 import {
 	insertCreditLinkedTransaction,
 	removeCreditLinkedTransaction,
 } from "./lib/creditTransactions";
-import { resolveFixedInstallmentForCredit, recalcAfterAbono } from "./lib/creditRecalc";
+import { resolveFixedInstallmentForCredit, recalcAfterAbono, resolveShortenTermBaseline } from "./lib/creditRecalc";
 import {
 	buildScheduleForCredit,
 	cancelPendingPayments,
@@ -996,8 +1000,8 @@ export const updateManualRow = mutation({
 		const payment = await ctx.db.get(args.paymentId);
 		if (!payment) throw new Error("Payment not found");
 		const credit = await requireCreditOwnership(ctx, userId, payment.creditId);
-		if (credit.scheduleMode !== "manual") {
-			throw new Error("Only manual schedule rows can be edited");
+		if (!canEditPendingPaymentAmount(credit.scheduleMode)) {
+			throw new Error("Este modo de cuotas no permite editar montos");
 		}
 		if (payment.status === "paid" || payment.status === "cancelled") {
 			throw new Error("Cannot edit paid or cancelled payment");
@@ -1007,18 +1011,25 @@ export const updateManualRow = mutation({
 		let interest: number;
 		let insurance: number;
 		let fees: number;
+		let totalDue: number;
 
 		if (args.totalAmount !== undefined) {
-			const total = validatePositiveCopAmount(args.totalAmount);
-			principal = total;
-			interest = 0;
-			insurance = 0;
-			fees = 0;
+			const patch = applyPaymentTotalOverride(
+				payment,
+				validatePositiveCopAmount(args.totalAmount),
+				credit.scheduleMode,
+			);
+			principal = patch.principal;
+			interest = patch.interest;
+			insurance = patch.insuranceAmount ?? 0;
+			fees = patch.otherFees ?? 0;
+			totalDue = patch.totalDue;
 		} else if (args.principal !== undefined && args.interest !== undefined) {
 			principal = validatePositiveCopAmount(args.principal);
 			interest = args.interest < 0 ? 0 : Math.round(args.interest);
 			insurance = args.insuranceAmount ?? payment.insuranceAmount ?? 0;
 			fees = args.otherFees ?? payment.otherFees ?? 0;
+			totalDue = principal + interest + insurance + fees;
 		} else {
 			throw new Error("Provide totalAmount or principal and interest");
 		}
@@ -1028,7 +1039,7 @@ export const updateManualRow = mutation({
 			interest,
 			insuranceAmount: insurance,
 			otherFees: fees,
-			totalDue: principal + interest + insurance + fees,
+			totalDue,
 			dueDate: args.dueDate ?? payment.dueDate,
 			isProjected: false,
 			updatedAt: Date.now(),
@@ -1055,8 +1066,8 @@ export const updateManualRows = mutation({
 			const payment = await ctx.db.get(paymentId);
 			if (!payment) throw new Error("Payment not found");
 			const credit = await requireCreditOwnership(ctx, userId, payment.creditId);
-			if (credit.scheduleMode !== "manual") {
-				throw new Error("Only manual schedule rows can be edited");
+			if (!canEditPendingPaymentAmount(credit.scheduleMode)) {
+				throw new Error("Este modo de cuotas no permite editar montos");
 			}
 			if (payment.status === "paid" || payment.status === "cancelled") {
 				throw new Error("Cannot edit paid or cancelled payment");
@@ -1067,12 +1078,10 @@ export const updateManualRows = mutation({
 				throw new Error("All payments must belong to the same credit");
 			}
 
+			const patch = applyPaymentTotalOverride(payment, total, credit.scheduleMode);
+
 			await ctx.db.patch(paymentId, {
-				principal: total,
-				interest: 0,
-				insuranceAmount: 0,
-				otherFees: 0,
-				totalDue: total,
+				...patch,
 				isProjected: false,
 				updatedAt: Date.now(),
 			});
@@ -1346,19 +1355,33 @@ export async function applyAbonoRecalc(
 	}
 
 	const monthlyRate = toMonthlyRate(credit.rateType, credit.interestRate);
+	const shortenBaseline =
+		recalcEffect === "shorten_term"
+			? resolveShortenTermBaseline({ credit, pendingRows })
+			: null;
 	const fixedInstallment =
-		credit.fixedInstallment ??
-		resolveFixedInstallmentForCredit({
-			principal: credit.outstandingBalance,
-			monthlyRate,
-			termMonths: credit.termMonths,
-			scheduleMode: credit.scheduleMode,
-		});
+		recalcEffect === "shorten_term"
+			? (shortenBaseline?.fixedInstallment ??
+				resolveFixedInstallmentForCredit({
+					principal: credit.principal,
+					monthlyRate,
+					termMonths: credit.termMonths,
+					scheduleMode: credit.scheduleMode,
+					fixedInstallment: credit.fixedInstallment,
+				}))
+			: (credit.fixedInstallment ??
+				resolveFixedInstallmentForCredit({
+					principal: credit.outstandingBalance,
+					monthlyRate,
+					termMonths: credit.termMonths,
+					scheduleMode: credit.scheduleMode,
+				}));
 
 	const rows = recalcAfterAbono(recalcEffect, {
 		outstandingBalance: newBalance,
 		monthlyRate,
 		fixedInstallment,
+		monthlyPrincipal: shortenBaseline?.monthlyPrincipal,
 		insuranceMonthly: credit.insuranceMonthly ?? 0,
 		dueDates,
 		scheduleMode: credit.scheduleMode,

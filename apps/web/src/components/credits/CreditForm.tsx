@@ -119,7 +119,7 @@ export function CreditForm({
 	const [paymentAccountId, setPaymentAccountId] = useState("");
 	const [registerDisbursementIncome, setRegisterDisbursementIncome] =
 		useState(false);
-	const [createFixedExpense, setCreateFixedExpense] = useState(false);
+	const [createFixedExpense, setCreateFixedExpense] = useState(true);
 	const [fixedExpenseAmountRaw, setFixedExpenseAmountRaw] = useState("");
 	const [fundCategories, setFundCategories] =
 		useState<FundExpenseCategorySelection>({

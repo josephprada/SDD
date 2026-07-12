@@ -1,9 +1,11 @@
 import { CategoryBreakdownChart } from "@app/components/reports/CategoryBreakdownChart";
 import { IncomeExpenseChart } from "@app/components/reports/IncomeExpenseChart";
 import { ReportBudgetsSection } from "@app/components/reports/ReportBudgetsSection";
+import { ReportCreditsSection } from "@app/components/reports/ReportCreditsSection";
 import { ReportExportActions } from "@app/components/reports/ReportExportActions";
 import { ReportFilters } from "@app/components/reports/ReportFilters";
 import { ReportFixedExpensesSection } from "@app/components/reports/ReportFixedExpensesSection";
+import { ReportSavingsSection } from "@app/components/reports/ReportSavingsSection";
 import { ReportSummaryCard } from "@app/components/reports/ReportSummaryCard";
 import { TrendChart } from "@app/components/reports/TrendChart";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
@@ -43,6 +45,8 @@ export function ReportsRoute() {
 	const accounts = useQuery(api.accounts.list, { includeArchived: false });
 	const budgets = useQuery(api.budgets.list, { periodKey });
 	const fixedExpenses = useQuery(api.fixedExpenses.list, { periodKey });
+	const credits = useQuery(api.credits.list, {});
+	const savingsGoals = useQuery(api.savingsGoals.list, {});
 	const transactions = useQuery(api.transactions.list, {
 		dateFrom: range.start,
 		dateTo: range.end,
@@ -64,6 +68,8 @@ export function ReportsRoute() {
 			summary === undefined ||
 			budgets === undefined ||
 			fixedExpenses === undefined ||
+			credits === undefined ||
+			savingsGoals === undefined ||
 			transactions === undefined
 		) {
 			return null;
@@ -89,6 +95,8 @@ export function ReportsRoute() {
 			},
 			budgets: budgets as BudgetItem[],
 			fixedExpenses: fixedExpenses as FixedExpenseItem[],
+			credits,
+			savingsGoals,
 			transactions: transactions.map((transaction) => ({
 				date: transaction.date,
 				type: transaction.type,
@@ -103,6 +111,8 @@ export function ReportsRoute() {
 		summary,
 		budgets,
 		fixedExpenses,
+		credits,
+		savingsGoals,
 		transactions,
 		grouping,
 		periodLabel,
@@ -146,12 +156,13 @@ export function ReportsRoute() {
 				onAnchorChange={setAnchor}
 				onCategoryChange={setCategoryId}
 				onAccountChange={setAccountId}
-			/>
-
-			<ReportExportActions
-				payload={exportPayload}
-				grouping={grouping}
-				anchor={anchor}
+				actions={
+					<ReportExportActions
+						payload={exportPayload}
+						grouping={grouping}
+						anchor={anchor}
+					/>
+				}
 			/>
 
 			<div className="report-export-panel animate-stagger-item">
@@ -171,6 +182,8 @@ export function ReportsRoute() {
 						items={exportPayload.fixedExpenses}
 						periodLabel={monthLabel}
 					/>
+					<ReportCreditsSection items={exportPayload.credits} />
+					<ReportSavingsSection items={exportPayload.savingsGoals} />
 				</div>
 			</div>
 		</div>
