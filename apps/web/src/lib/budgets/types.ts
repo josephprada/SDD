@@ -35,5 +35,6 @@ export type FixedExpenseItem = {
 	nextDueDate: number;
 	lastPaidPeriodKey?: string;
 	isPaidCurrentPeriod: boolean;
+	onlyPeriodKey?: string;
 	notes?: string;
 };

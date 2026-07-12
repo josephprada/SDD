@@ -17,6 +17,7 @@ export type TransactionItem = {
 	categoryName: string;
 	categoryIcon: string;
 	categoryColor?: string;
+	destinationName?: string;
 	notes?: string;
 };
 
@@ -206,7 +207,6 @@ export function TransactionList({
 					<colgroup>
 						<col />
 						<col className="tx-table__col-account" />
-						<col className="tx-table__col-category" />
 						<col className="tx-table__col-date" />
 						<col className="tx-table__col-amount" />
 						<col className="tx-table__col-actions" />
@@ -215,7 +215,6 @@ export function TransactionList({
 						<tr>
 							<th>Movimiento</th>
 							<th>Cuenta</th>
-							<th>Categoría</th>
 							<th>Fecha</th>
 							<th className="tx-table__amount-col">Monto</th>
 							<th className="tx-table__actions-col" aria-label="Acciones" />
@@ -277,10 +276,26 @@ export function TransactionList({
 											<span>
 												{tx.type === "transfer"
 													? "Transferencia"
-													: tx.categoryName}
-												{tx.notes ? (
-													<span className="tx-table__note"> · {tx.notes}</span>
-												) : null}
+													: (
+														<>
+															{tx.categoryName}
+															{tx.destinationName && tx.notes
+																? ` - ${tx.notes}`
+																: null}
+															{tx.destinationName ? (
+																<span className="tx-table__rubro">
+																	{" "}
+																	· {tx.destinationName}
+																</span>
+															) : null}
+															{!tx.destinationName && tx.notes ? (
+																<span className="tx-table__note">
+																	{" "}
+																	· {tx.notes}
+																</span>
+															) : null}
+														</>
+													)}
 											</span>
 										</div>
 									</td>
@@ -289,7 +304,6 @@ export function TransactionList({
 											? `${tx.accountName} → ${tx.toAccountName ?? ""}`
 											: tx.accountName}
 									</td>
-									<td>{tx.categoryName}</td>
 									<td>{formatShortDate(tx.date)}</td>
 									<td className="tx-table__amount-col">
 										<TransactionAmount type={tx.type} amount={tx.amount} />

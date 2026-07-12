@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
@@ -147,16 +147,33 @@ async function assertCategoriesAvailableForPeriod(
 		.collect();
 
 	const selected = new Set(categoryIds);
+	const conflicts = new Set<Id<"categories">>();
+
 	for (const budget of budgets) {
 		if (excludeBudgetId && budget._id === excludeBudgetId) continue;
 		for (const categoryId of budget.categoryIds) {
 			if (selected.has(categoryId)) {
-				throw new Error(
-					"One or more categories already belong to another budget this period",
-				);
+				conflicts.add(categoryId);
 			}
 		}
 	}
+
+	if (conflicts.size === 0) return;
+
+	const names: string[] = [];
+	for (const categoryId of conflicts) {
+		const category = await ctx.db.get(categoryId);
+		names.push(category?.name ?? "Categoría");
+	}
+
+	const label =
+		names.length === 1
+			? `La categoría «${names[0]}»`
+			: `Las categorías ${names.map((name) => `«${name}»`).join(", ")}`;
+
+	throw new ConvexError(
+		`${label} ya está en otro presupuesto de este mes. Cada categoría solo puede pertenecer a un presupuesto a la vez.`,
+	);
 }
 
 export const list = query({
@@ -381,32 +398,35 @@ export const checkThresholdAfterTransaction = internalMutation({
 			)
 			.collect();
 
-		const budget = budgets.find((b) => b.categoryIds.includes(categoryId));
-		if (!budget) return null;
+		const matching = budgets.filter((b) =>
+			b.categoryIds.includes(categoryId),
+		);
 
-		const enriched = await enrichBudget(ctx, budget);
-		const status = enriched.thresholdStatus;
-		if (status !== "warning" && status !== "danger") return null;
+		for (const budget of matching) {
+			const enriched = await enrichBudget(ctx, budget);
+			const status = enriched.thresholdStatus;
+			if (status !== "warning" && status !== "danger") continue;
 
-		const pct = Math.round(enriched.percent * 100);
-		const dateKey = new Date().toISOString().slice(0, 10);
-		const label = enriched.categories.map((c) => c.name).join(", ");
+			const pct = Math.round(enriched.percent * 100);
+			const dateKey = new Date().toISOString().slice(0, 10);
+			const label = enriched.categories.map((c) => c.name).join(", ");
 
-		await ctx.scheduler.runAfter(0, internal.notifications.dispatch, {
-			userId,
-			type: "budget_threshold",
-			referenceId: budget._id as string,
-			channels: ["in_app", "push"],
-			payload: {
-				title: `Presupuesto ${label}`,
-				body: `Has alcanzado el ${pct}% del límite (${status === "danger" ? "superado" : "alerta"})`,
-				url: "/budgets",
-				emailSubject: `Alerta de presupuesto — ${label}`,
-				emailHtml: `<p>Tu presupuesto <strong>${label}</strong> está al <strong>${pct}%</strong>.</p>`,
-			},
-			dateKey,
-			dedupeSuffix: status,
-		});
+			await ctx.scheduler.runAfter(0, internal.notifications.dispatch, {
+				userId,
+				type: "budget_threshold",
+				referenceId: budget._id as string,
+				channels: ["in_app", "push"],
+				payload: {
+					title: `Presupuesto ${label}`,
+					body: `Has alcanzado el ${pct}% del límite (${status === "danger" ? "superado" : "alerta"})`,
+					url: "/budgets",
+					emailSubject: `Alerta de presupuesto — ${label}`,
+					emailHtml: `<p>Tu presupuesto <strong>${label}</strong> está al <strong>${pct}%</strong>.</p>`,
+				},
+				dateKey,
+				dedupeSuffix: status,
+			});
+		}
 
 		return null;
 	},

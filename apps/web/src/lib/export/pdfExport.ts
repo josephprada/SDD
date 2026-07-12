@@ -1,12 +1,16 @@
 import type { BudgetItem, FixedExpenseItem } from "@app/lib/budgets/types";
+import { CREDIT_STATUS_LABELS } from "@app/lib/credits/types";
 import { TRANSACTION_TYPE_LABELS } from "@app/lib/core/icons";
 import { formatCOP } from "@app/lib/format/currency";
 import { formatFullDate } from "@app/lib/format/date";
 import type { ReportExportPayload } from "@app/lib/export/reportExportTypes";
 import {
 	budgetCategoriesLabel,
+	computeCreditsExportSummary,
+	computeSavingsExportSummary,
 	formatReminderOffsets,
 	groupingLabel,
+	SAVINGS_STATUS_LABELS,
 	thresholdLabel,
 } from "@app/lib/export/reportExportUtils";
 import type { jsPDF } from "jspdf";
@@ -222,6 +226,71 @@ function buildFixedExpenseRows(fixedExpenses: FixedExpenseItem[]): string[][] {
 	return rows;
 }
 
+function buildCreditRows(payload: ReportExportPayload): string[][] {
+	const summary = computeCreditsExportSummary(payload.credits);
+
+	if (summary.activeCredits.length === 0) {
+		return [["Sin creditos activos"]];
+	}
+
+	const rows = summary.activeCredits.map((credit) => [
+		credit.name,
+		credit.lender ?? "",
+		formatCOP(credit.principal),
+		formatCOP(credit.outstandingBalance),
+		CREDIT_STATUS_LABELS[credit.status],
+		credit.nextPayment ? `#${credit.nextPayment.installmentNumber}` : "",
+		credit.nextPayment ? formatFullDate(credit.nextPayment.dueDate) : "",
+		credit.nextPayment ? formatCOP(credit.nextPayment.totalDue) : "",
+	]);
+
+	rows.push([
+		"TOTAL DEUDA",
+		"",
+		"",
+		formatCOP(summary.totalOutstanding),
+		"",
+		"",
+		"",
+		"",
+	]);
+
+	return rows;
+}
+
+function buildSavingsRows(payload: ReportExportPayload): string[][] {
+	if (payload.savingsGoals.length === 0) {
+		return [["Sin metas de ahorro"]];
+	}
+
+	const summary = computeSavingsExportSummary(payload.savingsGoals);
+	const rows = payload.savingsGoals.map((goal) => [
+		goal.name,
+		formatCOP(goal.currentAmount),
+		formatCOP(goal.targetAmount),
+		`${Math.round(goal.percent * 100)}%`,
+		formatCOP(goal.remaining),
+		SAVINGS_STATUS_LABELS[goal.status],
+		goal.accountName ?? "",
+		goal.linkedCreditId ? "Si" : "No",
+		goal.deadline ? formatFullDate(goal.deadline) : "",
+	]);
+
+	rows.push([
+		"TOTAL ACTIVO",
+		formatCOP(summary.totalSaved),
+		formatCOP(summary.totalTarget),
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+	]);
+
+	return rows;
+}
+
 function buildTransactionRows(payload: ReportExportPayload): string[][] {
 	if (payload.transactions.length === 0) {
 		return [["Sin movimientos en el periodo y filtros seleccionados"]];
@@ -282,6 +351,10 @@ export async function exportReportPdf(
 	writer.addMeta("Filtro categoria", payload.filters.categoryLabel);
 	writer.addMeta("Filtro cuenta", payload.filters.accountLabel);
 	writer.addMeta("Mes presupuestos", payload.periodKey);
+	writer.addMeta(
+		"Modulos incluidos",
+		"Resumen, presupuestos, gastos fijos, creditos y ahorros",
+	);
 
 	writer.addSection("Resumen financiero");
 	writer.addTable(
@@ -348,6 +421,17 @@ export async function exportReportPdf(
 	);
 
 	writer.addSection("Presupuestos");
+	const totalBudget = payload.budgets.reduce((sum, item) => sum + item.amount, 0);
+	const totalSpent = payload.budgets.reduce((sum, item) => sum + item.spent, 0);
+	writer.addTable(
+		["Concepto", "Monto"],
+		[
+			["Presupuestado", formatCOP(totalBudget)],
+			["Gastado", formatCOP(totalSpent)],
+			["Restante", formatCOP(totalBudget - totalSpent)],
+		],
+		[220, writer.contentWidth - 220],
+	);
 	writer.addTable(
 		["Categorias", "Presup.", "Gastado", "Restante", "%", "Estado", "Notas"],
 		buildBudgetRows(payload.budgets),
@@ -355,6 +439,28 @@ export async function exportReportPdf(
 	);
 
 	writer.addSection("Gastos fijos");
+	const fixedTotal = payload.fixedExpenses.reduce(
+		(sum, item) => sum + item.amount,
+		0,
+	);
+	const fixedPending = payload.fixedExpenses
+		.filter((item) => !item.isPaidCurrentPeriod)
+		.reduce((sum, item) => sum + item.amount, 0);
+	const fixedPaidCount = payload.fixedExpenses.filter(
+		(item) => item.isPaidCurrentPeriod,
+	).length;
+	writer.addTable(
+		["Concepto", "Monto"],
+		[
+			["Comprometido", formatCOP(fixedTotal)],
+			["Pendiente", formatCOP(fixedPending)],
+			[
+				"Pagados",
+				`${fixedPaidCount}/${payload.fixedExpenses.length}`,
+			],
+		],
+		[220, writer.contentWidth - 220],
+	);
 	writer.addTable(
 		[
 			"Nombre",
@@ -370,6 +476,61 @@ export async function exportReportPdf(
 		],
 		buildFixedExpenseRows(payload.fixedExpenses),
 		[54, 48, 48, 22, 54, 40, 24, 24, 48, writer.contentWidth - 362],
+	);
+
+	const creditsSummary = computeCreditsExportSummary(payload.credits);
+	writer.addSection("Creditos");
+	writer.addMeta("Alcance", "Estado actual");
+	writer.addTable(
+		["Concepto", "Valor"],
+		[
+			["Deuda total", formatCOP(creditsSummary.totalOutstanding)],
+			["Creditos activos", String(creditsSummary.activeCount)],
+			["Con cuota pendiente", String(creditsSummary.withNextPayment)],
+		],
+		[220, writer.contentWidth - 220],
+	);
+	writer.addTable(
+		[
+			"Nombre",
+			"Acreedor",
+			"Desembolso",
+			"Saldo",
+			"Estado",
+			"Cuota",
+			"Vence",
+			"Monto",
+		],
+		buildCreditRows(payload),
+		[56, 48, 48, 48, 36, 24, 48, writer.contentWidth - 308],
+	);
+
+	const savingsSummary = computeSavingsExportSummary(payload.savingsGoals);
+	writer.addSection("Ahorros");
+	writer.addMeta("Alcance", "Estado actual");
+	writer.addTable(
+		["Concepto", "Valor"],
+		[
+			["Ahorrado (metas activas)", formatCOP(savingsSummary.totalSaved)],
+			["Meta activa", formatCOP(savingsSummary.totalTarget)],
+			["Metas completadas", String(savingsSummary.completedCount)],
+		],
+		[220, writer.contentWidth - 220],
+	);
+	writer.addTable(
+		[
+			"Meta",
+			"Ahorrado",
+			"Objetivo",
+			"Progreso",
+			"Restante",
+			"Estado",
+			"Cuenta",
+			"Vinculo credito",
+			"Fecha meta",
+		],
+		buildSavingsRows(payload),
+		[56, 48, 48, 36, 48, 40, 48, 36, writer.contentWidth - 360],
 	);
 
 	writer.save(filename);

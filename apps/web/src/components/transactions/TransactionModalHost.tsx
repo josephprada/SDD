@@ -17,7 +17,10 @@ export function TransactionModalHost() {
 	const accounts =
 		useQuery(api.accounts.list, { includeArchived: false }) ?? [];
 	const categories =
-		useQuery(api.categories.list, { includeArchived: false }) ?? [];
+		useQuery(api.categories.list, {
+			includeArchived: false,
+			includeCreditLinked: true,
+		}) ?? [];
 	const editingTx = useQuery(
 		api.transactions.get,
 		editingId ? { transactionId: editingId } : "skip",
@@ -28,6 +31,7 @@ export function TransactionModalHost() {
 	const removeTx = useMutation(api.transactions.remove);
 	const [loading, setLoading] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [submitError, setSubmitError] = useState("");
 
 	const paramMode = searchParams.get("mode");
 	const paramType = searchParams.get("type");
@@ -54,6 +58,7 @@ export function TransactionModalHost() {
 	const handleClose = () => {
 		close();
 		setConfirmDelete(false);
+		setSubmitError("");
 		handledParamsRef.current = null;
 		if (paramMode || searchParams.has("id")) {
 			setSearchParams({}, { replace: true });
@@ -89,11 +94,17 @@ export function TransactionModalHost() {
 					categories={categories}
 					initial={{ type: "transfer" }}
 					loading={loading}
+					serverError={submitError}
 					onSubmit={async (values) => {
 						setLoading(true);
+						setSubmitError("");
 						try {
 							await createTx(values);
 							handleClose();
+						} catch (e) {
+							setSubmitError(
+								e instanceof Error ? e.message : "Error al guardar movimiento",
+							);
 						} finally {
 							setLoading(false);
 						}
@@ -116,13 +127,20 @@ export function TransactionModalHost() {
 						toAccountId: editingTx.toAccountId,
 						categoryId: editingTx.categoryId,
 						notes: editingTx.notes ?? "",
+						destinationName: editingTx.destinationName,
 					}}
 					loading={loading}
+					serverError={submitError}
 					onSubmit={async (values) => {
 						setLoading(true);
+						setSubmitError("");
 						try {
 							await updateTx({ transactionId: editingTx._id, ...values });
 							handleClose();
+						} catch (e) {
+							setSubmitError(
+								e instanceof Error ? e.message : "Error al guardar movimiento",
+							);
 						} finally {
 							setLoading(false);
 						}
@@ -137,11 +155,17 @@ export function TransactionModalHost() {
 					categories={categories}
 					initial={{ type: createType }}
 					loading={loading}
+					serverError={submitError}
 					onSubmit={async (values) => {
 						setLoading(true);
+						setSubmitError("");
 						try {
 							await createTx(values);
 							handleClose();
+						} catch (e) {
+							setSubmitError(
+								e instanceof Error ? e.message : "Error al guardar movimiento",
+							);
 						} finally {
 							setLoading(false);
 						}

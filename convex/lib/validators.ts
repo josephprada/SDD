@@ -130,3 +130,162 @@ export function validateReminderOffsets(offsets: number[]): number[] {
 	}
 	return [...offsets].sort((a, b) => b - a);
 }
+
+export const MAX_CREDIT_NAME_LENGTH = 80;
+export const MAX_CREDIT_NOTES_LENGTH = 500;
+export const MAX_DESTINATION_NAME_LENGTH = 80;
+
+export const rateTypeValidator = v.union(
+	v.literal("EA"),
+	v.literal("NAMV"),
+	v.literal("MV"),
+);
+
+export const scheduleModeValidator = v.union(
+	v.literal("cuota_fija"),
+	v.literal("capital_constant"),
+	v.literal("manual"),
+);
+
+export const abonoRecalcEffectValidator = v.union(
+	v.literal("shorten_term"),
+	v.literal("lower_installment"),
+);
+
+export const creditStatusValidator = v.union(
+	v.literal("active"),
+	v.literal("paid_off"),
+	v.literal("defaulted"),
+);
+
+export const creditProfileValidator = v.union(
+	v.literal("free_purpose"),
+	v.literal("housing_improvement"),
+	v.literal("debt_consolidation"),
+	v.literal("tangible_product"),
+	v.literal("intangible_service"),
+	v.literal("p2p_agreement"),
+);
+
+export const setupStatusValidator = v.union(
+	v.literal("draft"),
+	v.literal("ready"),
+	v.literal("active"),
+);
+
+export const linkedAssetValidator = v.object({
+	kind: v.union(
+		v.literal("vehicle"),
+		v.literal("goods"),
+		v.literal("service"),
+		v.literal("other"),
+	),
+	label: v.string(),
+	vendor: v.optional(v.string()),
+	identifier: v.optional(v.string()),
+});
+
+export const informalAgreementValidator = v.object({
+	counterpartyName: v.optional(v.string()),
+	relationship: v.optional(v.string()),
+	notes: v.optional(v.string()),
+});
+
+export const creditPaymentStatusValidator = v.union(
+	v.literal("pending"),
+	v.literal("paid"),
+	v.literal("overdue"),
+	v.literal("cancelled"),
+);
+
+export const destinationStatusValidator = v.union(
+	v.literal("planned"),
+	v.literal("in_progress"),
+	v.literal("completed"),
+);
+
+export const savingsGoalStatusValidator = v.union(
+	v.literal("active"),
+	v.literal("completed"),
+	v.literal("paused"),
+);
+
+export const savingsGoalSnapshotValidator = v.object({
+	name: v.string(),
+	targetAmount: v.number(),
+	currentAmount: v.number(),
+	deadline: v.optional(v.number()),
+	accountId: v.optional(v.id("accounts")),
+	linkedCreditId: v.optional(v.id("credits")),
+	linkedFixedExpenseId: v.optional(v.id("fixedExpenses")),
+	icon: v.optional(v.string()),
+	color: v.optional(v.string()),
+	status: savingsGoalStatusValidator,
+	notes: v.optional(v.string()),
+	createdAt: v.number(),
+	contributions: v.array(
+		v.object({
+			amount: v.number(),
+			contributedAt: v.number(),
+			transactionId: v.optional(v.id("transactions")),
+			sourceTransactionId: v.optional(v.id("transactions")),
+			notes: v.optional(v.string()),
+			createdAt: v.number(),
+		}),
+	),
+});
+
+export function validateCreditName(name: string): string {
+	const trimmed = validateNonEmptyName(name);
+	if (trimmed.length > MAX_CREDIT_NAME_LENGTH) {
+		throw new Error("Name must be at most 80 characters");
+	}
+	return trimmed;
+}
+
+export function validateCreditNotes(notes?: string): string | undefined {
+	if (!notes?.trim()) return undefined;
+	const trimmed = notes.trim();
+	if (trimmed.length > MAX_CREDIT_NOTES_LENGTH) {
+		throw new Error("Notes must be at most 500 characters");
+	}
+	return trimmed;
+}
+
+export function validateOptionalCreditLender(lender?: string): string {
+	if (!lender?.trim()) return "";
+	const trimmed = lender.trim();
+	if (trimmed.length > MAX_CREDIT_NAME_LENGTH) {
+		throw new Error("Lender name must be at most 80 characters");
+	}
+	return trimmed;
+}
+
+export function validateInterestRate(rate: number): number {
+	if (typeof rate !== "number" || rate < 0 || rate > 100) {
+		throw new Error("Interest rate must be between 0 and 100");
+	}
+	return rate;
+}
+
+export function validateTermMonths(term: number): number {
+	if (!Number.isInteger(term) || term < 1 || term > 600) {
+		throw new Error("Term must be between 1 and 600 months");
+	}
+	return term;
+}
+
+export function validatePaidInstallmentsCount(
+	paid: number,
+	termMonths: number,
+): number {
+	if (!Number.isInteger(paid) || paid < 0) {
+		throw new Error("Las cuotas pagadas deben ser un número entero mayor o igual a 0");
+	}
+	if (paid >= termMonths) {
+		throw new Error(
+			"Las cuotas ya pagadas deben ser menores que el plazo total del crédito",
+		);
+	}
+	return paid;
+}

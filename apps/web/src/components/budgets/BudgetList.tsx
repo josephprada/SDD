@@ -28,11 +28,11 @@ export function BudgetList({ items, onEdit, onDelete }: BudgetListProps) {
 	return (
 		<div className="budget-list">
 			<div className="budget-summary glass">
-				<div>
+				<div className="budget-summary__stat">
 					<span className="budget-summary__label">Presupuestado</span>
 					<strong>{formatCOP(totalBudget)}</strong>
 				</div>
-				<div>
+				<div className="budget-summary__stat budget-summary__stat--end">
 					<span className="budget-summary__label">Gastado</span>
 					<strong>{formatCOP(totalSpent)}</strong>
 				</div>

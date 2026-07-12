@@ -4,6 +4,7 @@ import { DigitsInput } from "@app/components/ui/DigitsInput";
 import { FieldError } from "@app/components/ui/FieldError";
 import { FormModalFooter } from "@app/components/ui/FormModalFooter";
 import { ReminderOffsetsEditor } from "@app/components/budgets/ReminderOffsetsEditor";
+import { periodLabelFromKey } from "@app/lib/budgets/periodLabel";
 import type { Id } from "@convex/_generated/dataModel";
 import { formatCOPInput, parseCOPInput } from "@app/lib/format/currency";
 import { Checkbox, Input } from "@jp-ds";
@@ -18,6 +19,7 @@ type CategoryOption = {
 
 type FixedExpenseFormProps = {
 	categories: CategoryOption[];
+	periodKey?: string;
 	initial?: {
 		name?: string;
 		amount?: number;
@@ -28,6 +30,7 @@ type FixedExpenseFormProps = {
 		pushReminders?: boolean;
 		notes?: string;
 		isPaidCurrentPeriod?: boolean;
+		onlyPeriodKey?: string;
 	};
 	loading?: boolean;
 	serverError?: string;
@@ -41,6 +44,7 @@ type FixedExpenseFormProps = {
 		pushReminders: boolean;
 		notes?: string;
 		markAsPaid: boolean;
+		singleMonthOnly: boolean;
 	}) => void;
 	onCancel: () => void;
 	onDelete?: () => void;
@@ -48,6 +52,7 @@ type FixedExpenseFormProps = {
 
 export function FixedExpenseForm({
 	categories,
+	periodKey,
 	initial,
 	loading,
 	serverError,
@@ -55,6 +60,7 @@ export function FixedExpenseForm({
 	onCancel,
 	onDelete,
 }: FixedExpenseFormProps) {
+	const isCreate = !initial;
 	const [name, setName] = useState(initial?.name ?? "");
 	const [amountStr, setAmountStr] = useState(
 		initial?.amount ? formatCOPInput(initial.amount) : "",
@@ -75,7 +81,11 @@ export function FixedExpenseForm({
 	const [markAsPaid, setMarkAsPaid] = useState(
 		initial?.isPaidCurrentPeriod ?? false,
 	);
+	const [singleMonthOnly, setSingleMonthOnly] = useState(
+		Boolean(initial?.onlyPeriodKey),
+	);
 	const [error, setError] = useState("");
+	const periodLabel = periodKey ? periodLabelFromKey(periodKey) : "";
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -112,11 +122,12 @@ export function FixedExpenseForm({
 			pushReminders,
 			notes: notes.trim() || undefined,
 			markAsPaid,
+			singleMonthOnly: isCreate && singleMonthOnly,
 		});
 	};
 
 	return (
-		<form className="tx-form tx-form--modal" onSubmit={handleSubmit} noValidate>
+		<form className="tx-form tx-form--modal fixed-expense-form" onSubmit={handleSubmit} noValidate>
 			<div className="tx-form__scroll brand-scroll">
 				<Input label="Nombre" value={name} onChange={(e) => setName(e.target.value)} />
 				<CurrencyInput
@@ -136,6 +147,27 @@ export function FixedExpenseForm({
 					onChange={setDayOfMonth}
 					maxLength={2}
 				/>
+				{isCreate && periodKey ? (
+					<div className="fixed-expense-form__checks">
+						<Checkbox
+							label={`Solo para ${periodLabel}`}
+							checked={singleMonthOnly}
+							onChange={setSingleMonthOnly}
+						/>
+						{singleMonthOnly ? (
+							<p className="tx-form__hint fixed-expense-form__single-month-hint">
+								No se repetirá en los meses siguientes. Solo aparece en{" "}
+								{periodLabel}.
+							</p>
+						) : null}
+					</div>
+				) : null}
+				{initial?.onlyPeriodKey ? (
+					<p className="tx-form__hint">
+						Este gasto aplica solo a{" "}
+						<strong>{periodLabelFromKey(initial.onlyPeriodKey)}</strong>.
+					</p>
+				) : null}
 				<ReminderOffsetsEditor
 					value={reminderOffsets}
 					onChange={setReminderOffsets}
@@ -151,7 +183,8 @@ export function FixedExpenseForm({
 					<div>
 						<div className="settings-row__title">Pagado este mes</div>
 						<div className="settings-row__sub">
-							Al activar, registrarás el pago y crearás el movimiento
+							Marca el período como pagado. Si ya existe un movimiento
+							compatible, se vinculará sin crear otro.
 						</div>
 					</div>
 					<button

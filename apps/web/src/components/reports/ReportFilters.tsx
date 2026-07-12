@@ -3,6 +3,7 @@ import { addPeriod } from "@app/lib/period";
 import type { Id } from "@convex/_generated/dataModel";
 import type { GroupingId } from "@jp-ds/index";
 import { GROUPING_LABELS } from "@jp-ds/index";
+import type { ReactNode } from "react";
 
 type ReportFiltersProps = {
 	grouping: GroupingId;
@@ -15,6 +16,7 @@ type ReportFiltersProps = {
 	onAnchorChange: (d: Date) => void;
 	onCategoryChange: (id: Id<"categories"> | "") => void;
 	onAccountChange: (id: Id<"accounts"> | "") => void;
+	actions?: ReactNode;
 };
 
 export function ReportFilters({
@@ -28,6 +30,7 @@ export function ReportFilters({
 	onAnchorChange,
 	onCategoryChange,
 	onAccountChange,
+	actions,
 }: ReportFiltersProps) {
 	return (
 		<div className="report-filters glass">
@@ -52,39 +55,44 @@ export function ReportFilters({
 					onNext={() => onAnchorChange(addPeriod(grouping, anchor, 1))}
 				/>
 			</div>
-			<div className="report-filters__row">
-				<label>
-					Categoría
-					<select
-						value={categoryId}
-						onChange={(e) =>
-							onCategoryChange(e.target.value as Id<"categories"> | "")
-						}
-					>
-						<option value="">Todas</option>
-						{categories.map((c) => (
-							<option key={c._id} value={c._id}>
-								{c.name}
-							</option>
-						))}
-					</select>
-				</label>
-				<label>
-					Cuenta
-					<select
-						value={accountId}
-						onChange={(e) =>
-							onAccountChange(e.target.value as Id<"accounts"> | "")
-						}
-					>
-						<option value="">Todas</option>
-						{accounts.map((a) => (
-							<option key={a._id} value={a._id}>
-								{a.name}
-							</option>
-						))}
-					</select>
-				</label>
+			<div className="report-filters__row report-filters__row--controls">
+				<div className="report-filters__fields">
+					<label>
+						Categoría
+						<select
+							value={categoryId}
+							onChange={(e) =>
+								onCategoryChange(e.target.value as Id<"categories"> | "")
+							}
+						>
+							<option value="">Todas</option>
+							{categories.map((c) => (
+								<option key={c._id} value={c._id}>
+									{c.name}
+								</option>
+							))}
+						</select>
+					</label>
+					<label>
+						Cuenta
+						<select
+							value={accountId}
+							onChange={(e) =>
+								onAccountChange(e.target.value as Id<"accounts"> | "")
+							}
+						>
+							<option value="">Todas</option>
+							{accounts.map((a) => (
+								<option key={a._id} value={a._id}>
+									{a.name}
+								</option>
+							))}
+						</select>
+					</label>
+				</div>
+				{actions ? (
+					<div className="report-filters__actions">{actions}</div>
+				) : null}
 			</div>
 		</div>
 	);

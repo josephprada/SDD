@@ -3,20 +3,34 @@ import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { internalMutation, mutation, query } from "./_generated/server";
 import { requireAccountOwnership, requireCategoryOwnership, requireUserId } from "./lib/auth";
-import { getBalanceDeltas } from "./lib/balance";
+import { getBalanceDeltas, invertDeltas } from "./lib/balance";
 import {
 	dateKeyFromTimestamp,
 	dueTimestampForPeriodKey,
-	dueTimestampsInRange,
 	nextDueTimestamp,
 	reminderDatesForMonth,
 } from "./lib/fixedExpenses";
 import {
+	findMatchingPaymentTransaction,
 	hasValidPaymentTransaction,
 	reconcileFixedExpensePayment,
 } from "./lib/fixedExpensePayments";
 import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./lib/period";
+import {
+	appliesToPeriodKey,
+	assertAppliesToPeriodKey,
+	validateOnlyPeriodKey,
+} from "./lib/fixedExpensePeriod";
+import {
+	resolveFixedExpensePaymentDate,
+	resolveFixedExpensePaymentPeriodKey,
+} from "./lib/fixedExpensePaymentDate";
+import { registerFixedExpensePayment } from "./lib/fixedExpenseTransaction";
 import { resolveUserPreferences } from "./lib/preferences";
+import {
+	ensureSavingsContributionForPaidFixedExpense,
+	revertSavingsContributionForTransaction,
+} from "./lib/savingsGoalFixedExpense";
 import {
 	MAX_FIXED_EXPENSE_NAME_LENGTH,
 	validateDayOfMonth,
@@ -41,6 +55,7 @@ export type FixedExpenseListItem = {
 	nextDueDate: number;
 	lastPaidPeriodKey?: string;
 	isPaidCurrentPeriod: boolean;
+	onlyPeriodKey?: string;
 	notes?: string;
 };
 
@@ -75,6 +90,7 @@ async function enrichFixedExpense(
 			: nextDueTimestamp(item.dayOfMonth),
 		lastPaidPeriodKey: item.lastPaidPeriodKey,
 		isPaidCurrentPeriod,
+		onlyPeriodKey: item.onlyPeriodKey,
 		notes: item.notes,
 	};
 }
@@ -96,8 +112,7 @@ export const list = query({
 		}
 
 		if (periodKey) {
-			const { end } = periodKeyToMonthRange(periodKey);
-			items = items.filter((i) => i.createdAt <= end);
+			items = items.filter((i) => appliesToPeriodKey(i, periodKey));
 		}
 
 		const enriched = await Promise.all(
@@ -130,20 +145,29 @@ export const listUpcomingForPeriod = query({
 		const now = Date.now();
 		const upcoming: UpcomingEntry[] = [];
 		let pendingTotal = 0;
+		const viewingPeriodKey = periodKeyFromTimestamp(periodStart);
 
 		for (const item of items) {
-			const dues = dueTimestampsInRange(
-				item.dayOfMonth,
-				periodStart,
-				periodEnd,
-			);
-
-			for (const dueTs of dues) {
-				const periodKey = periodKeyFromTimestamp(dueTs);
-				if (await hasValidPaymentTransaction(ctx, item, periodKey)) continue;
+			if (item.onlyPeriodKey) {
+				const { start, end } = periodKeyToMonthRange(item.onlyPeriodKey);
+				if (end < periodStart || start > periodEnd) continue;
+				const dueTs = dueTimestampForPeriodKey(
+					item.dayOfMonth,
+					item.onlyPeriodKey,
+				);
+				if (dueTs < periodStart || dueTs > periodEnd) continue;
+				if (
+					await hasValidPaymentTransaction(ctx, item, item.onlyPeriodKey)
+				) {
+					continue;
+				}
 
 				pendingTotal += item.amount;
-				const enriched = await enrichFixedExpense(ctx, item);
+				const enriched = await enrichFixedExpense(
+					ctx,
+					item,
+					item.onlyPeriodKey,
+				);
 				upcoming.push({
 					...enriched,
 					dueDate: dueTs,
@@ -151,7 +175,28 @@ export const listUpcomingForPeriod = query({
 					nextDueDate: dueTs,
 					isPaidCurrentPeriod: false,
 				});
+				continue;
 			}
+
+			if (!appliesToPeriodKey(item, viewingPeriodKey)) continue;
+
+			const dueTs = dueTimestampForPeriodKey(
+				item.dayOfMonth,
+				viewingPeriodKey,
+			);
+			if (dueTs < periodStart || dueTs > periodEnd) continue;
+
+			const enriched = await enrichFixedExpense(ctx, item, viewingPeriodKey);
+			if (enriched.isPaidCurrentPeriod) continue;
+
+			pendingTotal += item.amount;
+			upcoming.push({
+				...enriched,
+				dueDate: dueTs,
+				isOverdue: dueTs < now,
+				nextDueDate: dueTs,
+				isPaidCurrentPeriod: false,
+			});
 		}
 
 		upcoming.sort((a, b) => a.dueDate - b.dueDate);
@@ -173,6 +218,7 @@ export const create = mutation({
 		emailReminders: v.optional(v.boolean()),
 		pushReminders: v.optional(v.boolean()),
 		notes: v.optional(v.string()),
+		onlyPeriodKey: v.optional(v.string()),
 	},
 	handler: async (ctx, args) => {
 		const userId = await requireUserId(ctx);
@@ -206,6 +252,9 @@ export const create = mutation({
 			emailReminders: args.emailReminders ?? false,
 			pushReminders: args.pushReminders ?? true,
 			active: true,
+			onlyPeriodKey: args.onlyPeriodKey
+				? validateOnlyPeriodKey(args.onlyPeriodKey)
+				: undefined,
 			notes: args.notes?.trim().slice(0, 200) || undefined,
 			createdAt: now,
 			updatedAt: now,
@@ -293,75 +342,81 @@ export const markPaid = mutation({
 			throw new Error("Fixed expense not found");
 		}
 
-		const paymentDate = args.dueDate ?? Date.now();
-		const periodKey = args.periodKey ?? periodKeyFromTimestamp(paymentDate);
-
-		if (item.lastPaidPeriodKey === periodKey) {
-			throw new Error("Already paid for this period");
-		}
-
-		const account = await requireAccountOwnership(ctx, userId, args.accountId);
-		if (account.archived) {
-			throw new Error("Account is archived");
-		}
-
-		const category = await requireCategoryOwnership(
-			ctx,
-			userId,
-			item.categoryId,
-		);
-		if (category.archived || category.type !== "expense") {
-			throw new Error("Invalid category for expense");
-		}
-
-		const amount = validatePositiveCopAmount(item.amount);
-		const deltas = getBalanceDeltas({
-			type: "expense",
-			amount,
-			accountId: args.accountId,
+		// Anchor the transaction inside the period being paid and never in the future.
+		const nowTs = Date.now();
+		const periodKey = resolveFixedExpensePaymentPeriodKey({
+			periodKey: args.periodKey,
+			dueDate: args.dueDate,
+			now: nowTs,
 		});
-		const now = Date.now();
+		const paymentDate = resolveFixedExpensePaymentDate({ now: nowTs });
 
-		for (const { accountId, delta } of deltas) {
-			const acc = await requireAccountOwnership(ctx, userId, accountId);
-			if (acc.archived && delta < 0) {
-				throw new Error("Cannot debit archived account");
-			}
-			await ctx.db.patch(accountId, {
-				balance: acc.balance + delta,
-				updatedAt: now,
-			});
-		}
-
-		const transactionId = await ctx.db.insert("transactions", {
-			userId,
-			type: "expense",
-			amount,
-			date: paymentDate,
+		await registerFixedExpensePayment(ctx, userId, {
+			fixedExpenseId: args.id,
 			accountId: args.accountId,
+			amount: item.amount,
+			date: paymentDate,
+			periodKey,
 			categoryId: item.categoryId,
 			notes: item.name,
-			sourceFixedExpenseId: args.id,
-			sortOrder: now,
-			createdAt: now,
-			updatedAt: now,
 		});
 
-		await ctx.db.patch(args.id, {
-			lastPaidPeriodKey: periodKey,
-			lastPaidTransactionId: transactionId,
-			updatedAt: now,
+		return null;
+	},
+});
+
+export const acknowledgePaidForPeriod = mutation({
+	args: {
+		id: v.id("fixedExpenses"),
+		periodKey: v.optional(v.string()),
+		dueDate: v.optional(v.number()),
+	},
+	handler: async (ctx, args) => {
+		const userId = await requireUserId(ctx);
+		const item = await ctx.db.get(args.id);
+		if (!item || item.userId !== userId) {
+			throw new Error("Fixed expense not found");
+		}
+
+		const periodKey = resolveFixedExpensePaymentPeriodKey({
+			periodKey: args.periodKey,
+			dueDate: args.dueDate,
+			now: Date.now(),
 		});
 
-		await ctx.scheduler.runAfter(
-			0,
-			internal.budgets.checkThresholdAfterTransaction,
-			{
-				userId,
-				categoryId: item.categoryId,
-				date: paymentDate,
-			},
+		if (item.lastPaidPeriodKey === periodKey) {
+			return null;
+		}
+
+		assertAppliesToPeriodKey(item, periodKey);
+
+		const matching = await findMatchingPaymentTransaction(
+			ctx,
+			item,
+			periodKey,
 		);
+		const now = Date.now();
+		const patch: Partial<Doc<"fixedExpenses">> = {
+			lastPaidPeriodKey: periodKey,
+			updatedAt: now,
+		};
+
+		if (matching) {
+			patch.lastPaidTransactionId = matching._id;
+			if (!matching.sourceFixedExpenseId) {
+				await ctx.db.patch(matching._id, {
+					sourceFixedExpenseId: item._id,
+					updatedAt: now,
+				});
+			}
+		}
+
+		await ctx.db.patch(args.id, patch);
+
+		await ensureSavingsContributionForPaidFixedExpense(ctx, {
+			userId,
+			fixedExpense: { ...item, ...patch },
+		});
 
 		return null;
 	},
@@ -375,10 +430,44 @@ export const unmarkPaid = mutation({
 		if (!item || item.userId !== userId) {
 			throw new Error("Fixed expense not found");
 		}
+
+		const now = Date.now();
+
+		if (item.lastPaidTransactionId) {
+			const transaction = await ctx.db.get(item.lastPaidTransactionId);
+			if (transaction && transaction.userId === userId) {
+				await revertSavingsContributionForTransaction(
+					ctx,
+					userId,
+					transaction._id,
+				);
+
+				const deltas = getBalanceDeltas({
+					type: transaction.type,
+					amount: transaction.amount,
+					accountId: transaction.accountId,
+					toAccountId: transaction.toAccountId,
+				});
+				for (const { accountId, delta } of invertDeltas(deltas)) {
+					const account = await requireAccountOwnership(
+						ctx,
+						userId,
+						accountId,
+					);
+					await ctx.db.patch(accountId, {
+						balance: account.balance + delta,
+						updatedAt: now,
+					});
+				}
+
+				await ctx.db.delete(transaction._id);
+			}
+		}
+
 		await ctx.db.patch(id, {
 			lastPaidPeriodKey: undefined,
 			lastPaidTransactionId: undefined,
-			updatedAt: Date.now(),
+			updatedAt: now,
 		});
 		return null;
 	},
@@ -398,6 +487,10 @@ export const reconcilePayments = mutation({
 			if (await reconcileFixedExpensePayment(ctx, item)) {
 				repaired += 1;
 			}
+			await ensureSavingsContributionForPaidFixedExpense(ctx, {
+				userId,
+				fixedExpense: item,
+			});
 		}
 
 		return { repaired };
@@ -416,6 +509,11 @@ export const processReminders = internalMutation({
 
 		for (const item of items) {
 			if (!item.active) continue;
+
+			const currentPeriodKey = periodKeyFromTimestamp(now.getTime());
+			if (item.onlyPeriodKey && item.onlyPeriodKey !== currentPeriodKey) {
+				continue;
+			}
 
 			const prefsDoc = await ctx.db
 				.query("userPreferences")

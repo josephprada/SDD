@@ -10,15 +10,20 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	CircleAlert,
+	CircleHelp,
 	CircleUserRound,
 	CloudUpload,
 	Edit3,
 	Ellipsis,
+	FileSpreadsheet,
+	FileText,
 	House,
 	Image,
+	Landmark,
 	Minus,
 	Paperclip,
 	Pencil,
+	PiggyBank,
 	Plus,
 	Search,
 	SearchX,
@@ -40,6 +45,8 @@ export type CoreIconName =
 	| "tag"
 	| "settings"
 	| "ellipsis"
+	| "file-spreadsheet"
+	| "file-text"
 	| "plus"
 	| "minus"
 	| "trash"
@@ -62,7 +69,10 @@ export type CoreIconName =
 	| "cloud-upload"
 	| "archive"
 	| "circle-alert"
-	| "badge-dollar-sign";
+	| "circle-help"
+	| "badge-dollar-sign"
+	| "landmark"
+	| "piggy-bank";
 
 const iconMap: Record<CoreIconName, LucideIcon> = {
 	house: House,
@@ -72,6 +82,8 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	tag: Tag,
 	settings: Settings,
 	ellipsis: Ellipsis,
+	"file-spreadsheet": FileSpreadsheet,
+	"file-text": FileText,
 	plus: Plus,
 	minus: Minus,
 	trash: Trash2,
@@ -94,7 +106,10 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	"cloud-upload": CloudUpload,
 	archive: Archive,
 	"circle-alert": CircleAlert,
+	"circle-help": CircleHelp,
 	"badge-dollar-sign": BadgeDollarSign,
+	landmark: Landmark,
+	"piggy-bank": PiggyBank,
 };
 
 type IconProps = {

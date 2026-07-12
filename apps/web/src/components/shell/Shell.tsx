@@ -1,3 +1,4 @@
+import { GenieModalSvgDefs } from "@app/components/ui/GenieModalSvgDefs";
 import { Outlet, useLocation } from "react-router";
 import { InAppToastHost } from "@app/components/notifications/InAppToastHost";
 import { TransactionFab } from "@app/components/transactions/TransactionFab";
@@ -11,6 +12,7 @@ export function Shell() {
 
 	return (
 		<div className="shell shell-bg shell--with-fab">
+			<GenieModalSvgDefs />
 			<SkipToContent />
 			<NavDesktop />
 			<div className="shell-content">

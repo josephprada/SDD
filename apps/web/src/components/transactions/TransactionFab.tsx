@@ -1,4 +1,5 @@
 import { CoreIcon } from "@app/lib/core/icons";
+import { captureGenieOrigin } from "@app/lib/core/genieOrigin";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
 
 type TransactionFabProps = {
@@ -11,9 +12,14 @@ export function TransactionFab({ className }: TransactionFabProps) {
 	return (
 		<button
 			type="button"
-			className={["tx-fab", "tx-fab--floating", className].filter(Boolean).join(" ")}
+			className={["tx-fab", "tx-fab--floating", className]
+				.filter(Boolean)
+				.join(" ")}
 			aria-label="Registrar gasto"
-			onClick={() => openCreate("expense")}
+			onClick={(event) => {
+				captureGenieOrigin(event.currentTarget);
+				openCreate("expense");
+			}}
 		>
 			<CoreIcon name="plus" size={22} />
 		</button>

@@ -5,6 +5,7 @@ type FormModalFooterProps = {
 	onDelete?: () => void;
 	deleteLabel?: string;
 	loading?: boolean;
+	submitDisabled?: boolean;
 	submitLabel?: string;
 	savingLabel?: string;
 };
@@ -14,6 +15,7 @@ export function FormModalFooter({
 	onDelete,
 	deleteLabel = "Eliminar",
 	loading = false,
+	submitDisabled = false,
 	submitLabel = "Guardar",
 	savingLabel = "Guardando…",
 }: FormModalFooterProps) {
@@ -32,7 +34,7 @@ export function FormModalFooter({
 					{deleteLabel}
 				</Button>
 			) : null}
-			<Button type="submit" disabled={loading}>
+			<Button type="submit" disabled={loading || submitDisabled}>
 				{loading ? savingLabel : submitLabel}
 			</Button>
 		</div>

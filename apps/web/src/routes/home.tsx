@@ -1,3 +1,4 @@
+import { CreditFundCard } from "@app/components/credits/CreditFundCard";
 import { DashboardBalanceCard } from "@app/components/dashboard/DashboardBalanceCard";
 import { DashboardBudgetAlerts } from "@app/components/dashboard/DashboardBudgetAlerts";
 import { DashboardFixedExpenses } from "@app/components/dashboard/DashboardFixedExpenses";
@@ -40,6 +41,7 @@ export function HomeRoute() {
 	const defaultGrouping = usePreferencesStore((s) => s.defaultGrouping);
 	const [anchor, setAnchor] = useState(() => new Date());
 	const range = periodRange(defaultGrouping, anchor);
+	const monthRange = periodRange("month", anchor);
 	const dashboardMainRef = useRef<HTMLDivElement>(null);
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const recentLimit = useRecentListLimit(dashboardMainRef, isDesktop);
@@ -53,14 +55,23 @@ export function HomeRoute() {
 	const periodKey = periodKeyFromDate(anchor);
 	const atRiskBudgets = useQuery(api.budgets.listAtRisk, { periodKey, limit: 3 });
 	const upcomingFixed = useQuery(api.fixedExpenses.listUpcomingForPeriod, {
+		periodStart: monthRange.start,
+		periodEnd: monthRange.end,
+		limit: 5,
+	});
+	const pendingFixedInView = useQuery(api.fixedExpenses.listUpcomingForPeriod, {
 		periodStart: range.start,
 		periodEnd: range.end,
-		limit: 3,
+		limit: 1,
 	});
 
 	const firstName = session?.name?.split(" ")[0] ?? "";
 
-	if (overview === undefined || upcomingFixed === undefined) {
+	if (
+		overview === undefined ||
+		upcomingFixed === undefined ||
+		pendingFixedInView === undefined
+	) {
 		return null;
 	}
 
@@ -80,7 +91,7 @@ export function HomeRoute() {
 	}
 
 	const net = overview.monthlyIncome - overview.monthlyExpense;
-	const pendingFixedExpenses = upcomingFixed.pendingTotal;
+	const pendingFixedExpenses = pendingFixedInView.pendingTotal;
 
 	return (
 		<div className="dashboard-page animate-stagger">
@@ -173,6 +184,7 @@ export function HomeRoute() {
 									amount: item.amount,
 									categoryName: item.categoryName,
 									dueDate: item.dueDate,
+									periodKey: periodKeyFromDate(new Date(item.dueDate)),
 								})
 							}
 						/>
@@ -183,6 +195,28 @@ export function HomeRoute() {
 							items={atRiskBudgets as BudgetItem[]}
 							periodLabel={formatMonthYear(anchor)}
 						/>
+					) : null}
+
+					{overview.creditFundCards &&
+					overview.creditFundCards.length > 0 ? (
+						<section
+							className="dash-credits glass"
+							aria-label="Créditos activos"
+						>
+							<div className="section-header">
+								<h2 className="section-title">Créditos</h2>
+								<Link to="/credits" className="link-accent show-desktop">
+									Ver todos
+								</Link>
+							</div>
+							<ul className="dash-credits__list">
+								{overview.creditFundCards.map((card) => (
+									<li key={card.creditId}>
+										<CreditFundCard {...card} />
+									</li>
+								))}
+							</ul>
+						</section>
 					) : null}
 
 					<section

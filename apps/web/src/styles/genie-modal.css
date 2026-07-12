@@ -1,0 +1,208 @@
+/* ── Genie modal (macOS/iOS minimize-style) ─────────────────────── */
+
+.genie-modal-svg-defs {
+	position: absolute;
+	width: 0;
+	height: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+:root {
+	--genie-ease-in: cubic-bezier(0.22, 1, 0.36, 1);
+	--genie-ease-out: cubic-bezier(0.55, 0, 1, 0.45);
+	--genie-duration: 420ms;
+}
+
+.modal--genie-warp {
+	filter: url("#genie-warp");
+}
+
+.modal--genie-in {
+	animation: modal-genie-in var(--genie-duration, 420ms) var(--genie-ease-in) both;
+	will-change: transform, clip-path, opacity, filter;
+}
+
+.modal--genie-out {
+	animation: modal-genie-out var(--genie-duration, 420ms) var(--genie-ease-out) both;
+	will-change: transform, clip-path, opacity, filter;
+}
+
+.dialog.modal--genie-in,
+.dialog.modal--genie-out {
+	will-change: transform, clip-path, opacity, filter;
+}
+
+/* Entrada orgánica: "bloom" que emerge desde el origen con foco suave y settle elástico */
+@keyframes modal-genie-in {
+	0% {
+		opacity: 0;
+		transform: translate(
+				calc(var(--genie-dx) * 0.55),
+				calc(var(--genie-dy) * 0.55)
+			)
+			scale(0.6);
+		clip-path: circle(
+			calc(8% * var(--genie-intensity, 1)) at var(--genie-x) var(--genie-y)
+		);
+		filter: blur(calc(8px * var(--genie-intensity, 1)));
+	}
+
+	42% {
+		opacity: 1;
+		transform: translate(
+				calc(var(--genie-dx) * 0.12),
+				calc(var(--genie-dy) * 0.12)
+			)
+			scale(0.9);
+		filter: blur(calc(2px * var(--genie-intensity, 1)));
+	}
+
+	70% {
+		opacity: 1;
+		transform: translate(
+				calc(var(--genie-dx) * -0.03),
+				calc(var(--genie-dy) * -0.03)
+			)
+			scale(calc(1 + 0.035 * var(--genie-intensity, 1)));
+		clip-path: circle(135% at var(--genie-x) var(--genie-y));
+		filter: blur(0);
+	}
+
+	86% {
+		transform: scale(calc(1 - 0.008 * var(--genie-intensity, 1)));
+	}
+
+	100% {
+		opacity: 1;
+		transform: none;
+		clip-path: circle(150% at var(--genie-x) var(--genie-y));
+		filter: blur(0);
+	}
+}
+
+@keyframes modal-genie-out {
+	0% {
+		opacity: 1;
+		transform: none;
+		clip-path: inset(0 0 0 0 round var(--radius-lg));
+		--genie-warp: 0;
+	}
+
+	18% {
+		transform: translate(
+				calc(var(--genie-dx) * 0.04),
+				calc(var(--genie-dy) * 0.03)
+			)
+			scale(0.98, 0.96);
+		--genie-warp: calc(3 * var(--genie-intensity, 1));
+	}
+
+	45% {
+		opacity: 0.9;
+		transform: translate(
+				calc(var(--genie-dx) * 0.38),
+				calc(var(--genie-dy) * 0.32)
+			)
+			scale(0.52, 0.36) skewY(var(--genie-skew));
+		clip-path: polygon(
+			10% 0%,
+			90% 0%,
+			calc(var(--genie-x) + 14%) 100%,
+			calc(var(--genie-x) - 14%) 100%
+		);
+		--genie-warp: calc(16 * var(--genie-intensity, 1));
+	}
+
+	100% {
+		opacity: 0.2;
+		transform: translate(var(--genie-dx), var(--genie-dy)) scale(0.02, 0.01);
+		clip-path: polygon(
+			calc(var(--genie-x) - 1px) calc(var(--genie-y) - 1px),
+			calc(var(--genie-x) + 1px) calc(var(--genie-y) - 1px),
+			calc(var(--genie-x) + 1px) calc(var(--genie-y) + 1px),
+			calc(var(--genie-x) - 1px) calc(var(--genie-y) + 1px)
+		);
+		--genie-warp: calc(24 * var(--genie-intensity, 1));
+	}
+}
+
+/* Origen arriba del centro de la modal: invierte el embudo de salida.
+   La entrada usa un bloom circular simétrico, así que no necesita variante. */
+[data-genie-anchor="top"].modal--genie-out {
+	animation-name: modal-genie-out-to-top;
+}
+
+@keyframes modal-genie-out-to-top {
+	0% {
+		opacity: 1;
+		transform: none;
+		clip-path: inset(0 0 0 0 round var(--radius-lg));
+		--genie-warp: 0;
+	}
+
+	45% {
+		opacity: 0.9;
+		transform: translate(
+				calc(var(--genie-dx) * 0.38),
+				calc(var(--genie-dy) * 0.32)
+			)
+			scale(0.52, 0.36) skewY(calc(var(--genie-skew) * -1));
+		clip-path: polygon(
+			calc(var(--genie-x) - 14%) 0%,
+			calc(var(--genie-x) + 14%) 0%,
+			90% 100%,
+			10% 100%
+		);
+		--genie-warp: calc(16 * var(--genie-intensity, 1));
+	}
+
+	100% {
+		opacity: 0.2;
+		transform: translate(var(--genie-dx), var(--genie-dy)) scale(0.02, 0.01);
+		clip-path: polygon(
+			calc(var(--genie-x) - 1px) calc(var(--genie-y) - 1px),
+			calc(var(--genie-x) + 1px) calc(var(--genie-y) - 1px),
+			calc(var(--genie-x) + 1px) calc(var(--genie-y) + 1px),
+			calc(var(--genie-x) - 1px) calc(var(--genie-y) + 1px)
+		);
+		--genie-warp: calc(24 * var(--genie-intensity, 1));
+	}
+}
+
+/* prefers-reduced-motion: fade + scale simple */
+@media (prefers-reduced-motion: reduce) {
+	.modal--genie-in {
+		animation: modal-genie-reduced-in 220ms var(--ease-out) both;
+		filter: none !important;
+		will-change: opacity, transform;
+	}
+
+	.modal--genie-out {
+		animation: modal-genie-reduced-out 180ms var(--ease-out) both;
+		filter: none !important;
+		will-change: opacity, transform;
+	}
+}
+
+@keyframes modal-genie-reduced-in {
+	from {
+		opacity: 0;
+		transform: scale(0.96);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes modal-genie-reduced-out {
+	from {
+		opacity: 1;
+		transform: scale(1);
+	}
+	to {
+		opacity: 0;
+		transform: scale(0.96);
+	}
+}

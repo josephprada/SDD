@@ -8,8 +8,10 @@ type NavMobileProps = {
 };
 
 const MORE_ITEMS: Array<{ to: string; label: string; icon: CoreIconName }> = [
+	{ to: "/credits", label: "Créditos", icon: "landmark" },
+	{ to: "/savings", label: "Ahorros", icon: "piggy-bank" },
 	{ to: "/categories", label: "Categorías", icon: "tags" },
-	{ to: "/budgets", label: "Presupuestos", icon: "badge-dollar-sign" },
+	{ to: "/budgets", label: "Presupuestos y Gastos fijos", icon: "badge-dollar-sign" },
 	{ to: "/reports", label: "Reportes", icon: "chart-line" },
 	{ to: "/settings", label: "Ajustes", icon: "settings" },
 ];

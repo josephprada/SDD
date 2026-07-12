@@ -1,6 +1,7 @@
-import { useOverlayAnimation } from "@app/lib/core/useOverlayAnimation";
+import type { GenieOriginRect } from "@app/lib/motion/genieModal";
+import { useGenieOverlay } from "@app/lib/motion/useGenieOverlay";
 import { Button } from "@jp-ds";
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { OverlayPortal } from "./OverlayPortal";
 
 type ConfirmDialogProps = {
@@ -12,6 +13,9 @@ type ConfirmDialogProps = {
 	variant?: "danger" | "primary";
 	onConfirm: () => void;
 	onCancel: () => void;
+	genieOrigin?: GenieOriginRect | null;
+	genieIntensity?: number;
+	genieDuration?: number;
 };
 
 export function ConfirmDialog({
@@ -23,10 +27,26 @@ export function ConfirmDialog({
 	variant = "primary",
 	onConfirm,
 	onCancel,
+	genieOrigin = null,
+	genieIntensity = 1,
+	genieDuration,
 }: ConfirmDialogProps) {
 	const titleId = useId();
 	const descId = useId();
-	const { mounted, closing, handleAnimationEnd } = useOverlayAnimation(open);
+	const dialogRef = useRef<HTMLDivElement>(null);
+	const {
+		mounted,
+		closing,
+		handleAnimationEnd,
+		surfaceAnimClass,
+		surfaceExtraClass,
+	} = useGenieOverlay({
+		open,
+		surfaceRef: dialogRef,
+		genieOrigin,
+		genieIntensity,
+		genieDuration,
+	});
 
 	useEffect(() => {
 		if (!mounted) return;
@@ -59,9 +79,10 @@ export function ConfirmDialog({
 					onClick={onCancel}
 				/>
 				<div
+					ref={dialogRef}
 					role="alertdialog"
 					aria-modal="true"
-					className={`dialog glass${closing ? " modal--sheet-out" : " modal--sheet-in"}`}
+					className={`dialog glass ${surfaceAnimClass} ${surfaceExtraClass}`.trim()}
 					aria-labelledby={titleId}
 					aria-describedby={descId}
 					onAnimationEnd={(event) => {

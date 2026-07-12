@@ -21,21 +21,55 @@ export const overview = query({
 			)
 			.collect();
 
-		const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+		const totalBalance = accounts
+			.filter((a) => !a.isCreditEscrow)
+			.reduce((sum, a) => sum + a.balance, 0);
 
-		const activeAccounts = accounts.sort(compareAccounts).map((a) => ({
+		const activeAccounts = accounts
+			.filter((a) => !a.isCreditEscrow)
+			.sort(compareAccounts)
+			.map((a) => ({
 				_id: a._id,
 				name: a.name,
 				type: a.type,
 				balance: a.balance,
 			}));
 
+		const credits = await ctx.db
+			.query("credits")
+			.withIndex("by_user_status", (q) =>
+				q.eq("userId", userId).eq("status", "active"),
+			)
+			.collect();
+
+		const creditFundCards = [];
+		for (const credit of credits) {
+			if (!credit.disbursementAccountId) continue;
+			const disbursementAccount = accounts.find(
+				(a) => a._id === credit.disbursementAccountId,
+			);
+			if (disbursementAccount) {
+				const available = disbursementAccount.balance;
+				creditFundCards.push({
+					creditId: credit._id,
+					name: credit.name,
+					principal: credit.principal,
+					escrowBalance: available,
+					spentFromDisbursement: Math.max(0, credit.principal - available),
+					availableFromDisbursement: available,
+				});
+			}
+		}
+
 		const transactions = await ctx.db
 			.query("transactions")
 			.withIndex("by_user_date", (q) => q.eq("userId", userId))
 			.collect();
 
-		const periodTransactions = transactions.filter(
+		const allTransactions = transactions.filter((t) => !t.isCreditFundMovement);
+		const sorted = [...allTransactions].sort(compareTransactions);
+
+		const periodTransactions = sorted.filter(
 			(t) => t.date >= periodStart && t.date <= periodEnd,
 		);
 
@@ -46,7 +80,6 @@ export const overview = query({
 			if (t.type === "expense") monthlyExpense += t.amount;
 		}
 
-		const sorted = [...periodTransactions].sort(compareTransactions);
 		const limit = Math.min(Math.max(recentLimit ?? 5, 1), 30);
 		const recentSlice = sorted.slice(0, limit);
 		const recentTransactions = await Promise.all(
@@ -59,7 +92,8 @@ export const overview = query({
 			monthlyExpense,
 			activeAccounts,
 			recentTransactions,
-			recentTotal: sorted.length,
+			recentTotal: allTransactions.length,
+			creditFundCards,
 		};
 	},
 });

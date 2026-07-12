@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
+import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 import "./components.css";
 
 export type CheckboxProps = Omit<
@@ -18,11 +18,12 @@ export function Checkbox({
 	disabled,
 	...props
 }: CheckboxProps) {
+	const autoId = useId();
 	const inputId =
 		id ??
-		(typeof label === "string"
+		(typeof label === "string" && label.trim()
 			? label.toLowerCase().replace(/\s+/g, "-")
-			: undefined);
+			: autoId);
 
 	return (
 		<label
