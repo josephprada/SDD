@@ -31,7 +31,7 @@ export function DestinationList({
 					desembolsado.
 				</p>
 			) : null}
-			<div className="credit-summary">
+			<div className="credit-summary card-stagger">
 				<div className="credit-summary__item">
 					<span className="credit-summary__label">Asignado</span>
 					<strong>{formatCOP(totalAllocated)}</strong>
@@ -44,7 +44,7 @@ export function DestinationList({
 			{destinations.length === 0 ? (
 				<p className="budget-empty">Sin rubros definidos.</p>
 			) : (
-				<ul className="credit-list">
+				<ul className="credit-list card-stagger">
 					{destinations.map((d) => {
 						const spentTotal = d.spentTotal ?? 0;
 						const progress =
@@ -55,7 +55,10 @@ export function DestinationList({
 						const movements = d.movements ?? [];
 
 						return (
-							<li key={d._id} className="credit-card destination-card glass">
+							<li
+								key={d._id}
+								className="credit-card destination-card glass interactive-lift"
+							>
 								<div className="destination-card__header">
 									<button
 										type="button"

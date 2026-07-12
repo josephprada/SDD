@@ -47,7 +47,7 @@ export function ReportBudgetsSection({
 						</div>
 					</div>
 
-					<ul className="report-budgets__list">
+					<ul className="report-budgets__list card-stagger">
 						{items.map((item) => {
 							const label = budgetLabel(item);
 							const pct = Math.round(item.percent * 100);

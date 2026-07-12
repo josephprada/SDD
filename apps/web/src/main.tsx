@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { GenieModalSvgDefs } from "@app/components/ui/GenieModalSvgDefs";
 import { AppRouter } from "./routes/router";
 import "@jp-ds/index";
 import "./styles/aurora.css";
@@ -13,7 +14,12 @@ import "./styles/login-brand.css";
 import "./index.css";
 
 function App() {
-	return <AppRouter />;
+	return (
+		<>
+			<GenieModalSvgDefs />
+			<AppRouter />
+		</>
+	);
 }
 
 const rootElement = document.getElementById("root");

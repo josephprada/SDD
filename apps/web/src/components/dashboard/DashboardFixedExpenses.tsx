@@ -32,7 +32,7 @@ export function DashboardFixedExpenses({
 				</Link>
 			</div>
 
-			<ul className="dash-fixed-expenses__list">
+			<ul className="dash-fixed-expenses__list card-stagger">
 				{items.map((item) => (
 					<li
 						key={`${item._id}-${item.dueDate}`}

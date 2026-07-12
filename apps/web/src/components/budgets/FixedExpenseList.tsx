@@ -26,7 +26,7 @@ export function FixedExpenseList({
 	}
 
 	return (
-		<ul className="fixed-expense-list">
+		<ul className="fixed-expense-list card-stagger">
 			{items.map((item) => {
 				const isPaid = item.isPaidCurrentPeriod;
 

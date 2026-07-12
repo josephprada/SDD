@@ -17,7 +17,10 @@
 }
 
 .shell .interactive-lift {
-	transition: transform 0.15s ease, border-color 0.15s ease;
+	transition:
+		transform var(--duration-fast) var(--ease-out),
+		box-shadow var(--duration-fast) var(--ease-out),
+		border-color var(--duration-fast) var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -28,6 +31,32 @@
 			var(--color-border)
 		);
 	}
+}
+
+/* Touch: sin flash azul del navegador; anillo de foco solo con teclado */
+.shell button,
+.shell a,
+.shell [role="button"],
+.shell [role="tab"],
+.shell .chip,
+.shell .credit-tab,
+.shell .credit-card,
+.shell .destination-card,
+.shell .account-card,
+.shell .budget-card,
+.shell .fixed-expense-card,
+.shell .category-list__item,
+.shell .tx-row--selectable {
+	-webkit-tap-highlight-color: transparent;
+}
+
+.shell button:focus:not(:focus-visible),
+.shell a:focus:not(:focus-visible),
+.shell [role="button"]:focus:not(:focus-visible),
+.shell [role="tab"]:focus:not(:focus-visible),
+.shell .credit-card__main:focus:not(:focus-visible),
+.shell .destination-movement:focus:not(:focus-visible) {
+	outline: none;
 }
 
 /* Montos en fuente mono */
@@ -2416,7 +2445,9 @@
 	.modal--genie-in,
 	.modal--genie-out,
 	.modal-backdrop--in,
-	.modal-backdrop--out {
+	.modal-backdrop--out,
+	.modal-backdrop--genie-out,
+	.card-stagger > * {
 		animation: none !important;
 		transition: none !important;
 	}

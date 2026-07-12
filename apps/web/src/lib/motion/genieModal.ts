@@ -76,7 +76,7 @@ export function applyGenieModalVars(
 	modalEl.style.setProperty("--genie-dx", `${deltaX}px`);
 	modalEl.style.setProperty("--genie-dy", `${deltaY}px`);
 	modalEl.style.setProperty("--genie-intensity", String(intensity));
-	modalEl.style.setProperty("--genie-warp", String(Math.round(18 * intensity)));
+	modalEl.style.removeProperty("--genie-warp");
 	modalEl.style.setProperty("--genie-skew", `${6 * intensity}deg`);
 	modalEl.style.setProperty("--genie-duration", `${duration}ms`);
 	modalEl.style.setProperty("--genie-anchor", anchor === "top" ? "0" : "1");

@@ -55,7 +55,7 @@ export function ReportFixedExpensesSection({
 						</div>
 					</div>
 
-					<ul className="report-fixed-expenses__list">
+					<ul className="report-fixed-expenses__list card-stagger">
 						{items.map((item) => (
 							<li key={item._id} className="report-fixed-expense-item">
 								<div className="report-fixed-expense-item__head">

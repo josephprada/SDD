@@ -55,7 +55,7 @@ export function ReportSavingsSection({ items }: ReportSavingsSectionProps) {
 						</div>
 					</div>
 
-					<ul className="report-savings__list">
+					<ul className="report-savings__list card-stagger">
 						{items.map((goal) => {
 							const pct = Math.min(100, Math.round(goal.percent * 100));
 

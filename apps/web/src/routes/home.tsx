@@ -146,7 +146,7 @@ export function HomeRoute() {
 				/>
 			</div>
 
-			<div className="dash-metrics show-desktop animate-stagger-item">
+			<div className="dash-metrics show-desktop card-stagger">
 				<MetricCard label="Balance total" value={overview.totalBalance} />
 				<MetricCard
 					label="Ingresos"
@@ -212,7 +212,7 @@ export function HomeRoute() {
 									Ver todos
 								</Link>
 							</div>
-							<ul className="dash-credits__list">
+							<ul className="dash-credits__list card-stagger">
 								{overview.creditFundCards.map((card) => (
 									<li key={card.creditId}>
 										<CreditFundCard {...card} />
@@ -232,7 +232,7 @@ export function HomeRoute() {
 								Ver todas
 							</Link>
 						</div>
-						<div className="accounts-compact__grid">
+						<div className="accounts-compact__grid card-stagger">
 							{overview.activeAccounts.map((account) => (
 								<div key={account._id} className="account-compact">
 									<span className="account-compact__name">{account.name}</span>

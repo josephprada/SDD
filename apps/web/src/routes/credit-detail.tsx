@@ -22,7 +22,7 @@ import { CoreIcon } from "@app/lib/core/icons";
 import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@jp-ds";
+import { Button, IconButton } from "@jp-ds";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
@@ -256,6 +256,14 @@ export function CreditDetailRoute() {
 		setAbonoModal(true);
 	};
 
+	const openSavingsForAbono = () => {
+		navigate("/savings");
+	};
+
+	const openSavingsForGoal = (goalId: Id<"savingsGoals">) => {
+		navigate(`/savings?goal=${goalId}`);
+	};
+
 	const isGoalReadyForAbono = (goal: (typeof linkedGoals)[number]) =>
 		goal.status === "completed" || goal.currentAmount >= goal.targetAmount;
 
@@ -318,7 +326,7 @@ export function CreditDetailRoute() {
 				</div>
 			</section>
 
-			<div className="credit-summary">
+			<div className="credit-summary card-stagger">
 				{hasFund ? (
 					<>
 						<div className="credit-summary__item">
@@ -545,7 +553,7 @@ export function CreditDetailRoute() {
 					{linkedGoals.length > 0 ? (
 						<div>
 							<h3 className="section-title">Ahorro para abonos</h3>
-							<ul className="credit-list">
+							<ul className="credit-list card-stagger">
 								{linkedGoals.map((goal) => {
 									const pct = Math.min(
 										100,
@@ -555,10 +563,14 @@ export function CreditDetailRoute() {
 									return (
 										<li
 											key={goal._id}
-											className="credit-card glass savings-goal-card destination-card"
+											className="credit-card glass savings-goal-card destination-card interactive-lift"
 										>
 											<div className="destination-card__header">
-												<div className="credit-card__main credit-card__main--static">
+												<button
+													type="button"
+													className="credit-card__main"
+													onClick={() => openSavingsForGoal(goal._id)}
+												>
 													<div className="credit-card__row">
 														<strong>{goal.name}</strong>
 														<span>{pct}%</span>
@@ -576,9 +588,16 @@ export function CreditDetailRoute() {
 															? " — meta cumplida"
 															: " — sigue aportando para habilitar el abono"}
 													</span>
-												</div>
+													<span className="credit-card__lender credit-card__lender--link">
+														Ver en Ahorros
+													</span>
+												</button>
 												{ready ? (
-													<div className="credit-card__actions">
+													<div
+														className="credit-card__actions"
+														onClick={(event) => event.stopPropagation()}
+														onKeyDown={(event) => event.stopPropagation()}
+													>
 														<Button
 															onClick={() =>
 																openAbonoModal(
@@ -605,29 +624,61 @@ export function CreditDetailRoute() {
 						</div>
 					) : null}
 					{abonos.length > 0 ? (
-						<ul className="credit-list">
-							{abonos.map((abono) => (
-								<li key={abono._id} className="credit-card glass interactive-lift">
-									<button
-										type="button"
-										className="credit-card__main"
-										onClick={() => openEditAbono(abono)}
+						<ul className="credit-list card-stagger">
+							{abonos.map((abono) => {
+								const fromSavings = Boolean(abono.savingsGoalSnapshot);
+								return (
+									<li
+										key={abono._id}
+										className="credit-card glass interactive-lift"
 									>
-										<div className="credit-card__row">
-											<strong>{formatFullDate(abono.paidAt)}</strong>
-											<span>{formatCOP(abono.amount)}</span>
+										<div className="destination-card__header">
+											<button
+												type="button"
+												className="credit-card__main"
+												onClick={() =>
+													fromSavings
+														? openSavingsForAbono()
+														: openEditAbono(abono)
+												}
+											>
+												<div className="credit-card__row">
+													<strong>{formatFullDate(abono.paidAt)}</strong>
+													<span>{formatCOP(abono.amount)}</span>
+												</div>
+												<span className="credit-card__lender">
+													{RECALC_EFFECT_LABELS[abono.recalcEffect]}
+												</span>
+												{abono.notes ? (
+													<span className="credit-card__lender">
+														{abono.notes}
+													</span>
+												) : null}
+												{fromSavings ? (
+													<span className="credit-card__lender credit-card__lender--link">
+														Meta: {abono.savingsGoalSnapshot!.name} · Ver en
+														Ahorros
+													</span>
+												) : null}
+											</button>
+											{fromSavings ? (
+												<div
+													className="credit-card__actions"
+													onClick={(event) => event.stopPropagation()}
+													onKeyDown={(event) => event.stopPropagation()}
+												>
+													<IconButton
+														aria-label="Editar abono"
+														onClick={() => openEditAbono(abono)}
+													>
+														<CoreIcon name="edit" size={16} />
+													</IconButton>
+												</div>
+											) : null}
 										</div>
-										<span className="credit-card__lender">
-											{RECALC_EFFECT_LABELS[abono.recalcEffect]}
-										</span>
-										{abono.notes ? (
-											<span className="credit-card__lender">
-												{abono.notes}
-											</span>
-										) : null}
-									</button>
-								</li>
-							))}
+									</li>
+								);
+							})}
 						</ul>
 					) : (
 						<p className="tx-form__hint">

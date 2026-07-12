@@ -181,7 +181,7 @@ export function TransactionList({
 				{groups.map((group) => (
 					<div key={group.label} className="tx-group">
 						<h3 className="tx-group__label">{group.label}</h3>
-						<ul className="tx-rows">
+						<ul className="tx-rows card-stagger">
 							{group.items.map((tx) => (
 								<TransactionRow
 									key={tx._id}
@@ -220,7 +220,7 @@ export function TransactionList({
 							<th className="tx-table__actions-col" aria-label="Acciones" />
 						</tr>
 					</thead>
-					<tbody>
+					<tbody className="card-stagger">
 						{transactions.map((tx) => (
 							<tr
 								key={tx._id}

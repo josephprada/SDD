@@ -25,7 +25,7 @@ export function CreditList({ items }: CreditListProps) {
 	}
 
 	return (
-		<ul className="credit-list">
+		<ul className="credit-list card-stagger">
 			{items.map((credit) => (
 				<li key={credit._id}>
 					<Link

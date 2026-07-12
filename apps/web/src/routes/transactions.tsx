@@ -162,16 +162,14 @@ export function TransactionsRoute() {
 				))}
 			</div>
 
-			<div className="animate-stagger-item">
-				<TransactionList
-					transactions={transactions}
-					reorderSource={allTransactions}
-					onCreate={() => openCreate("expense")}
-					onEdit={(id) => openEdit(id as Id<"transactions">)}
-					onDelete={(id) => setDeletingId(id as Id<"transactions">)}
-					onReorder={handleReorder}
-				/>
-			</div>
+			<TransactionList
+				transactions={transactions}
+				reorderSource={allTransactions}
+				onCreate={() => openCreate("expense")}
+				onEdit={(id) => openEdit(id as Id<"transactions">)}
+				onDelete={(id) => setDeletingId(id as Id<"transactions">)}
+				onReorder={handleReorder}
+			/>
 
 			<ConfirmDialog
 				open={deletingId !== null}

@@ -136,7 +136,7 @@ export function CategoryList({
 					icon={<CoreIcon name="tags" size={32} />}
 				/>
 			) : (
-				<ul className="category-list">
+				<ul className="category-list card-stagger">
 					{filtered.map((cat) => {
 						const usage = usageCounts[cat._id] ?? EMPTY_USAGE;
 						const isSelected = selectedId === cat._id;

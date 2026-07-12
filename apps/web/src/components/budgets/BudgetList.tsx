@@ -38,7 +38,7 @@ export function BudgetList({ items, onEdit, onDelete }: BudgetListProps) {
 				</div>
 			</div>
 
-			<ul className="budget-list__items">
+			<ul className="budget-list__items card-stagger">
 				{items.map((item) => {
 					const label = budgetLabel(item);
 					return (

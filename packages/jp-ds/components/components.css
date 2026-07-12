@@ -11,6 +11,7 @@
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   cursor: pointer;
+  transform-origin: center center;
   transition:
     transform var(--duration-fast) var(--ease-out),
     box-shadow var(--duration-fast) var(--ease-out),
@@ -34,8 +35,13 @@
 
 @media (hover: hover) and (pointer: fine) {
   .jp-btn--primary:hover:not(:disabled) {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.024);
     box-shadow: 0 12px 56px var(--color-accent-glow);
+  }
+
+  .jp-btn--secondary:hover:not(:disabled),
+  .jp-btn--danger:hover:not(:disabled) {
+    transform: scale(1.018);
   }
 }
 
@@ -62,6 +68,7 @@
 
 @media (hover: hover) and (pointer: fine) {
   .jp-btn--google:hover:not(:disabled) {
+    transform: scale(1.012);
     box-shadow: var(--shadow-glow);
   }
 }
@@ -199,6 +206,7 @@ select.jp-input option:checked {
   background: var(--color-surface-2);
   color: var(--color-text-primary);
   cursor: pointer;
+  transform-origin: center center;
   transition:
     box-shadow var(--duration-fast),
     transform var(--duration-fast) var(--ease-spring);
@@ -210,6 +218,7 @@ select.jp-input option:checked {
 
 @media (hover: hover) and (pointer: fine) {
   .jp-icon-btn:hover:not(:disabled) {
+    transform: scale(1.06);
     box-shadow: var(--shadow-glow);
   }
 }

@@ -128,7 +128,7 @@ export function AccountsRoute() {
 				/>
 			) : (
 				<>
-					<div className="dash-metrics show-desktop animate-stagger-item">
+					<div className="dash-metrics show-desktop card-stagger">
 						<MetricCard label="Balance total" value={totalBalance} />
 						<MetricCard label="Disponible" value={disponible} />
 						<MetricCard label="Crédito usado" value={credito} tone="expense" />
@@ -147,18 +147,16 @@ export function AccountsRoute() {
 					>
 						Tus cuentas
 					</h2>
-					<div className="animate-stagger-item">
-						<AccountList
-							accounts={accounts}
-							onCreate={() => setMode("create")}
-							onEdit={(account) => {
-								setEditing(account);
-								setMode("edit");
-							}}
-							onArchive={setArchiving}
-							onReorder={handleReorder}
-						/>
-					</div>
+					<AccountList
+						accounts={accounts}
+						onCreate={() => setMode("create")}
+						onEdit={(account) => {
+							setEditing(account);
+							setMode("edit");
+						}}
+						onArchive={setArchiving}
+						onReorder={handleReorder}
+					/>
 
 				</>
 			)}

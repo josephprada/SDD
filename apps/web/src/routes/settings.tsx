@@ -46,14 +46,15 @@ export function SettingsRoute() {
 				</div>
 			</div>
 
-			<section className="settings-section animate-stagger-item">
+			<div className="card-stagger settings-sections">
+			<section className="settings-section">
 				<h2 className="settings-section__title">Perfil</h2>
 				<ProfileEditor />
 			</section>
 
 			<AppearanceSection />
 
-			<section className="settings-section animate-stagger-item">
+			<section className="settings-section">
 				<h2 className="settings-section__title">Preferencias</h2>
 				<div className="settings-card glass">
 					<PreferenceRow
@@ -83,7 +84,7 @@ export function SettingsRoute() {
 
 			{session ? (
 				<div
-					className="settings-sign-out show-mobile animate-stagger-item"
+					className="settings-sign-out show-mobile"
 					style={{ marginTop: "var(--space-6)" }}
 				>
 					<Button variant="secondary" fullWidth onClick={handleSignOut}>
@@ -91,6 +92,7 @@ export function SettingsRoute() {
 					</Button>
 				</div>
 			) : null}
+			</div>
 
 			<GroupingPicker open={groupingOpen} onClose={() => setGroupingOpen(false)} />
 			<LanguagePicker open={languageOpen} onClose={() => setLanguageOpen(false)} />

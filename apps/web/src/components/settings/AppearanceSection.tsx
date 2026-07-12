@@ -31,7 +31,7 @@ export function AppearanceSection() {
 	};
 
 	return (
-		<section className="settings-section animate-stagger-item" aria-label="Apariencia">
+		<section className="settings-section" aria-label="Apariencia">
 			<h2 className="settings-section__title">Apariencia</h2>
 			<div className="settings-card glass">
 				<div>

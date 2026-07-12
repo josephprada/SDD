@@ -1,3 +1,4 @@
+import { takeGenieOrigin } from "@app/lib/core/genieOrigin";
 import {
 	applyGenieModalVars,
 	type GenieOriginRect,
@@ -7,13 +8,26 @@ import {
 import { useOverlayAnimation } from "@app/lib/core/useOverlayAnimation";
 import { type RefObject, useEffect, useLayoutEffect, useState } from "react";
 
+const GENIE_DISPLACEMENT_ID = "genie-displacement-map";
+
+function setSvgWarpScale(scale: number): void {
+	const node = document.getElementById(GENIE_DISPLACEMENT_ID);
+	if (!node) return;
+	node.setAttribute("scale", String(Math.max(0, scale)));
+}
+
+function readGenieWarpScale(surface: HTMLElement): number {
+	const warp = getComputedStyle(surface).getPropertyValue("--genie-warp").trim();
+	const scale = Number.parseFloat(warp);
+	return Number.isFinite(scale) ? scale : 0;
+}
+
 type UseGenieOverlayOptions = {
 	open: boolean;
 	surfaceRef: RefObject<HTMLElement | null>;
 	genieOrigin?: GenieOriginRect | null;
 	genieIntensity?: number;
 	genieDuration?: number;
-	/** Si true, intenta usar document.activeElement al abrir cuando no hay origin explícito. */
 	autoCaptureActiveElement?: boolean;
 };
 
@@ -35,6 +49,7 @@ export function useGenieOverlay({
 		if (open) {
 			setResolvedOrigin(
 				genieOrigin ??
+					takeGenieOrigin() ??
 					(autoCaptureActiveElement
 						? getGenieOriginFromActiveElement()
 						: null),
@@ -58,6 +73,12 @@ export function useGenieOverlay({
 				intensity: genieIntensity,
 				duration: genieDuration,
 			});
+			if (closing) {
+				surfaceRef.current.style.removeProperty("--genie-warp");
+				setSvgWarpScale(readGenieWarpScale(surfaceRef.current));
+			} else {
+				setSvgWarpScale(0);
+			}
 		};
 
 		sync();
@@ -73,6 +94,27 @@ export function useGenieOverlay({
 		surfaceRef,
 	]);
 
+	useEffect(() => {
+		if (!mounted || !useGenie || !closing) {
+			setSvgWarpScale(0);
+			return;
+		}
+
+		let frame = 0;
+		const tick = () => {
+			const surface = surfaceRef.current;
+			if (surface) {
+				setSvgWarpScale(readGenieWarpScale(surface));
+			}
+			frame = requestAnimationFrame(tick);
+		};
+		frame = requestAnimationFrame(tick);
+		return () => {
+			cancelAnimationFrame(frame);
+			setSvgWarpScale(0);
+		};
+	}, [mounted, useGenie, closing, surfaceRef]);
+
 	const surfaceAnimClass = useGenie
 		? closing
 			? "modal--genie-out"
@@ -81,7 +123,7 @@ export function useGenieOverlay({
 			? "modal--sheet-out"
 			: "modal--sheet-in";
 
-	const surfaceExtraClass = "";
+	const surfaceExtraClass = useGenie ? "modal--genie-warp" : "";
 
 	return {
 		mounted,

@@ -60,7 +60,7 @@ export function ReportCreditsSection({ items }: ReportCreditsSectionProps) {
 						</div>
 					</div>
 
-					<ul className="report-credits__list">
+					<ul className="report-credits__list card-stagger">
 						{activeCredits.map((credit) => (
 							<li key={credit._id} className="report-credit-item">
 								<div className="report-credit-item__head">

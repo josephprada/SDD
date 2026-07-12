@@ -38,6 +38,7 @@ export function ConfirmDialog({
 		mounted,
 		closing,
 		handleAnimationEnd,
+		useGenie,
 		surfaceAnimClass,
 		surfaceExtraClass,
 	} = useGenieOverlay({
@@ -46,7 +47,6 @@ export function ConfirmDialog({
 		genieOrigin,
 		genieIntensity,
 		genieDuration,
-		autoCaptureActiveElement: false,
 	});
 
 	const frozenContentRef = useRef({ title, description });
@@ -80,7 +80,11 @@ export function ConfirmDialog({
 	return (
 		<OverlayPortal>
 			<div
-				className={`dialog-backdrop${closing ? " modal-backdrop--out" : " modal-backdrop--in"}`}
+				className={`dialog-backdrop${
+					closing
+						? ` modal-backdrop--out${useGenie ? " modal-backdrop--genie-out" : ""}`
+						: " modal-backdrop--in"
+				}`}
 			>
 				<button
 					type="button"

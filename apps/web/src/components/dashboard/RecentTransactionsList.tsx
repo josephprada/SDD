@@ -30,7 +30,7 @@ export function RecentTransactionsList({
 					icon={<CoreIcon name="arrow-down-up" size={28} />}
 				/>
 			) : (
-				<ul className="tx-rows">
+				<ul className="tx-rows card-stagger">
 					{transactions.map((tx) => (
 						<TransactionRow
 							key={tx._id}

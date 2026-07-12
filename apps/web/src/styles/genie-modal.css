@@ -14,6 +14,22 @@
 	--genie-duration: 420ms;
 }
 
+@property --genie-warp {
+	syntax: "<number>";
+	inherits: false;
+	initial-value: 0;
+}
+
+.modal--genie-warp {
+	filter: url("#genie-warp");
+}
+
+.modal-backdrop--genie-out,
+.dialog-backdrop.modal-backdrop--genie-out {
+	animation: modal-backdrop-genie-out var(--genie-duration, 420ms)
+		var(--genie-ease-out) both;
+}
+
 .modal--genie-in {
 	animation: modal-genie-in var(--genie-duration, 420ms) var(--genie-ease-in) both;
 	will-change: transform, clip-path, opacity, filter;
@@ -77,6 +93,17 @@
 	}
 }
 
+@keyframes modal-backdrop-genie-out {
+	0%,
+	72% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
 @keyframes modal-genie-out {
 	0% {
 		opacity: 1;
@@ -86,16 +113,17 @@
 	}
 
 	18% {
+		opacity: 1;
 		transform: translate(
 				calc(var(--genie-dx) * 0.04),
 				calc(var(--genie-dy) * 0.03)
 			)
 			scale(0.98, 0.96);
-		--genie-warp: calc(3 * var(--genie-intensity, 1));
+		--genie-warp: calc(4 * var(--genie-intensity, 1));
 	}
 
 	45% {
-		opacity: 0.9;
+		opacity: 1;
 		transform: translate(
 				calc(var(--genie-dx) * 0.38),
 				calc(var(--genie-dy) * 0.32)
@@ -107,11 +135,27 @@
 			calc(var(--genie-x) + 14%) 100%,
 			calc(var(--genie-x) - 14%) 100%
 		);
-		--genie-warp: calc(16 * var(--genie-intensity, 1));
+		--genie-warp: calc(18 * var(--genie-intensity, 1));
+	}
+
+	78% {
+		opacity: 1;
+		transform: translate(
+				calc(var(--genie-dx) * 0.82),
+				calc(var(--genie-dy) * 0.76)
+			)
+			scale(0.08, 0.04) skewY(calc(var(--genie-skew) * 0.5));
+		clip-path: polygon(
+			calc(var(--genie-x) - 12%) calc(var(--genie-y) - 8%),
+			calc(var(--genie-x) + 12%) calc(var(--genie-y) - 8%),
+			calc(var(--genie-x) + 6%) calc(var(--genie-y) + 6%),
+			calc(var(--genie-x) - 6%) calc(var(--genie-y) + 6%)
+		);
+		--genie-warp: calc(26 * var(--genie-intensity, 1));
 	}
 
 	100% {
-		opacity: 0.2;
+		opacity: 0;
 		transform: translate(var(--genie-dx), var(--genie-dy)) scale(0.02, 0.01);
 		clip-path: polygon(
 			calc(var(--genie-x) - 1px) calc(var(--genie-y) - 1px),
@@ -119,7 +163,7 @@
 			calc(var(--genie-x) + 1px) calc(var(--genie-y) + 1px),
 			calc(var(--genie-x) - 1px) calc(var(--genie-y) + 1px)
 		);
-		--genie-warp: calc(24 * var(--genie-intensity, 1));
+		--genie-warp: calc(30 * var(--genie-intensity, 1));
 	}
 }
 
@@ -138,7 +182,7 @@
 	}
 
 	45% {
-		opacity: 0.9;
+		opacity: 1;
 		transform: translate(
 				calc(var(--genie-dx) * 0.38),
 				calc(var(--genie-dy) * 0.32)
@@ -150,11 +194,21 @@
 			90% 100%,
 			10% 100%
 		);
-		--genie-warp: calc(16 * var(--genie-intensity, 1));
+		--genie-warp: calc(18 * var(--genie-intensity, 1));
+	}
+
+	78% {
+		opacity: 1;
+		transform: translate(
+				calc(var(--genie-dx) * 0.82),
+				calc(var(--genie-dy) * 0.76)
+			)
+			scale(0.08, 0.04);
+		--genie-warp: calc(26 * var(--genie-intensity, 1));
 	}
 
 	100% {
-		opacity: 0.2;
+		opacity: 0;
 		transform: translate(var(--genie-dx), var(--genie-dy)) scale(0.02, 0.01);
 		clip-path: polygon(
 			calc(var(--genie-x) - 1px) calc(var(--genie-y) - 1px),
@@ -162,7 +216,7 @@
 			calc(var(--genie-x) + 1px) calc(var(--genie-y) + 1px),
 			calc(var(--genie-x) - 1px) calc(var(--genie-y) + 1px)
 		);
-		--genie-warp: calc(24 * var(--genie-intensity, 1));
+		--genie-warp: calc(30 * var(--genie-intensity, 1));
 	}
 }
 

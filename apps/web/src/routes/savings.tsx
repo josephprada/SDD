@@ -12,9 +12,12 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { Button, IconButton } from "@jp-ds";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 
 export function SavingsRoute() {
+	const [searchParams, setSearchParams] = useSearchParams();
+	const highlightGoalId = searchParams.get("goal") as Id<"savingsGoals"> | null;
 	const openEditTransaction = useTransactionModalStore((s) => s.openEdit);
 	const goals = useQuery(api.savingsGoals.list, {});
 	const accounts = useQuery(api.accounts.list, {});
@@ -43,6 +46,22 @@ export function SavingsRoute() {
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState("");
+
+	useEffect(() => {
+		if (!highlightGoalId || goals === undefined) return;
+		const element = document.getElementById(`savings-goal-${highlightGoalId}`);
+		if (!element) {
+			setSearchParams({}, { replace: true });
+			return;
+		}
+		element.scrollIntoView({ behavior: "smooth", block: "center" });
+		element.classList.add("savings-goal-card--highlight");
+		const timer = window.setTimeout(() => {
+			element.classList.remove("savings-goal-card--highlight");
+			setSearchParams({}, { replace: true });
+		}, 2200);
+		return () => window.clearTimeout(timer);
+	}, [highlightGoalId, goals, setSearchParams]);
 
 	if (
 		goals === undefined ||

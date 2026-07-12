@@ -165,15 +165,15 @@ export function ReportsRoute() {
 				}
 			/>
 
-			<div className="report-export-panel animate-stagger-item">
+			<div className="report-export-panel card-stagger">
 				<ReportSummaryCard summary={report} />
-				<div className="report-charts">
+				<div className="report-charts card-stagger">
 					<IncomeExpenseChart summary={report} />
 					<CategoryBreakdownChart summary={report} />
 					<TrendChart summary={report} />
 				</div>
 
-				<div className="report-commitments">
+				<div className="report-commitments card-stagger">
 					<ReportBudgetsSection
 						items={exportPayload.budgets}
 						periodLabel={monthLabel}

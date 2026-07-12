@@ -40,6 +40,7 @@ export function Modal({
 		mounted,
 		closing,
 		handleAnimationEnd,
+		useGenie,
 		surfaceAnimClass,
 		surfaceExtraClass,
 	} = useGenieOverlay({
@@ -48,7 +49,6 @@ export function Modal({
 		genieOrigin,
 		genieIntensity,
 		genieDuration,
-		autoCaptureActiveElement: false,
 	});
 
 	useEffect(() => {
@@ -116,7 +116,11 @@ export function Modal({
 	return (
 		<OverlayPortal>
 			<div
-				className={`modal-backdrop${closing ? " modal-backdrop--out" : " modal-backdrop--in"}`}
+				className={`modal-backdrop${
+					closing
+						? ` modal-backdrop--out${useGenie ? " modal-backdrop--genie-out" : ""}`
+						: " modal-backdrop--in"
+				}`}
 			>
 				<button
 					type="button"

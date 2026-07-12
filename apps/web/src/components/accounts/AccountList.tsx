@@ -86,7 +86,7 @@ export function AccountList({
 	};
 
 	return (
-		<div className="account-grid">
+		<div className="account-grid card-stagger">
 			{accounts.map((account) => (
 				<AccountCard
 					key={account._id}

@@ -90,7 +90,7 @@ export function ProfileEditor() {
 	};
 
 	return (
-		<section className="settings-card glass animate-stagger-item" aria-label="Perfil">
+		<section className="settings-card glass" aria-label="Perfil">
 			<div className="profile-editor">
 				<div className="profile-editor__avatar-wrap">
 					<Avatar

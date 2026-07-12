@@ -31,7 +31,7 @@ export function SavingsGoalList({
 	}
 
 	return (
-		<ul className="savings-goal-list">
+		<ul className="savings-goal-list card-stagger">
 			{items.map((goal) => {
 				const pct = Math.min(100, Math.round(goal.percent * 100));
 				const movements = goal.movements ?? [];
@@ -41,6 +41,7 @@ export function SavingsGoalList({
 				return (
 					<li
 						key={goal._id}
+						id={`savings-goal-${goal._id}`}
 						className="savings-goal-card destination-card glass interactive-lift"
 					>
 						<div className="destination-card__header">

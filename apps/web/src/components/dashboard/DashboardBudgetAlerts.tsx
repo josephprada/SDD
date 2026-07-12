@@ -31,7 +31,7 @@ export function DashboardBudgetAlerts({
 				</Link>
 			</div>
 
-			<ul className="dash-budget-alerts__list">
+			<ul className="dash-budget-alerts__list card-stagger">
 				{items.map((item) => {
 					const label = budgetLabel(item);
 					const pct = Math.round(item.percent * 100);

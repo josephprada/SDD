@@ -275,9 +275,109 @@
 	animation: fade-up var(--duration-slow) var(--ease-out) both;
 }
 
+/* Card cascade — entrada en cascada de cards al cargar cada módulo */
+@keyframes card-cascade-in {
+	from {
+		opacity: 0;
+		transform: translateY(var(--distance-md, 8px)) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.card-stagger > * {
+	animation: card-cascade-in var(--duration-slow) var(--ease-out) both;
+}
+
+.card-stagger > *:nth-child(1) {
+	animation-delay: 0ms;
+}
+.card-stagger > *:nth-child(2) {
+	animation-delay: 60ms;
+}
+.card-stagger > *:nth-child(3) {
+	animation-delay: 120ms;
+}
+.card-stagger > *:nth-child(4) {
+	animation-delay: 180ms;
+}
+.card-stagger > *:nth-child(5) {
+	animation-delay: 240ms;
+}
+.card-stagger > *:nth-child(6) {
+	animation-delay: 300ms;
+}
+.card-stagger > *:nth-child(7) {
+	animation-delay: 360ms;
+}
+.card-stagger > *:nth-child(8) {
+	animation-delay: 420ms;
+}
+.card-stagger > *:nth-child(9) {
+	animation-delay: 480ms;
+}
+.card-stagger > *:nth-child(10) {
+	animation-delay: 540ms;
+}
+.card-stagger > *:nth-child(11) {
+	animation-delay: 600ms;
+}
+.card-stagger > *:nth-child(12) {
+	animation-delay: 660ms;
+}
+.card-stagger > *:nth-child(13) {
+	animation-delay: 720ms;
+}
+.card-stagger > *:nth-child(14) {
+	animation-delay: 780ms;
+}
+.card-stagger > *:nth-child(15) {
+	animation-delay: 840ms;
+}
+.card-stagger > *:nth-child(16) {
+	animation-delay: 900ms;
+}
+.card-stagger > *:nth-child(17) {
+	animation-delay: 960ms;
+}
+.card-stagger > *:nth-child(18) {
+	animation-delay: 1020ms;
+}
+.card-stagger > *:nth-child(19) {
+	animation-delay: 1080ms;
+}
+.card-stagger > *:nth-child(20) {
+	animation-delay: 1140ms;
+}
+.card-stagger > *:nth-child(21) {
+	animation-delay: 1200ms;
+}
+.card-stagger > *:nth-child(22) {
+	animation-delay: 1260ms;
+}
+.card-stagger > *:nth-child(23) {
+	animation-delay: 1320ms;
+}
+.card-stagger > *:nth-child(24) {
+	animation-delay: 1380ms;
+}
+.card-stagger > *:nth-child(n + 25) {
+	animation-delay: 1380ms;
+}
+
 /* ── Interactive motion ─────────────────────────────────────────── */
 
+:root {
+	--hover-zoom: 1.018;
+	--hover-zoom-btn: 1.024;
+	--hover-zoom-chip: 1.036;
+	--hover-lift: -2px;
+}
+
 .interactive-lift {
+	transform-origin: center center;
 	transition: transform var(--duration-fast) var(--ease-out), box-shadow
 		var(--duration-fast) var(--ease-out), border-color var(--duration-fast)
 		var(--ease-out), background var(--duration-fast) var(--ease-out);
@@ -285,7 +385,7 @@
 
 @media (hover: hover) and (pointer: fine) {
 	.interactive-lift:hover {
-		transform: translateY(-2px);
+		transform: translateY(var(--hover-lift)) scale(var(--hover-zoom));
 		box-shadow: var(--shadow-glow);
 	}
 }
@@ -294,8 +394,96 @@
 	transform: translateY(0) scale(0.98);
 }
 
+/* Hover zoom — cards, chips, nav y controles del shell */
+.shell .account-card--selectable,
+.shell .account-add,
+.shell .budget-card--selectable,
+.shell .fixed-expense-card--selectable:not(.fixed-expense-card--paid),
+.shell .chip,
+.shell .credit-tab,
+.shell .quick-actions__btn,
+.shell .budget-tabs__btn,
+.shell .dash-fixed-expense--actionable,
+.shell .destination-movement,
+.shell .payment-table__row--clickable,
+.shell .credit-profile-picker__card,
+.shell .grouping-option,
+.shell .nav-more__item,
+.shell .tx-row--selectable,
+.shell .preference-row,
+.shell .tx-fab--floating,
+.shell .nav-fab,
+.shell .user-menu__item {
+	transform-origin: center center;
+	transition:
+		transform var(--duration-fast) var(--ease-out),
+		box-shadow var(--duration-fast) var(--ease-out),
+		border-color var(--duration-fast) var(--ease-out),
+		background-color var(--duration-fast) var(--ease-out),
+		opacity var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.shell .account-card--selectable:hover,
+	.shell .account-add:hover,
+	.shell .budget-card--selectable:hover,
+	.shell .fixed-expense-card--selectable:not(.fixed-expense-card--paid):hover,
+	.shell .dash-fixed-expense--actionable:hover,
+	.shell .destination-movement:hover,
+	.shell .payment-table__row--clickable:hover,
+	.shell .credit-profile-picker__card:hover,
+	.shell .preference-row:hover {
+		transform: translateY(var(--hover-lift)) scale(var(--hover-zoom));
+	}
+
+	.shell .chip:not(.chip--active):hover,
+	.shell .credit-tab:not(.credit-tab--active):hover,
+	.shell .budget-tabs__btn:not(.budget-tabs__btn--active):hover,
+	.shell .grouping-option:not(.grouping-option--active):hover,
+	.shell .nav-item:not(.nav-item--active):hover,
+	.shell .nav-more__item:hover {
+		transform: scale(var(--hover-zoom-chip));
+	}
+
+	.shell .quick-actions__btn:hover {
+		transform: scale(var(--hover-zoom-btn));
+		opacity: 1;
+	}
+
+	.shell .tx-row--selectable:hover {
+		transform: scale(1.008);
+	}
+
+	.shell .sidebar-link:not(.sidebar-link--active):hover {
+		transform: scale(1.012);
+	}
+
+	.shell .tx-fab--floating:hover,
+	.shell .nav-fab:hover {
+		transform: scale(1.06);
+	}
+
+	.shell .user-menu__item:hover {
+		transform: scale(1.02);
+	}
+}
+
+.shell .account-add:active,
+.shell .chip:active,
+.shell .credit-tab:active,
+.shell .budget-tabs__btn:active,
+.shell .nav-item:active,
+.shell .quick-actions__btn:active,
+.shell .tx-row--selectable:active,
+.shell .tx-fab--floating:active,
+.shell .nav-fab:active,
+.shell .user-menu__item:active {
+	transform: scale(0.98);
+}
+
 .nav-item,
 .sidebar-link {
+	transform-origin: center center;
 	transition:
 		color var(--duration-fast) var(--ease-out),
 		transform var(--duration-fast) var(--ease-spring),
@@ -379,6 +567,7 @@
 	.animate-scale-in,
 	.animate-page-enter,
 	.animate-stagger-item,
+	.card-stagger > *,
 	.animate-logo-float,
 	.animate-glow-pulse,
 	.animate-menu-in,
@@ -388,6 +577,7 @@
 	.modal--genie-out,
 	.modal-backdrop--in,
 	.modal-backdrop--out,
+	.modal-backdrop--genie-out,
 	.theme-toggle-icon,
 	.not-found-content > *,
 	.loading-screen,
@@ -409,6 +599,25 @@
 
 	.interactive-lift:hover,
 	.interactive-lift:active,
+	.shell .account-card--selectable:hover,
+	.shell .account-add:hover,
+	.shell .budget-card--selectable:hover,
+	.shell .fixed-expense-card--selectable:hover,
+	.shell .chip:hover,
+	.shell .credit-tab:hover,
+	.shell .quick-actions__btn:hover,
+	.shell .budget-tabs__btn:hover,
+	.shell .dash-fixed-expense--actionable:hover,
+	.shell .destination-movement:hover,
+	.shell .payment-table__row--clickable:hover,
+	.shell .credit-profile-picker__card:hover,
+	.shell .grouping-option:hover,
+	.shell .nav-more__item:hover,
+	.shell .tx-row--selectable:hover,
+	.shell .preference-row:hover,
+	.shell .tx-fab--floating:hover,
+	.shell .nav-fab:hover,
+	.shell .user-menu__item:hover,
 	.nav-item:active,
 	.sidebar-link:active {
 		transform: none;
@@ -417,6 +626,25 @@
 	.nav-item,
 	.sidebar-link,
 	.interactive-lift,
+	.shell .account-card--selectable,
+	.shell .account-add,
+	.shell .budget-card--selectable,
+	.shell .fixed-expense-card--selectable,
+	.shell .chip,
+	.shell .credit-tab,
+	.shell .quick-actions__btn,
+	.shell .budget-tabs__btn,
+	.shell .dash-fixed-expense--actionable,
+	.shell .destination-movement,
+	.shell .payment-table__row--clickable,
+	.shell .credit-profile-picker__card,
+	.shell .grouping-option,
+	.shell .nav-more__item,
+	.shell .tx-row--selectable,
+	.shell .preference-row,
+	.shell .tx-fab--floating,
+	.shell .nav-fab,
+	.shell .user-menu__item,
 	.user-menu__item,
 	.user-menu__trigger:active {
 		transition: none;

@@ -1,4 +1,5 @@
 import { Button } from "@jp-ds";
+import { captureGenieOrigin } from "@app/lib/core/genieOrigin";
 
 type FormModalFooterProps = {
 	onCancel: () => void;
@@ -28,7 +29,10 @@ export function FormModalFooter({
 				<Button
 					type="button"
 					variant="danger"
-					onClick={onDelete}
+					onClick={(event) => {
+						captureGenieOrigin(event.currentTarget);
+						onDelete();
+					}}
 					disabled={loading}
 				>
 					{deleteLabel}

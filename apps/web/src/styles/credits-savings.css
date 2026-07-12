@@ -86,6 +86,36 @@
 	background: var(--color-danger);
 }
 
+.destination-card {
+	transition:
+		border-color var(--duration-fast) var(--ease-out),
+		box-shadow var(--duration-fast) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.destination-card:hover {
+		border-color: color-mix(
+			in srgb,
+			var(--color-accent) 45%,
+			var(--color-border)
+		);
+	}
+}
+
+.destination-card .credit-card__main {
+	-webkit-tap-highlight-color: transparent;
+}
+
+.destination-card .credit-card__main:focus:not(:focus-visible) {
+	outline: none;
+}
+
+.destination-card .credit-card__main:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+	border-radius: var(--radius-md);
+}
+
 .destination-card:has(.credit-card__main) {
 	flex-direction: column;
 }
@@ -130,9 +160,14 @@
 	font: inherit;
 	color: inherit;
 	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
 	transition:
 		border-color 0.15s ease,
 		background-color 0.15s ease;
+}
+
+.destination-movement:focus:not(:focus-visible) {
+	outline: none;
 }
 
 .destination-movement:hover {
@@ -679,6 +714,19 @@
 .savings-goal-card.destination-card {
 	padding: var(--space-3);
 	cursor: default;
+}
+
+.savings-goal-card--highlight {
+	border-color: var(--color-accent) !important;
+	box-shadow: 0 0 0 1px
+		color-mix(in srgb, var(--color-accent) 35%, transparent);
+	transition:
+		border-color var(--duration-fast) var(--ease-out),
+		box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.credit-card__lender--link {
+	color: var(--color-accent);
 }
 
 .savings-goal-card .credit-card__main {
