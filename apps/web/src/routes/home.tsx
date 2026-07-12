@@ -17,6 +17,7 @@ import { formatMonthYear } from "@app/lib/format/date";
 import { useRecentListLimit } from "@app/lib/dashboard/useRecentListLimit";
 import { useFixedExpensePayment } from "@app/lib/budgets/useFixedExpensePayment";
 import { useReconcileFixedExpensePayments } from "@app/lib/budgets/useReconcileFixedExpensePayments";
+import { useTransactionModalStore } from "@app/stores/transactionModal";
 import {
 	addPeriod,
 	dashboardSubtitle,
@@ -46,6 +47,7 @@ export function HomeRoute() {
 	const isDesktop = useMediaQuery(MEDIA_DESKTOP);
 	const recentLimit = useRecentListLimit(dashboardMainRef, isDesktop);
 	const fixedPayment = useFixedExpensePayment();
+	const openEditTransaction = useTransactionModalStore((s) => s.openEdit);
 
 	const overview = useQuery(api.dashboard.overview, {
 		periodStart: range.start,
@@ -170,6 +172,7 @@ export function HomeRoute() {
 				<div className="dashboard-main" ref={dashboardMainRef}>
 					<RecentTransactionsList
 						transactions={overview.recentTransactions}
+						onEdit={openEditTransaction}
 					/>
 				</div>
 

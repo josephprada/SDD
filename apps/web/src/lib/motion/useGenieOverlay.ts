@@ -81,7 +81,7 @@ export function useGenieOverlay({
 			? "modal--sheet-out"
 			: "modal--sheet-in";
 
-	const surfaceExtraClass = useGenie ? "modal--genie-warp" : "";
+	const surfaceExtraClass = "";
 
 	return {
 		mounted,

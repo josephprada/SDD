@@ -410,6 +410,7 @@ export function BudgetsRoute() {
 							? () => {
 									setFixedToDelete(editFixed);
 									setConfirmDeleteFixed(true);
+									setFixedModal(false);
 								}
 							: undefined
 					}

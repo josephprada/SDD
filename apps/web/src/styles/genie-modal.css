@@ -14,10 +14,6 @@
 	--genie-duration: 420ms;
 }
 
-.modal--genie-warp {
-	filter: url("#genie-warp");
-}
-
 .modal--genie-in {
 	animation: modal-genie-in var(--genie-duration, 420ms) var(--genie-ease-in) both;
 	will-change: transform, clip-path, opacity, filter;

@@ -48,6 +48,7 @@ export function Modal({
 		genieOrigin,
 		genieIntensity,
 		genieDuration,
+		autoCaptureActiveElement: false,
 	});
 
 	useEffect(() => {

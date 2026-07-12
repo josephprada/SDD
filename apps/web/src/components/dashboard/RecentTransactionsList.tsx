@@ -2,17 +2,18 @@ import type { TransactionItem } from "@app/components/transactions/TransactionLi
 import { TransactionRow } from "@app/components/transactions/TransactionRow";
 import { EmptyState } from "@app/components/ui/EmptyState";
 import { CoreIcon } from "@app/lib/core/icons";
-import { Link, useNavigate } from "react-router";
+import type { Id } from "@convex/_generated/dataModel";
+import { Link } from "react-router";
 
 type RecentTransactionsListProps = {
 	transactions: TransactionItem[];
+	onEdit: (id: Id<"transactions">) => void;
 };
 
 export function RecentTransactionsList({
 	transactions,
+	onEdit,
 }: RecentTransactionsListProps) {
-	const navigate = useNavigate();
-
 	return (
 		<section className="recent-tx glass" aria-label="Movimientos recientes">
 			<div className="section-header">
@@ -35,7 +36,7 @@ export function RecentTransactionsList({
 							key={tx._id}
 							tx={tx}
 							variant="dashboard"
-							onSelect={(id) => navigate(`/transactions?id=${id}`)}
+							onSelect={(id) => onEdit(id as Id<"transactions">)}
 						/>
 					))}
 				</ul>

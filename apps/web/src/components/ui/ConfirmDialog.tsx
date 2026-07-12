@@ -46,7 +46,17 @@ export function ConfirmDialog({
 		genieOrigin,
 		genieIntensity,
 		genieDuration,
+		autoCaptureActiveElement: false,
 	});
+
+	const frozenContentRef = useRef({ title, description });
+	if (open) {
+		frozenContentRef.current = { title, description };
+	}
+	const displayTitle = open ? title : frozenContentRef.current.title;
+	const displayDescription = open
+		? description
+		: frozenContentRef.current.description;
 
 	useEffect(() => {
 		if (!mounted) return;
@@ -91,10 +101,10 @@ export function ConfirmDialog({
 					}}
 				>
 					<h2 id={titleId} className="dialog__title">
-						{title}
+						{displayTitle}
 					</h2>
 					<p id={descId} className="dialog__desc">
-						{description}
+						{displayDescription}
 					</p>
 					<div className="dialog__actions">
 						<Button variant="secondary" onClick={onCancel}>

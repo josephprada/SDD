@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { AppRouter } from "./routes/router";
 import "@jp-ds/index";
 import "./styles/aurora.css";
+import "./styles/animations.css";
 import "./styles/genie-modal.css";
 import "./styles/core.css";
 import "./styles/settings.css";
