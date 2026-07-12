@@ -3,7 +3,7 @@ import { ConvexAuthShell } from "@app/components/shell/ConvexAuthShell";
 import { OAUTH_NEXT_STORAGE_KEY } from "@app/lib/auth/googlePopupSignIn";
 import { usePreferencesStore } from "@app/stores/preferences";
 import { useConvexAuth } from "convex/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
 	Navigate,
 	RouterProvider,
@@ -48,19 +48,9 @@ function GuestGate({ children }: { children: React.ReactNode }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const [authTimedOut, setAuthTimedOut] = useState(false);
 	const searchParams = new URLSearchParams(location.search);
 	const hasOAuthCode = searchParams.has("code");
 	const oauthError = searchParams.get("error");
-
-	useEffect(() => {
-		if (!isLoading) {
-			setAuthTimedOut(false);
-			return;
-		}
-		const timer = window.setTimeout(() => setAuthTimedOut(true), 10_000);
-		return () => window.clearTimeout(timer);
-	}, [isLoading]);
 
 	useEffect(() => {
 		if (oauthError && !hasOAuthCode) {
@@ -84,12 +74,12 @@ function GuestGate({ children }: { children: React.ReactNode }) {
 				sessionStorage.removeItem(OAUTH_NEXT_STORAGE_KEY);
 				navigate("/login?error=signin_failed", { replace: true });
 			}
-		}, 12_000);
+		}, 20_000);
 		return () => window.clearTimeout(timer);
 	}, [hasOAuthCode, isAuthenticated, navigate]);
 
-	// Solo spinner mientras Convex Auth resuelve sesión; timeout si Convex no responde.
-	if ((isLoading || isAuthenticated) && !authTimedOut) {
+	// Mantener spinner mientras OAuth procesa ?code= — evita reintentos y "Invalid verifier".
+	if (isLoading || isAuthenticated || hasOAuthCode) {
 		return (
 			<div className="login-brand login-screen aurora-bg aurora-bg--galaxy">
 				<LoadingScreen brand label="Iniciando sesión" />
