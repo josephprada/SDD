@@ -15,7 +15,7 @@ export function DashboardBalanceCard({
 		<div
 			className={`balance-card glass${isNegative ? " balance-card--negative" : ""}`}
 		>
-			<span className="balance-card__label">Balance total</span>
+			<span className="balance-card__label">Disponible</span>
 			<span className="balance-card__value">{formatCOP(totalBalance)}</span>
 			<span className="balance-card__meta">
 				{accountCount}{" "}

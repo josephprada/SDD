@@ -147,7 +147,7 @@ export function HomeRoute() {
 			</div>
 
 			<div className="dash-metrics show-desktop card-stagger">
-				<MetricCard label="Balance total" value={overview.totalBalance} />
+				<MetricCard label="Disponible" value={overview.totalBalance} />
 				<MetricCard
 					label="Ingresos"
 					value={overview.monthlyIncome}

@@ -91,7 +91,7 @@ export function MonthOverview({
 			{pendingFixedExpenses > 0 ? (
 				<div className="month-overview__net month-overview__net--projected">
 					<span className="month-overview__label">
-						Neto con gastos fijos pendientes
+						Si pagas fijos pendientes
 					</span>
 					<span className="month-overview__net-projected">
 						{projectedNet < 0 ? "−" : "+"}

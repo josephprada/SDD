@@ -32,13 +32,14 @@ export function AccountsRoute() {
 			a.excludeFromPersonalFinance !== true &&
 			!(a.excludeFromPersonalFinance === undefined && a.isCreditEscrow),
 	);
-	const totalBalance = personalAccounts.reduce((s, a) => s + a.balance, 0);
 	const disponible = personalAccounts
 		.filter((a) => a.type !== "credit")
 		.reduce((s, a) => s + a.balance, 0);
 	const credito = personalAccounts
 		.filter((a) => a.type === "credit")
 		.reduce((s, a) => s + a.balance, 0);
+	// «Balance total» del header = disponible (sin deudas tipo crédito).
+	const totalBalance = disponible;
 
 	const closeModal = () => {
 		setMode("closed");
@@ -139,7 +140,6 @@ export function AccountsRoute() {
 			) : (
 				<>
 					<div className="dash-metrics show-desktop card-stagger">
-						<MetricCard label="Balance total" value={totalBalance} />
 						<MetricCard label="Disponible" value={disponible} />
 						<MetricCard label="Crédito usado" value={credito} tone="expense" />
 					</div>

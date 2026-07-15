@@ -15,7 +15,7 @@ export function MetricCard({
 	tone = "default",
 	signed = false,
 	projectedValue,
-	projectedLabel = "Con gastos fijos",
+	projectedLabel = "Si pagas fijos pendientes",
 }: MetricCardProps) {
 	const sign = signed ? (value < 0 ? "−" : "+") : "";
 	const display = signed

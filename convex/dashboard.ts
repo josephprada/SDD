@@ -29,7 +29,12 @@ export const overview = query({
 		const personalAccounts = accounts.filter(
 			(a) => !isAccountExcludedFromPersonalFinance(a),
 		);
-		const totalBalance = personalAccounts.reduce(
+		// Balance personal = disponible (efectivo/banco). Las deudas tipo
+		// «credit» no restan aquí; se ven en la tarjeta de cuenta.
+		const availableAccounts = personalAccounts.filter(
+			(a) => a.type !== "credit",
+		);
+		const totalBalance = availableAccounts.reduce(
 			(sum, a) => sum + a.balance,
 			0,
 		);
