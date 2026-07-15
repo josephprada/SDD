@@ -25,7 +25,7 @@ import {
 import { executeSpendFromFund } from "./lib/creditFundSpend";
 import {
 	countsForPersonalFinance,
-	excludedPersonalFinanceCreditIds,
+	excludedPersonalFinanceAccountIds,
 } from "./lib/personalFinance";
 import { revertSavingsContributionForTransaction } from "./lib/savingsGoalFixedExpense";
 import {
@@ -181,11 +181,14 @@ export const list = query({
 			.withIndex("by_user", (q) => q.eq("userId", userId))
 			.collect();
 
-		const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
+		const excludedAccountIds = await excludedPersonalFinanceAccountIds(
+			ctx,
+			userId,
+		);
 		const includeCredit = args.includeCreditMovements ?? false;
 		if (!includeCredit && !args.creditId) {
 			transactions = transactions.filter((t) =>
-				countsForPersonalFinance(t, excludedCreditIds),
+				countsForPersonalFinance(t, excludedAccountIds),
 			);
 		}
 		if (args.creditId) {

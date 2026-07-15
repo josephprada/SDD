@@ -27,11 +27,16 @@ export function AccountsRoute() {
 	const [archiving, setArchiving] = useState<Doc<"accounts"> | null>(null);
 	const [loading, setLoading] = useState(false);
 
-	const totalBalance = accounts.reduce((s, a) => s + a.balance, 0);
-	const disponible = accounts
+	const personalAccounts = accounts.filter(
+		(a) =>
+			a.excludeFromPersonalFinance !== true &&
+			!(a.excludeFromPersonalFinance === undefined && a.isCreditEscrow),
+	);
+	const totalBalance = personalAccounts.reduce((s, a) => s + a.balance, 0);
+	const disponible = personalAccounts
 		.filter((a) => a.type !== "credit")
 		.reduce((s, a) => s + a.balance, 0);
-	const credito = accounts
+	const credito = personalAccounts
 		.filter((a) => a.type === "credit")
 		.reduce((s, a) => s + a.balance, 0);
 
@@ -44,6 +49,7 @@ export function AccountsRoute() {
 		name: string;
 		type: AccountType;
 		initialBalance?: number;
+		excludeFromPersonalFinance: boolean;
 	}) => {
 		setLoading(true);
 		try {
@@ -54,7 +60,11 @@ export function AccountsRoute() {
 		}
 	};
 
-	const handleUpdate = async (values: { name: string; type: AccountType }) => {
+	const handleUpdate = async (values: {
+		name: string;
+		type: AccountType;
+		excludeFromPersonalFinance: boolean;
+	}) => {
 		if (!editing) return;
 		setLoading(true);
 		try {
@@ -157,7 +167,6 @@ export function AccountsRoute() {
 						onArchive={setArchiving}
 						onReorder={handleReorder}
 					/>
-
 				</>
 			)}
 
@@ -170,7 +179,13 @@ export function AccountsRoute() {
 					<AccountForm
 						isEdit
 						loading={loading}
-						initial={{ name: editing.name, type: editing.type }}
+						initial={{
+							name: editing.name,
+							type: editing.type,
+							excludeFromPersonalFinance:
+								editing.excludeFromPersonalFinance ??
+								editing.isCreditEscrow === true,
+						}}
 						onSubmit={handleUpdate}
 						onCancel={closeModal}
 						onDelete={() => setArchiving(editing)}

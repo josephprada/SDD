@@ -112,11 +112,7 @@ export const CREDIT_PROFILE_LABELS: Record<CreditProfile, string> = {
 	p2p_agreement: "Préstamo personal",
 };
 
-export type CreditTab =
-	| "payments"
-	| "abonos"
-	| "destinations"
-	| "settings";
+export type CreditTab = "payments" | "abonos" | "destinations" | "settings";
 
 /** Cuenta donde entra el dinero del préstamo */
 export const DISBURSEMENT_ACCOUNT_LABEL = "Cuenta de desembolso";
@@ -173,9 +169,9 @@ export const TRACK_REMAINING_ONLY_HINT =
 	"Si está activo, no se crean las cuotas anteriores: solo las que faltan por pagar. Si lo desactivas, se generan todas y las ya pagadas quedan marcadas como pagadas.";
 
 export const EXCLUDE_FROM_PERSONAL_FINANCE_LABEL =
-	"Separar de mis finanzas personales";
+	"Aislar cuenta de desembolso de mis finanzas personales";
 export const EXCLUDE_FROM_PERSONAL_FINANCE_HINT =
-	"La cuenta de desembolso no sumará al balance general y los movimientos de este crédito no entrarán en ingresos ni gastos del mes.";
+	"Saca del balance total y del neto del mes (ingresos/gastos) solo la cuenta de desembolso y sus movimientos de fondo. Los pagos de cuota sí se registran en movimientos y cuentan en tus gastos.";
 
 /** @deprecated use DISBURSEMENT_ACCOUNT_LABEL */
 export const FUND_ACCOUNT_LABEL = DISBURSEMENT_ACCOUNT_LABEL;

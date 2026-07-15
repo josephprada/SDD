@@ -37,6 +37,7 @@ import {
 	insertCreditLinkedTransaction,
 	removeCreditLinkedTransaction,
 } from "./lib/creditTransactions";
+import { syncDisbursementAccountIsolation } from "./lib/personalFinance";
 import { resolveFixedInstallmentForCredit, recalcAfterAbono, resolveShortenTermBaseline } from "./lib/creditRecalc";
 import {
 	buildScheduleForCredit,
@@ -291,10 +292,11 @@ export const create = mutation({
 			});
 
 			if (args.disbursementAccountId) {
-				await ctx.db.patch(args.disbursementAccountId, {
-					isCreditEscrow: true,
-					updatedAt: now,
-				});
+				await syncDisbursementAccountIsolation(
+					ctx,
+					args.disbursementAccountId,
+					excludeFromPersonalFinance,
+				);
 			}
 
 			const fundExpenseCategoryIds = await syncFundExpenseCategories(
@@ -523,6 +525,12 @@ export const create = mutation({
 			);
 		}
 
+		await syncDisbursementAccountIsolation(
+			ctx,
+			args.disbursementAccountId,
+			excludeFromPersonalFinance,
+		);
+
 		return creditId;
 	},
 });
@@ -637,10 +645,6 @@ export const update = mutation({
 		} else if (args.disbursementAccountId !== undefined) {
 			await requireAccountOwnership(ctx, userId, args.disbursementAccountId);
 			patch.disbursementAccountId = args.disbursementAccountId;
-			await ctx.db.patch(args.disbursementAccountId, {
-				isCreditEscrow: true,
-				updatedAt: now,
-			});
 		}
 
 		if (args.clearOperatingAccount) {
@@ -697,6 +701,22 @@ export const update = mutation({
 
 		await ctx.db.patch(args.creditId, patch);
 
+		const isolationFlag =
+			(patch.excludeFromPersonalFinance as boolean | undefined) ??
+			credit.excludeFromPersonalFinance ??
+			true;
+		const nextDisbursementId = args.clearDisbursementAccount
+			? undefined
+			: ((patch.disbursementAccountId as Id<"accounts"> | undefined) ??
+				credit.disbursementAccountId);
+		if (nextDisbursementId) {
+			await syncDisbursementAccountIsolation(
+				ctx,
+				nextDisbursementId,
+				isolationFlag !== false,
+			);
+		}
+
 		if (scheduleFieldsChanged && hasMinimumScheduleFields(merged)) {
 			const updated = { ...credit, ...patch } as Doc<"credits">;
 			const { regenerated } = await rebuildPendingSchedule(ctx, updated);
@@ -743,6 +763,7 @@ export const update = mutation({
 			if (!stillUsed) {
 				await ctx.db.patch(prevDisbursement, {
 					isCreditEscrow: false,
+					excludeFromPersonalFinance: false,
 					updatedAt: now,
 				});
 			}
@@ -862,6 +883,7 @@ export const remove = mutation({
 			if (!stillUsed) {
 				await ctx.db.patch(credit.disbursementAccountId, {
 					isCreditEscrow: false,
+					excludeFromPersonalFinance: false,
 					updatedAt: now,
 				});
 			}

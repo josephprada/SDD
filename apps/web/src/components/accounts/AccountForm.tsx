@@ -1,6 +1,6 @@
+import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { FieldError } from "@app/components/ui/FieldError";
 import { FormModalFooter } from "@app/components/ui/FormModalFooter";
-import { CurrencyInput } from "@app/components/ui/CurrencyInput";
 import { ACCOUNT_TYPE_LABELS } from "@app/lib/core/icons";
 import type { AccountFormValues, AccountType } from "@app/lib/core/types";
 import {
@@ -8,7 +8,7 @@ import {
 	formatCOPInputFromRaw,
 	parseCOPInput,
 } from "@app/lib/format/currency";
-import { Input } from "@jp-ds";
+import { Checkbox, Input } from "@jp-ds";
 import { useId, useState } from "react";
 
 type AccountFormProps = {
@@ -19,6 +19,7 @@ type AccountFormProps = {
 		name: string;
 		type: AccountType;
 		initialBalance?: number;
+		excludeFromPersonalFinance: boolean;
 	}) => void;
 	onCancel: () => void;
 	onDelete?: () => void;
@@ -29,6 +30,7 @@ const defaultValues: AccountFormValues = {
 	name: "",
 	type: "cash",
 	initialBalance: formatCOPInput(0),
+	excludeFromPersonalFinance: false,
 };
 
 export function AccountForm({
@@ -47,6 +49,9 @@ export function AccountForm({
 			initial?.initialBalance !== undefined
 				? formatCOPInputFromRaw(initial.initialBalance)
 				: defaultValues.initialBalance,
+		excludeFromPersonalFinance:
+			initial?.excludeFromPersonalFinance ??
+			defaultValues.excludeFromPersonalFinance,
 	}));
 	const [errors, setErrors] = useState<Record<string, string>>({});
 	const nameErrorId = useId();
@@ -69,7 +74,11 @@ export function AccountForm({
 		if (!validate()) return;
 
 		if (isEdit) {
-			onSubmit({ name: values.name.trim(), type: values.type });
+			onSubmit({
+				name: values.name.trim(),
+				type: values.type,
+				excludeFromPersonalFinance: values.excludeFromPersonalFinance,
+			});
 			return;
 		}
 
@@ -78,6 +87,7 @@ export function AccountForm({
 			name: values.name.trim(),
 			type: values.type,
 			initialBalance: balance,
+			excludeFromPersonalFinance: values.excludeFromPersonalFinance,
 		});
 	};
 
@@ -124,6 +134,20 @@ export function AccountForm({
 					<FieldError message={errors.initialBalance} />
 				</>
 			) : null}
+
+			<div className="credit-form-check">
+				<Checkbox
+					label="Excluir de finanzas personales"
+					checked={values.excludeFromPersonalFinance}
+					onChange={(excludeFromPersonalFinance) =>
+						setValues((v) => ({ ...v, excludeFromPersonalFinance }))
+					}
+				/>
+				<p className="tx-form__hint">
+					Si está activo, esta cuenta no suma al balance total ni a ingresos,
+					gastos o neto del mes.
+				</p>
+			</div>
 
 			<FormModalFooter
 				onCancel={onCancel}

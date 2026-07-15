@@ -1,12 +1,13 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
-import { requireUserId } from "./lib/auth";
 import { compareAccounts } from "./lib/accounts";
-import { compareTransactions } from "./lib/transactions";
+import { requireUserId } from "./lib/auth";
 import {
 	countsForPersonalFinance,
-	excludedPersonalFinanceCreditIds,
+	excludedPersonalFinanceAccountIds,
+	isAccountExcludedFromPersonalFinance,
 } from "./lib/personalFinance";
+import { compareTransactions } from "./lib/transactions";
 import { enrichTransaction } from "./transactions";
 
 export const overview = query({
@@ -25,19 +26,20 @@ export const overview = query({
 			)
 			.collect();
 
-		const totalBalance = accounts
-			.filter((a) => !a.isCreditEscrow)
-			.reduce((sum, a) => sum + a.balance, 0);
+		const personalAccounts = accounts.filter(
+			(a) => !isAccountExcludedFromPersonalFinance(a),
+		);
+		const totalBalance = personalAccounts.reduce(
+			(sum, a) => sum + a.balance,
+			0,
+		);
 
-		const activeAccounts = accounts
-			.filter((a) => !a.isCreditEscrow)
-			.sort(compareAccounts)
-			.map((a) => ({
-				_id: a._id,
-				name: a.name,
-				type: a.type,
-				balance: a.balance,
-			}));
+		const activeAccounts = personalAccounts.sort(compareAccounts).map((a) => ({
+			_id: a._id,
+			name: a.name,
+			type: a.type,
+			balance: a.balance,
+		}));
 
 		const credits = await ctx.db
 			.query("credits")
@@ -70,9 +72,12 @@ export const overview = query({
 			.withIndex("by_user_date", (q) => q.eq("userId", userId))
 			.collect();
 
-		const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
+		const excludedAccountIds = await excludedPersonalFinanceAccountIds(
+			ctx,
+			userId,
+		);
 		const allTransactions = transactions.filter((t) =>
-			countsForPersonalFinance(t, excludedCreditIds),
+			countsForPersonalFinance(t, excludedAccountIds),
 		);
 		const sorted = [...allTransactions].sort(compareTransactions);
 

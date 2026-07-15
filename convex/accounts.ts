@@ -6,6 +6,7 @@ import {
 	requireCreditOwnership,
 	requireUserId,
 } from "./lib/auth";
+import { syncDisbursementAccountIsolation } from "./lib/personalFinance";
 import {
 	accountTypeValidator,
 	validateCopAmount,
@@ -37,8 +38,12 @@ export const create = mutation({
 		type: accountTypeValidator,
 		initialBalance: v.optional(v.number()),
 		isCreditEscrow: v.optional(v.boolean()),
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 	},
-	handler: async (ctx, { name, type, initialBalance, isCreditEscrow }) => {
+	handler: async (
+		ctx,
+		{ name, type, initialBalance, isCreditEscrow, excludeFromPersonalFinance },
+	) => {
 		const userId = await requireUserId(ctx);
 		const trimmedName = validateNonEmptyName(name);
 		const balance = validateCopAmount(initialBalance ?? 0, "initialBalance");
@@ -60,6 +65,7 @@ export const create = mutation({
 			balance,
 			archived: false,
 			isCreditEscrow: isCreditEscrow ?? false,
+			excludeFromPersonalFinance: excludeFromPersonalFinance ?? false,
 			sortOrder: maxOrder + 1,
 			createdAt: now,
 			updatedAt: now,
@@ -73,8 +79,12 @@ export const update = mutation({
 		name: v.string(),
 		type: accountTypeValidator,
 		isCreditEscrow: v.optional(v.boolean()),
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 	},
-	handler: async (ctx, { accountId, name, type, isCreditEscrow }) => {
+	handler: async (
+		ctx,
+		{ accountId, name, type, isCreditEscrow, excludeFromPersonalFinance },
+	) => {
 		const userId = await requireUserId(ctx);
 		await requireAccountOwnership(ctx, userId, accountId);
 		const trimmedName = validateNonEmptyName(name);
@@ -83,6 +93,9 @@ export const update = mutation({
 			name: trimmedName,
 			type,
 			...(isCreditEscrow !== undefined ? { isCreditEscrow } : {}),
+			...(excludeFromPersonalFinance !== undefined
+				? { excludeFromPersonalFinance }
+				: {}),
 			updatedAt: Date.now(),
 		});
 
@@ -163,15 +176,18 @@ export const linkToCredit = mutation({
 				disbursementAccountId: args.accountId,
 				updatedAt: now,
 			});
-			const patch: Record<string, unknown> = {
-				isCreditEscrow: true,
-				updatedAt: now,
-			};
+			await syncDisbursementAccountIsolation(
+				ctx,
+				args.accountId,
+				credit.excludeFromPersonalFinance !== false,
+			);
 			if (args.setEscrowBalanceToPrincipal) {
-				patch.balance = credit.principal;
-				patch.initialBalance = credit.principal;
+				await ctx.db.patch(args.accountId, {
+					balance: credit.principal,
+					initialBalance: credit.principal,
+					updatedAt: now,
+				});
 			}
-			await ctx.db.patch(args.accountId, patch);
 		} else {
 			await ctx.db.patch(args.creditId, {
 				operatingAccountId: args.accountId,

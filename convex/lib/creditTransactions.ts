@@ -1,6 +1,6 @@
+import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
-import { internal } from "../_generated/api";
 import { requireAccountOwnership } from "./auth";
 import { getBalanceDeltas, invertDeltas } from "./balance";
 import { validatePositiveCopAmount } from "./validators";
@@ -31,6 +31,7 @@ export async function insertCreditLinkedTransaction(
 		creditId: Id<"credits">;
 		notes?: string;
 		isCreditFundMovement?: boolean;
+		isCreditInstallmentPayment?: boolean;
 	},
 ): Promise<Id<"transactions">> {
 	const amount = validatePositiveCopAmount(params.amount);
@@ -54,6 +55,7 @@ export async function insertCreditLinkedTransaction(
 		notes: params.notes,
 		creditId: params.creditId,
 		isCreditFundMovement: params.isCreditFundMovement,
+		isCreditInstallmentPayment: params.isCreditInstallmentPayment,
 		sortOrder: now,
 		createdAt: now,
 		updatedAt: now,

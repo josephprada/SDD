@@ -1,34 +1,71 @@
 import type { Doc, Id } from "../_generated/dataModel";
-import type { QueryCtx } from "../_generated/server";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
 
-export async function excludedPersonalFinanceCreditIds(
+/** Cuenta aislada del balance y del neto mensual (ingresos/gastos). */
+export function isAccountExcludedFromPersonalFinance(
+	account: Pick<
+		Doc<"accounts">,
+		"excludeFromPersonalFinance" | "isCreditEscrow"
+	>,
+): boolean {
+	if (account.excludeFromPersonalFinance === true) return true;
+	if (account.excludeFromPersonalFinance === false) return false;
+	// Legacy: escrow sin flag explícito sigue fuera del balance personal.
+	return account.isCreditEscrow === true;
+}
+
+export async function excludedPersonalFinanceAccountIds(
 	ctx: { db: QueryCtx["db"] },
 	userId: Id<"users">,
-): Promise<Set<Id<"credits">>> {
-	const credits = await ctx.db
-		.query("credits")
+): Promise<Set<Id<"accounts">>> {
+	const accounts = await ctx.db
+		.query("accounts")
 		.withIndex("by_user", (q) => q.eq("userId", userId))
 		.collect();
 
 	return new Set(
-		credits
-			.filter((credit) => credit.excludeFromPersonalFinance === true)
-			.map((credit) => credit._id),
+		accounts
+			.filter((account) => isAccountExcludedFromPersonalFinance(account))
+			.map((account) => account._id),
 	);
 }
 
-/** Whether a transaction should count in personal income/expense summaries. */
+/**
+ * Marca la cuenta de desembolso como escrow y aplica/quita aislamiento
+ * de finanzas personales según el flag del crédito.
+ */
+export async function syncDisbursementAccountIsolation(
+	ctx: MutationCtx,
+	disbursementAccountId: Id<"accounts"> | undefined,
+	isolate: boolean,
+) {
+	if (!disbursementAccountId) return;
+	await ctx.db.patch(disbursementAccountId, {
+		isCreditEscrow: true,
+		excludeFromPersonalFinance: isolate,
+		updatedAt: Date.now(),
+	});
+}
+
+/**
+ * Whether a transaction should count in personal income/expense summaries
+ * and appear in the default movimientos list.
+ *
+ * - Pagos de cuota: siempre sí (dinero real que sale de la billetera personal).
+ * - Movimientos de fondo escrow: no.
+ * - Resto: no si la cuenta origen está aislada.
+ */
 export function countsForPersonalFinance(
 	transaction: Doc<"transactions">,
-	excludedCreditIds: Set<Id<"credits">>,
+	excludedAccountIds: Set<Id<"accounts">>,
 ): boolean {
+	if (transaction.isCreditInstallmentPayment) {
+		return true;
+	}
 	if (transaction.isCreditFundMovement) {
 		return false;
 	}
-	if (
-		transaction.creditId &&
-		excludedCreditIds.has(transaction.creditId)
-	) {
+	if (excludedAccountIds.has(transaction.accountId)) {
 		return false;
 	}
 	return true;

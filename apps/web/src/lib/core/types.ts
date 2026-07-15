@@ -8,6 +8,7 @@ export type AccountFormValues = {
 	name: string;
 	type: AccountType;
 	initialBalance: string;
+	excludeFromPersonalFinance: boolean;
 };
 
 export type CategoryFormValues = {

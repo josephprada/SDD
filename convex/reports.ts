@@ -7,7 +7,7 @@ import { groupingValidator } from "./lib/preferences";
 import { aggregateTransactions } from "./lib/reports";
 import {
 	countsForPersonalFinance,
-	excludedPersonalFinanceCreditIds,
+	excludedPersonalFinanceAccountIds,
 } from "./lib/personalFinance";
 import {
 	periodKeyForClosedPeriod,
@@ -33,9 +33,12 @@ async function loadReportData(
 		.withIndex("by_user_date", (q) => q.eq("userId", userId))
 		.collect();
 
-	const excludedCreditIds = await excludedPersonalFinanceCreditIds(ctx, userId);
+	const excludedAccountIds = await excludedPersonalFinanceAccountIds(
+		ctx,
+		userId,
+	);
 	const personalTransactions = transactions.filter((t) =>
-		countsForPersonalFinance(t, excludedCreditIds),
+		countsForPersonalFinance(t, excludedAccountIds),
 	);
 
 	const categories = await ctx.db

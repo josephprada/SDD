@@ -111,6 +111,8 @@ export default defineSchema({
 		balance: v.number(),
 		archived: v.boolean(),
 		isCreditEscrow: v.optional(v.boolean()),
+		/** Excluir saldo e ingresos/gastos/neto del mes de las finanzas personales. */
+		excludeFromPersonalFinance: v.optional(v.boolean()),
 		sortOrder: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -132,6 +134,8 @@ export default defineSchema({
 		creditId: v.optional(v.id("credits")),
 		creditDestinationId: v.optional(v.id("creditDestinations")),
 		isCreditFundMovement: v.optional(v.boolean()),
+		/** Pago de cuota: siempre cuenta en finanzas personales aunque la cuenta esté aislada. */
+		isCreditInstallmentPayment: v.optional(v.boolean()),
 		sortOrder: v.optional(v.number()),
 		createdAt: v.number(),
 		updatedAt: v.number(),

@@ -1,8 +1,8 @@
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { requireAccountOwnership, requireCreditOwnership } from "./auth";
-import { markOverdueStatus } from "./creditDates";
 import { createCreditPaymentCategory } from "./creditCategories";
+import { markOverdueStatus } from "./creditDates";
 import { insertCreditLinkedTransaction } from "./creditTransactions";
 import { validatePositiveCopAmount } from "./validators";
 
@@ -97,9 +97,9 @@ export async function createAndRegisterCreditPayment(
 		accountId: params.accountId,
 		categoryId: paymentCategoryId,
 		creditId: credit._id,
+		isCreditInstallmentPayment: true,
 		notes:
-			params.notes ??
-			`Cuota #${payment.installmentNumber} — ${credit.name}`,
+			params.notes ?? `Cuota #${payment.installmentNumber} — ${credit.name}`,
 	});
 
 	await registerCreditPayment(ctx, userId, {
@@ -120,9 +120,12 @@ export async function revertCreditPaymentForTransaction(
 	const transaction = await ctx.db.get(transactionId);
 	if (!transaction?.creditId) return;
 
+	const creditId = transaction.creditId;
+	if (!creditId) return;
+
 	const payments = await ctx.db
 		.query("creditPayments")
-		.withIndex("by_credit", (q) => q.eq("creditId", transaction.creditId!))
+		.withIndex("by_credit", (q) => q.eq("creditId", creditId))
 		.collect();
 	const payment = payments.find(
 		(p) => p.transactionId === transactionId && p.status === "paid",
