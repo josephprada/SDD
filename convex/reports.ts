@@ -1,21 +1,21 @@
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 import { internalMutation, query } from "./_generated/server";
 import { requireUserId } from "./lib/auth";
-import { groupingValidator } from "./lib/preferences";
-import { aggregateTransactions } from "./lib/reports";
+import {
+	type GroupingId,
+	periodKeyForClosedPeriod,
+	periodRangeForGrouping,
+} from "./lib/period";
 import {
 	countsForPersonalFinance,
 	excludedPersonalFinanceAccountIds,
 } from "./lib/personalFinance";
-import {
-	periodKeyForClosedPeriod,
-	periodRangeForGrouping,
-	type GroupingId,
-} from "./lib/period";
+import { groupingValidator } from "./lib/preferences";
 import { resolveUserPreferences } from "./lib/preferences";
-import { internal } from "./_generated/api";
+import { aggregateTransactions } from "./lib/reports";
 
 async function loadReportData(
 	ctx: QueryCtx,
@@ -48,7 +48,13 @@ async function loadReportData(
 
 	const catMap = new Map(categories.map((c) => [c._id, c]));
 
-	return aggregateTransactions(personalTransactions, catMap, filters, grouping);
+	return aggregateTransactions(
+		personalTransactions,
+		catMap,
+		filters,
+		grouping,
+		excludedAccountIds,
+	);
 }
 
 export const summary = query({

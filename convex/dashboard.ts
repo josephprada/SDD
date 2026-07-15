@@ -6,6 +6,7 @@ import {
 	countsForPersonalFinance,
 	excludedPersonalFinanceAccountIds,
 	isAccountExcludedFromPersonalFinance,
+	personalFinanceExpenseAmount,
 } from "./lib/personalFinance";
 import { compareTransactions } from "./lib/transactions";
 import { enrichTransaction } from "./transactions";
@@ -94,7 +95,7 @@ export const overview = query({
 		let monthlyExpense = 0;
 		for (const t of periodTransactions) {
 			if (t.type === "income") monthlyIncome += t.amount;
-			if (t.type === "expense") monthlyExpense += t.amount;
+			monthlyExpense += personalFinanceExpenseAmount(t, excludedAccountIds);
 		}
 
 		const limit = Math.min(Math.max(recentLimit ?? 5, 1), 30);

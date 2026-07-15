@@ -1,5 +1,6 @@
 import type { Doc, Id } from "../_generated/dataModel";
 import type { GroupingId } from "./period";
+import { personalFinanceExpenseAmount } from "./personalFinance";
 
 export type ReportFilters = {
 	periodStart: number;
@@ -40,6 +41,7 @@ export function aggregateTransactions(
 	categories: Map<Id<"categories">, Doc<"categories">>,
 	filters: ReportFilters,
 	grouping: GroupingId = "month",
+	excludedAccountIds: Set<Id<"accounts">> = new Set(),
 ): ReportSummary {
 	let filtered = transactions.filter(
 		(t) => t.date >= filters.periodStart && t.date <= filters.periodEnd,
@@ -51,7 +53,8 @@ export function aggregateTransactions(
 	if (filters.accountId) {
 		filtered = filtered.filter(
 			(t) =>
-				t.accountId === filters.accountId || t.toAccountId === filters.accountId,
+				t.accountId === filters.accountId ||
+				t.toAccountId === filters.accountId,
 		);
 	}
 
@@ -61,10 +64,11 @@ export function aggregateTransactions(
 
 	for (const t of filtered) {
 		if (t.type === "income") totalIncome += t.amount;
-		if (t.type === "expense") {
-			totalExpense += t.amount;
+		const expenseAmount = personalFinanceExpenseAmount(t, excludedAccountIds);
+		if (expenseAmount > 0) {
+			totalExpense += expenseAmount;
 			const key = t.categoryId as string;
-			byCat.set(key, (byCat.get(key) ?? 0) + t.amount);
+			byCat.set(key, (byCat.get(key) ?? 0) + expenseAmount);
 		}
 	}
 
@@ -99,6 +103,7 @@ export function aggregateTransactions(
 		filters.periodStart,
 		filters.periodEnd,
 		grouping,
+		excludedAccountIds,
 	);
 
 	return {
@@ -117,6 +122,7 @@ function buildTimeSeries(
 	periodStart: number,
 	periodEnd: number,
 	grouping: GroupingId,
+	excludedAccountIds: Set<Id<"accounts">> = new Set(),
 ): TimeSeriesPoint[] {
 	const granularity = timeSeriesGranularityForGrouping(grouping);
 	const buckets = createEmptyBuckets(periodStart, periodEnd, granularity);
@@ -126,7 +132,7 @@ function buildTimeSeries(
 		if (bucketStart < periodStart || bucketStart > periodEnd) continue;
 		const entry = buckets.get(bucketStart) ?? { income: 0, expense: 0 };
 		if (t.type === "income") entry.income += t.amount;
-		if (t.type === "expense") entry.expense += t.amount;
+		entry.expense += personalFinanceExpenseAmount(t, excludedAccountIds);
 		buckets.set(bucketStart, entry);
 	}
 

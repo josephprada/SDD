@@ -3,6 +3,8 @@ import type { Doc, Id } from "../_generated/dataModel";
 import {
 	countsForPersonalFinance,
 	isAccountExcludedFromPersonalFinance,
+	personalFinanceExpenseAmount,
+	transferToIsolatedCountsAsExpense,
 } from "./personalFinance";
 
 function account(
@@ -20,7 +22,12 @@ function tx(
 	overrides: Partial<
 		Pick<
 			Doc<"transactions">,
-			"accountId" | "isCreditFundMovement" | "isCreditInstallmentPayment"
+			| "type"
+			| "accountId"
+			| "toAccountId"
+			| "amount"
+			| "isCreditFundMovement"
+			| "isCreditInstallmentPayment"
 		>
 	>,
 ): Doc<"transactions"> {
@@ -28,10 +35,11 @@ function tx(
 		_id: "tx1" as Id<"transactions">,
 		_creationTime: 0,
 		userId: "u1" as Id<"users">,
-		type: "expense",
-		amount: 1000,
+		type: overrides.type ?? "expense",
+		amount: overrides.amount ?? 1000,
 		date: 0,
 		accountId: (overrides.accountId ?? "acc1") as Id<"accounts">,
+		toAccountId: overrides.toAccountId,
 		categoryId: "cat1" as Id<"categories">,
 		isCreditFundMovement: overrides.isCreditFundMovement,
 		isCreditInstallmentPayment: overrides.isCreditInstallmentPayment,
@@ -93,5 +101,57 @@ describe("countsForPersonalFinance", () => {
 				excluded,
 			),
 		).toBe(true);
+	});
+});
+
+describe("transferToIsolatedCountsAsExpense", () => {
+	const excluded = new Set<Id<"accounts">>(["meta" as Id<"accounts">]);
+
+	it("counts personal → isolated transfer as expense", () => {
+		expect(
+			transferToIsolatedCountsAsExpense(
+				tx({
+					type: "transfer",
+					accountId: "payroll" as Id<"accounts">,
+					toAccountId: "meta" as Id<"accounts">,
+					amount: 500_000,
+				}),
+				excluded,
+			),
+		).toBe(true);
+		expect(
+			personalFinanceExpenseAmount(
+				tx({
+					type: "transfer",
+					accountId: "payroll" as Id<"accounts">,
+					toAccountId: "meta" as Id<"accounts">,
+					amount: 500_000,
+				}),
+				excluded,
+			),
+		).toBe(500_000);
+	});
+
+	it("ignores internal and reverse transfers", () => {
+		expect(
+			transferToIsolatedCountsAsExpense(
+				tx({
+					type: "transfer",
+					accountId: "payroll" as Id<"accounts">,
+					toAccountId: "cash" as Id<"accounts">,
+				}),
+				excluded,
+			),
+		).toBe(false);
+		expect(
+			transferToIsolatedCountsAsExpense(
+				tx({
+					type: "transfer",
+					accountId: "meta" as Id<"accounts">,
+					toAccountId: "payroll" as Id<"accounts">,
+				}),
+				excluded,
+			),
+		).toBe(false);
 	});
 });

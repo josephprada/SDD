@@ -70,3 +70,37 @@ export function countsForPersonalFinance(
 	}
 	return true;
 }
+
+/**
+ * Transferencia desde cuenta personal hacia ahorro/meta aislada.
+ * Cuenta como gasto del mes (sale del disponible y del neto).
+ */
+export function transferToIsolatedCountsAsExpense(
+	transaction: Doc<"transactions">,
+	excludedAccountIds: Set<Id<"accounts">>,
+): boolean {
+	if (transaction.type !== "transfer" || !transaction.toAccountId) {
+		return false;
+	}
+	if (excludedAccountIds.has(transaction.accountId)) {
+		return false;
+	}
+	return excludedAccountIds.has(transaction.toAccountId);
+}
+
+/** Monto que aporta al total de gastos personales del período. */
+export function personalFinanceExpenseAmount(
+	transaction: Doc<"transactions">,
+	excludedAccountIds: Set<Id<"accounts">>,
+): number {
+	if (
+		transaction.type === "expense" &&
+		countsForPersonalFinance(transaction, excludedAccountIds)
+	) {
+		return transaction.amount;
+	}
+	if (transferToIsolatedCountsAsExpense(transaction, excludedAccountIds)) {
+		return transaction.amount;
+	}
+	return 0;
+}
