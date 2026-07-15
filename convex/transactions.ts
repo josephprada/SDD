@@ -14,20 +14,20 @@ import {
 	getBalanceDeltas,
 	invertDeltas,
 } from "./lib/balance";
-import { compareTransactions } from "./lib/transactions";
-import { clearFixedExpensePaymentForDeletedTransaction } from "./lib/fixedExpensePayments";
-import { registerFixedExpensePayment } from "./lib/fixedExpenseTransaction";
-import { periodKeyFromTimestamp } from "./lib/period";
+import { executeSpendFromFund } from "./lib/creditFundSpend";
 import {
 	createAndRegisterCreditPayment,
 	revertCreditPaymentForTransaction,
 } from "./lib/creditPaymentRegistration";
-import { executeSpendFromFund } from "./lib/creditFundSpend";
+import { clearFixedExpensePaymentForDeletedTransaction } from "./lib/fixedExpensePayments";
+import { registerFixedExpensePayment } from "./lib/fixedExpenseTransaction";
+import { periodKeyFromTimestamp } from "./lib/period";
 import {
 	countsForPersonalFinance,
 	excludedPersonalFinanceAccountIds,
 } from "./lib/personalFinance";
 import { revertSavingsContributionForTransaction } from "./lib/savingsGoalFixedExpense";
+import { compareTransactions } from "./lib/transactions";
 import {
 	transactionTypeValidator,
 	validatePositiveCopAmount,
@@ -100,11 +100,7 @@ async function applyBalanceDeltas(
 ) {
 	for (const { accountId, delta } of deltas) {
 		const account = await requireAccountOwnership(ctx, userId, accountId);
-		if (
-			!options?.allowArchivedReversal &&
-			account.archived &&
-			delta < 0
-		) {
+		if (!options?.allowArchivedReversal && account.archived && delta < 0) {
 			throw new Error("Cannot debit archived account");
 		}
 		await ctx.db.patch(accountId, {
@@ -195,14 +191,14 @@ export const list = query({
 			transactions = transactions.filter((t) => t.creditId === args.creditId);
 		}
 
-    if (args.dateFrom !== undefined) {
-      const dateFrom = args.dateFrom;
-      transactions = transactions.filter((t) => t.date >= dateFrom);
-    }
-    if (args.dateTo !== undefined) {
-      const dateTo = args.dateTo;
-      transactions = transactions.filter((t) => t.date <= dateTo);
-    }
+		if (args.dateFrom !== undefined) {
+			const dateFrom = args.dateFrom;
+			transactions = transactions.filter((t) => t.date >= dateFrom);
+		}
+		if (args.dateTo !== undefined) {
+			const dateTo = args.dateTo;
+			transactions = transactions.filter((t) => t.date <= dateTo);
+		}
 		if (args.accountId) {
 			transactions = transactions.filter(
 				(t) =>
@@ -214,14 +210,14 @@ export const list = query({
 				(t) => t.categoryId === args.categoryId,
 			);
 		}
-    if (args.amountMin !== undefined) {
-      const amountMin = args.amountMin;
-      transactions = transactions.filter((t) => t.amount >= amountMin);
-    }
-    if (args.amountMax !== undefined) {
-      const amountMax = args.amountMax;
-      transactions = transactions.filter((t) => t.amount <= amountMax);
-    }
+		if (args.amountMin !== undefined) {
+			const amountMin = args.amountMin;
+			transactions = transactions.filter((t) => t.amount >= amountMin);
+		}
+		if (args.amountMax !== undefined) {
+			const amountMax = args.amountMax;
+			transactions = transactions.filter((t) => t.amount <= amountMax);
+		}
 
 		transactions.sort(compareTransactions);
 
@@ -255,11 +251,10 @@ export const get = query({
 	},
 	handler: async (ctx, { transactionId }) => {
 		const userId = await requireUserId(ctx);
-		const transaction = await requireTransactionOwnership(
-			ctx,
-			userId,
-			transactionId,
-		);
+		const transaction = await ctx.db.get(transactionId);
+		if (!transaction || transaction.userId !== userId) {
+			return null;
+		}
 		return enrichTransaction(ctx, transaction);
 	},
 });
@@ -528,11 +523,7 @@ export const remove = mutation({
 
 		await revertCreditPaymentForTransaction(ctx, userId, transactionId);
 
-		await revertSavingsContributionForTransaction(
-			ctx,
-			userId,
-			transactionId,
-		);
+		await revertSavingsContributionForTransaction(ctx, userId, transactionId);
 
 		await ctx.db.delete(transactionId);
 

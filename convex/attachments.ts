@@ -26,7 +26,11 @@ export const listByTransaction = query({
 	},
 	handler: async (ctx, { transactionId }) => {
 		const userId = await requireUserId(ctx);
-		await requireTransactionOwnership(ctx, userId, transactionId);
+		const transaction = await ctx.db.get(transactionId);
+		// Tras eliminar el movimiento, las suscripciones activas no deben tumbar la UI.
+		if (!transaction || transaction.userId !== userId) {
+			return [];
+		}
 
 		return await ctx.db
 			.query("attachments")

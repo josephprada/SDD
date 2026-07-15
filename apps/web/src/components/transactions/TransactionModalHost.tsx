@@ -67,15 +67,36 @@ export function TransactionModalHost() {
 
 	const handleDelete = async () => {
 		if (!editingTx) return;
+		const transactionId = editingTx._id;
 		setLoading(true);
 		try {
-			await removeTx({ transactionId: editingTx._id });
+			// Cerrar primero para saltar queries reactivas del id borrado.
 			setConfirmDelete(false);
 			handleClose();
+			await removeTx({ transactionId });
 		} finally {
 			setLoading(false);
 		}
 	};
+
+	useEffect(() => {
+		if (mode !== "edit" || !editingId || editingTx !== null) return;
+		close();
+		setConfirmDelete(false);
+		setSubmitError("");
+		handledParamsRef.current = null;
+		if (paramMode || searchParams.has("id")) {
+			setSearchParams({}, { replace: true });
+		}
+	}, [
+		mode,
+		editingId,
+		editingTx,
+		close,
+		paramMode,
+		searchParams,
+		setSearchParams,
+	]);
 
 	const isOpen = mode !== "closed";
 	const modalTitle =
@@ -89,89 +110,95 @@ export function TransactionModalHost() {
 		<>
 			<Modal open={isOpen} title={modalTitle} onClose={handleClose}>
 				{mode === "transfer" ? (
-				<TransactionForm
-					accounts={accounts}
-					categories={categories}
-					initial={{ type: "transfer" }}
-					loading={loading}
-					serverError={submitError}
-					onSubmit={async (values) => {
-						setLoading(true);
-						setSubmitError("");
-						try {
-							await createTx(values);
-							handleClose();
-						} catch (e) {
-							setSubmitError(
-								e instanceof Error ? e.message : "Error al guardar movimiento",
-							);
-						} finally {
-							setLoading(false);
-						}
-					}}
-					onCancel={handleClose}
-				/>
-			) : mode === "edit" ? (
-				editingTx === undefined ? (
-					<p className="modal-loading">Cargando movimiento…</p>
-				) : editingTx ? (
-				<TransactionForm
-					accounts={accounts}
-					categories={categories}
-					transactionId={editingTx._id}
-					initial={{
-						type: editingTx.type,
-						amount: String(editingTx.amount),
-						date: toDateInputValue(editingTx.date),
-						accountId: editingTx.accountId,
-						toAccountId: editingTx.toAccountId,
-						categoryId: editingTx.categoryId,
-						notes: editingTx.notes ?? "",
-						destinationName: editingTx.destinationName,
-					}}
-					loading={loading}
-					serverError={submitError}
-					onSubmit={async (values) => {
-						setLoading(true);
-						setSubmitError("");
-						try {
-							await updateTx({ transactionId: editingTx._id, ...values });
-							handleClose();
-						} catch (e) {
-							setSubmitError(
-								e instanceof Error ? e.message : "Error al guardar movimiento",
-							);
-						} finally {
-							setLoading(false);
-						}
-					}}
-					onCancel={handleClose}
-					onDelete={() => setConfirmDelete(true)}
-				/>
-				) : null
-			) : mode === "create" ? (
-				<TransactionForm
-					accounts={accounts}
-					categories={categories}
-					initial={{ type: createType }}
-					loading={loading}
-					serverError={submitError}
-					onSubmit={async (values) => {
-						setLoading(true);
-						setSubmitError("");
-						try {
-							await createTx(values);
-							handleClose();
-						} catch (e) {
-							setSubmitError(
-								e instanceof Error ? e.message : "Error al guardar movimiento",
-							);
-						} finally {
-							setLoading(false);
-						}
-					}}
-					onCancel={handleClose}
-				/>
+					<TransactionForm
+						accounts={accounts}
+						categories={categories}
+						initial={{ type: "transfer" }}
+						loading={loading}
+						serverError={submitError}
+						onSubmit={async (values) => {
+							setLoading(true);
+							setSubmitError("");
+							try {
+								await createTx(values);
+								handleClose();
+							} catch (e) {
+								setSubmitError(
+									e instanceof Error
+										? e.message
+										: "Error al guardar movimiento",
+								);
+							} finally {
+								setLoading(false);
+							}
+						}}
+						onCancel={handleClose}
+					/>
+				) : mode === "edit" ? (
+					editingTx === undefined ? (
+						<p className="modal-loading">Cargando movimiento…</p>
+					) : editingTx ? (
+						<TransactionForm
+							accounts={accounts}
+							categories={categories}
+							transactionId={editingTx._id}
+							initial={{
+								type: editingTx.type,
+								amount: String(editingTx.amount),
+								date: toDateInputValue(editingTx.date),
+								accountId: editingTx.accountId,
+								toAccountId: editingTx.toAccountId,
+								categoryId: editingTx.categoryId,
+								notes: editingTx.notes ?? "",
+								destinationName: editingTx.destinationName,
+							}}
+							loading={loading}
+							serverError={submitError}
+							onSubmit={async (values) => {
+								setLoading(true);
+								setSubmitError("");
+								try {
+									await updateTx({ transactionId: editingTx._id, ...values });
+									handleClose();
+								} catch (e) {
+									setSubmitError(
+										e instanceof Error
+											? e.message
+											: "Error al guardar movimiento",
+									);
+								} finally {
+									setLoading(false);
+								}
+							}}
+							onCancel={handleClose}
+							onDelete={() => setConfirmDelete(true)}
+						/>
+					) : null
+				) : mode === "create" ? (
+					<TransactionForm
+						accounts={accounts}
+						categories={categories}
+						initial={{ type: createType }}
+						loading={loading}
+						serverError={submitError}
+						onSubmit={async (values) => {
+							setLoading(true);
+							setSubmitError("");
+							try {
+								await createTx(values);
+								handleClose();
+							} catch (e) {
+								setSubmitError(
+									e instanceof Error
+										? e.message
+										: "Error al guardar movimiento",
+								);
+							} finally {
+								setLoading(false);
+							}
+						}}
+						onCancel={handleClose}
+					/>
 				) : null}
 			</Modal>
 			<ConfirmDialog

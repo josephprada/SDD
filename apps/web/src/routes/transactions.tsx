@@ -1,9 +1,9 @@
-import { TransactionList } from "@app/components/transactions/TransactionList";
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
 import { MonthSwitcher } from "@app/components/dashboard/MonthSwitcher";
+import { TransactionList } from "@app/components/transactions/TransactionList";
 import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
-import { addMonths, monthRange } from "@app/lib/format/date";
 import { useReconcileFixedExpensePayments } from "@app/lib/budgets/useReconcileFixedExpensePayments";
+import { addMonths, monthRange } from "@app/lib/format/date";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -67,6 +67,7 @@ export function TransactionsRoute() {
 		if (handledDeepLinkRef.current === paramId) return;
 
 		handledDeepLinkRef.current = paramId;
+		if (!deepLinkedTx) return;
 		setMonth(new Date(deepLinkedTx.date));
 		setTypeTab("all");
 		openEdit(paramId);
