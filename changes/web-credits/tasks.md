@@ -288,4 +288,14 @@ Phase 12 Perfiles adaptativos v1.6
 
 ---
 
+## Post-cierre — Finanzas personales (2026-07-15)
+
+- [x] T100 Schema `accounts.excludeFromPersonalFinance` + `transactions.isCreditInstallmentPayment`
+- [x] T101 `convex/lib/personalFinance.ts` (cuentas, cuotas, transfer→meta como gasto)
+- [x] T102 Checkbox exclusión en `AccountForm` / sync desembolso desde crédito
+- [x] T103 Dashboard Disponible + «Si pagas fijos pendientes»
+- [x] T104 Soft `transactions.get` / `attachments.listByTransaction` + close-before-delete
+
+---
+
 ## Dependency Graph

@@ -63,7 +63,7 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ## Change en curso: web-credits ✅ (cerrado 2026-07-12)
 
-Rama: `feat/web-credits` — merge en `testing`.
+Rama histórica: `feat/web-credits` — merge en `testing`.
 
 | Artefacto | Ruta |
 |-----------|------|
@@ -72,6 +72,10 @@ Rama: `feat/web-credits` — merge en `testing`.
 | Diseño técnico | `changes/web-credits/design.md` |
 | Quickstart QA | `changes/web-credits/quickstart.md` |
 | Tasks | `changes/web-credits/tasks.md` |
+
+**Iteración post-cierre (2026-07-15) en `testing`:** finanzas personales — aislamiento por cuenta, pagos de cuota visibles, transferencias a meta = gasto, Disponible sin tarjetas, soft-delete de movimientos. Ver `design.md` D-47…D-52 y F-01…F-04.
+
+**Flujo de ramas:** desarrollar y documentar en **`testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
 **Change anterior cerrado:** web-budgets-reports ✅ — `https://wallet.lavalex.co`  
 **Change 6 — `web-tax-dian`** queda al final (integra créditos + metas).

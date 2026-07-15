@@ -28,6 +28,7 @@
 | `informalAgreement` | `object` | No | — | `{ counterpartyName?, relationship?, notes? }` — perfil `p2p_agreement` |
 | `profileMetadata` | `object` | No | — | Datos conservados al cambiar perfil (campos ocultos) |
 | `outstandingBalance` | `number` | No | `0` | Saldo deuda; denormalizado |
+| `excludeFromPersonalFinance` | `boolean` | No | `true` | Preferencia UI: aislar cuenta de **desembolso** (sync a `accounts.excludeFromPersonalFinance`) |
 | `reminderOffsets` | `number[]` | Yes | `[3, 0]` | Días antes vencimiento cuota |
 | `status` | `"active" \| "paid_off" \| "defaulted"` | Yes | `active` | Lifecycle de deuda (independiente de `setupStatus`) |
 | `notes` | `string` | No | — | Max 500 |
@@ -198,7 +199,8 @@ type CreditProfile =
 
 | Field | Type | Required | Default | Notes |
 |-------|------|----------|---------|-------|
-| `isCreditEscrow` | `boolean` | Yes | `false` | Excluir de balance personal |
+| `isCreditEscrow` | `boolean` | Yes | `false` | Marca cuenta fondo/desembolso; UI fondo crédito |
+| `excludeFromPersonalFinance` | `boolean` | No | `false` | Excluir de Disponible e ingresos/gastos/neto; checkbox en crear/editar cuenta. Legado: si está unset y `isCreditEscrow`, se trata como excluida |
 
 ---
 
@@ -210,7 +212,8 @@ type CreditProfile =
 |-------|------|----------|-------|
 | `creditId` | `Id<"credits">` | No | Movimiento del fondo/cuota |
 | `creditDestinationId` | `Id<"creditDestinations">` | No | Rubro asociado |
-| `isCreditFundMovement` | `boolean` | No | `true` para wizard escrow |
+| `isCreditFundMovement` | `boolean` | No | `true` para gastos del fondo escrow |
+| `isCreditInstallmentPayment` | `boolean` | No | `true` en pago de cuota — **siempre** cuenta en finanzas personales |
 
 ---
 

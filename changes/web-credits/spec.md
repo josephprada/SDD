@@ -378,11 +378,15 @@ Sin cambio v1.1 — CRUD, aportes, `/savings`.
 - **FR-021**: Transacciones del fondo MUST soportar `creditId`, `creditDestinationId?`, `isCreditFundMovement`.
 - **FR-022**: Gasto desde fondo MUST registrarse vía modal Movimientos con `creditFundContext`; **un solo movimiento** tipo `expense` con `creditDestinationId`. Mutation `spendFromFund` (wizard multi-tx) queda como **legacy opcional** no expuesta en UI v1.5.
 - **FR-022b**: MUST permitir categorías de gasto del fondo (`fundExpenseCategoryIds`) en crear/ajustes crédito.
-- **FR-022c**: Pago de cuota MAY registrarse desde modal Movimientos vía `creditPaymentContext`.
+- **FR-022c**: Pago de cuota MAY registrarse desde modal Movimientos vía `creditPaymentContext`; MUST marcar `isCreditInstallmentPayment` y **contar** en Gastos/Neto y listado de movimientos personales.
 - **FR-022d**: `creditDestinations.list` MUST incluir `spentTotal` por rubro.
+- **FR-022e**: Opción «aislar» del crédito MUST aplicar `excludeFromPersonalFinance` **solo** a la cuenta de desembolso (no ocultar pagos de cuota).
+- **FR-022f**: Cuentas MUST permitir checkbox `excludeFromPersonalFinance` en crear/editar; esas cuentas se excluyen de Disponible e ingresos/gastos, salvo reglas especiales (cuotas).
+- **FR-022g**: Transferencias desde cuenta personal hacia cuenta aislada (ahorro/meta) MUST sumar como **gasto** del período en dashboard y reportes.
 - **FR-023**: Pestaña **Movimientos del fondo** en detalle del crédito.
-- **FR-024**: `/transactions` MUST ocultar movimientos con `creditId` por defecto; toggle para mostrarlos.
+- **FR-024**: `/transactions` y dashboard MUST excluir movimientos de cuentas aisladas y `isCreditFundMovement`; MUST **incluir** pagos de cuota (`isCreditInstallmentPayment`) y transferencias personal→aislada en el neto.
 - **FR-025**: Desembolso MUST NOT registrarse como `income` en cuenta nómina al configurar crédito vinculado.
+- **FR-025b**: Card de balance del inicio MUST mostrar **Disponible** (cuentas personales sin `type: credit`), no restar saldos de tarjetas.
 
 ### Simulación
 

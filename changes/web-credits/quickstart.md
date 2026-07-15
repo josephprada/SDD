@@ -14,10 +14,14 @@
 
 ## Setup cuentas (caso referencia)
 
-| Cuenta (nombre libre) | Rol | `isCreditEscrow` |
-|-----------------------|-----|------------------|
-| «Ahorros nómina» | Operativa diaria | false |
-| «Fondo crédito obra» | Escrow desembolso | true |
+| Cuenta (nombre libre) | Rol | `isCreditEscrow` | `excludeFromPersonalFinance` |
+|-----------------------|-----|------------------|------------------------------|
+| «Ahorros nómina» | Operativa diaria / pago cuotas | false | false |
+| «Fondo crédito obra» | Escrow desembolso | true | true (aislada) |
+| «Meta abono / ahorro» | Ahorro aparte | false | true (aislada; transferencias hacia ella = gasto del mes) |
+
+**Dashboard:** card **Disponible** = suma de cuentas personales no aisladas y no `type: credit`.  
+**Neto:** incluye pagos de cuota y transferencias hacia cuentas aisladas; no incluye solo el saldo negativo de tarjetas (sí incluye las compras con tarjeta).
 
 ---
 

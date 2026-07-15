@@ -27,8 +27,8 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 | D-03 | Redondeo | **Peso entero**; última cuota ajusta residuo | Alineado bancos COP |
 | D-04 | Abono recálculo | **Cancel pending + regenerate** | Historial `paid` intacto |
 | D-05 | Escrow | **`disbursementAccountId` + `isCreditEscrow`** | No saldo virtual duplicado |
-| D-06 | Balance personal | **Excluir escrow** en `dashboard.overview` | Tarjeta `credits.fundSummary` aparte |
-| D-07 | Movimientos crédito | **`creditId` en transactions**; filtro default off en `/transactions` | Vista principal limpia |
+| D-06 | Balance personal | **Excluir** cuentas con `excludeFromPersonalFinance` (legado: `isCreditEscrow` sin flag) **y** `type !== credit` en card Disponible | Tarjeta `credits.fundSummary` aparte |
+| D-07 | Movimientos crédito | **`creditId` en transactions**; listado personal filtra por cuenta aislada / fund movement, **no** oculta pagos de cuota | Vista principal limpia sin perder cuotas |
 | D-08 | Gasto fondo | **Gasto único** `creditFundSpend` desde modal Movimientos; `spendFromFund` legacy | UX más simple que wizard 3 txs |
 | D-09 | Rubros | **Tabla `creditDestinations`** + `spentTotal` en list | ≠ categorías gasto |
 | D-10 | Metas | **Tabla propia**; `linkedCreditId` opcional | ≠ escrow obra |
@@ -68,6 +68,12 @@ Frontend: `/credits`, `/credits/:id` (tabs), `/savings`; gasto fondo vía modal 
 | D-44 | Edición cuotas | **`creditPaymentEdit.ts`** + batch UI en `CreditPaymentTable` | manual + cuota_fija + capital_constant |
 | D-45 | Reportes cross-module | **`ReportCreditsSection`**, **`ReportSavingsSection`** + export CSV/PDF | Estado actual, no filtrado por período |
 | D-46 | Motion genie modales | **`useGenieOverlay`**, bloom in / genie out, `genie-modal.css`, SVG warp | `ConfirmDialog` sin `.modal` en móvil |
+| D-47 | Aislamiento | **Por cuenta** (`accounts.excludeFromPersonalFinance`), no por `creditId` blanket | Pagos de cuota visibles en movimientos/neto |
+| D-48 | Check «aislar» crédito | Sync **solo cuenta desembolso** vía `syncDisbursementAccountIsolation` | Desembolso/fondo fuera; cuotas dentro |
+| D-49 | Pago cuota en metrics | Flag **`isCreditInstallmentPayment`** → siempre cuenta en personal finance | Aunque se pague desde escrow |
+| D-50 | Dashboard «Disponible» | `totalBalance` = cuentas personales **sin** `type: credit` | Deuda tarjeta no resta el disponible |
+| D-51 | Transfer → meta aislada | Cuenta como **gasto** del mes (`transferToIsolatedCountsAsExpense`) | Alinea neto con salida de disponible |
+| D-52 | Delete movimiento UX | `transactions.get` / `attachments.listByTransaction` soft (null/`[]`); modal cierra antes del delete | Evita ErrorBoundary por suscripción huérfana |
 
 ### Cierre v1.7 (2026-07-12) ✅
 
@@ -81,6 +87,19 @@ Change **web-credits** cerrado. Pendientes v1.6 migrados o absorbidos en iteraci
 | P-04 | `creditProfileRegistry.ts` | ✅ |
 | P-05 | Cambio perfil (modales en `CreditSettingsForm`) | ✅ |
 | P-06 | Backend `setupStatus` + recalc abonos | ✅ |
+
+### Iteración finanzas personales (2026-07-15) ✅ — rama `testing`
+
+Post-cierre web-credits: aislamiento alineado al producto real (JP-Apartament + metas).
+
+| # | Tema | Estado |
+|---|------|--------|
+| F-01 | Schema cuenta `excludeFromPersonalFinance` + checkbox en `AccountForm` | ✅ |
+| F-02 | `convex/lib/personalFinance.ts` — cuentas excluídas, cuotas, transfer→meta | ✅ |
+| F-03 | Dashboard Disponible + copy «Si pagas fijos pendientes» | ✅ |
+| F-04 | Soft queries al borrar movimiento (attachments / get) | ✅ |
+
+**Fuente de verdad de docs:** `testing`. Merges a `main`/prod solo cuando se pida explícitamente.
 
 ---
 
@@ -211,8 +230,10 @@ CRUD metas + aportes; `suggestAbono` internal si `linkedCreditId` y umbral.
 
 ### Extensiones
 
-- `convex/dashboard.ts` — excluir `isCreditEscrow` del total
-- `convex/transactions.ts` — args opcionales `creditId`, etc.; filtro list
+- `convex/dashboard.ts` — Disponible + gastos con `personalFinanceExpenseAmount`
+- `convex/lib/personalFinance.ts` — exclusión por cuenta, cuotas, transfer→meta
+- `convex/transactions.ts` — args opcionales `creditId`, etc.; filtro list; `get` soft
+- `convex/attachments.ts` — `listByTransaction` soft si tx borrada
 - `convex/notifications/processDaily` — `credits.processReminders`
 
 ---
@@ -271,10 +292,23 @@ styles/
 ## Integración dashboard
 
 ```typescript
-// dashboard.overview — exclude isCreditEscrow accounts from totalBalance
-// Optional card: CreditFundCard — calls credits.fundSummary per active credit
+// dashboard.overview
+// - totalBalance (UI «Disponible»): cuentas !excluded && type !== "credit"
+// - monthlyExpense: expenses personales + transferencias hacia cuentas aisladas
+// - personalFinance: convex/lib/personalFinance.ts
+// Optional card: CreditFundCard — credits.fundSummary per active credit
 ```
 
+### Reglas `personalFinance` (fuente de verdad)
+
+| Caso | ¿Cuenta en Disponible? | ¿Cuenta en Gastos/Neto? |
+|------|------------------------|-------------------------|
+| Cuenta con `excludeFromPersonalFinance` / escrow legacy | No | Movimientos **desde** ella: no (salvo cuota) |
+| Cuenta `type: credit` (tarjeta) | No (disponible) | Compras **sí** (expense) |
+| Pago cuota (`isCreditInstallmentPayment`) | N/A | **Sí** siempre |
+| Movimiento fondo (`isCreditFundMovement`) | N/A | No |
+| Transfer personal → meta/ahorro aislado | Baja origen | **Sí** (como gasto) |
+| Transfer interna entre cuentas personales | Neto 0 | No |
 ---
 
 ## Seguridad

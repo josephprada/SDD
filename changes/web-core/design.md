@@ -22,7 +22,7 @@ La decisión central es mantener `accounts.balance` **denormalizado** y actualiz
 | 2 | Transferencias | Una sola transacción `type: "transfer"` con `accountId` origen y `toAccountId` destino | Evita doble conteo; requiere validación de origen ≠ destino y delta doble |
 | 3 | Borrado de cuentas/categorías | Soft delete con `archived: true` si hay historial | Conserva auditoría financiera; UI debe ocultar archivados en nuevos formularios |
 | 4 | Categoría sistema | `categories.isSystem` para proteger "Transferencia" | Permite categorías editables sin romper transferencias |
-| 5 | Adjuntos | Convex file storage + tabla `attachments` con metadata | Storage queda desacoplado de transacciones; delete debe borrar metadata y archivo |
+| 5 | Adjuntos | Convex file storage + tabla `attachments` con metadata | Storage queda desacoplado de transacciones; delete debe borrar metadata y archivo; **reads soft** si la tx ya no existe |
 | 6 | Filtros de transacciones | Query por `userId` + rango `date`, filtros secundarios en servidor | Mantiene índices simples; para volúmenes grandes se puede añadir índices específicos |
 | 7 | Dashboard | Queries acotadas: cuentas activas, transacciones del mes, últimas N | Sin agregados persistidos en este change; suficiente para MVP personal |
 | 8 | UI core | Formularios en componentes por dominio, no lógica en rutas | Rutas orquestan datos; componentes quedan reutilizables para drawers/dialogs futuros |

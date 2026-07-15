@@ -211,6 +211,16 @@ args: {
 returns: Attachment[]
 ```
 
+Returns `[]` if the transaction is missing or not owned (soft read — evita crash en UI tras delete).
+
+### `transactions.get` (comportamiento soft)
+
+```ts
+args: { transactionId: Id<"transactions"> }
+returns: TransactionListItem | null
+```
+
+Returns `null` when not found / not owned (no throw). El modal de edición debe cerrarse si el id deja de existir.
 ### `attachments.create`
 
 ```ts
