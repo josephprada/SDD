@@ -61,24 +61,28 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change en curso: web-credits ✅ (cerrado 2026-07-12)
+## Change en curso: web-tax-dian (Change 6)
 
-Rama histórica: `feat/web-credits` — merge en `testing`.
+Rama: `feat/web-tax-dian` (desde `testing`).
 
 | Artefacto | Ruta |
 |-----------|------|
-| Spec | `changes/web-credits/spec.md` |
-| Propuesta | `changes/web-credits/proposal.md` |
-| Diseño técnico | `changes/web-credits/design.md` |
-| Quickstart QA | `changes/web-credits/quickstart.md` |
-| Tasks | `changes/web-credits/tasks.md` |
+| Spec | `changes/web-tax-dian/spec.md` |
+| Propuesta | `changes/web-tax-dian/proposal.md` |
+| Plan | `changes/web-tax-dian/plan.md` |
+| Diseño técnico | `changes/web-tax-dian/design.md` |
+| Research | `changes/web-tax-dian/research.md` |
+| Data model | `changes/web-tax-dian/data-model.md` |
+| Quickstart QA | `changes/web-tax-dian/quickstart.md` |
+| Contracts | `changes/web-tax-dian/contracts/` |
+| Tasks | `changes/web-tax-dian/tasks.md` *(pendiente `/speckit-tasks`)* |
 
-**Iteración post-cierre (2026-07-15) en `testing`:** finanzas personales — aislamiento por cuenta, pagos de cuota visibles, transferencias a meta = gasto, Disponible sin tarjetas, soft-delete de movimientos. Ver `design.md` D-47…D-52 y F-01…F-04.
+**Alcance v1:** organizador anual DIAN (secciones, rubros, adjuntos, sugerencias, export) — **sin** motor UVT ni Muisca.
 
-**Flujo de ramas:** desarrollar y documentar en **`testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
+**Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Change anterior cerrado:** web-budgets-reports ✅ — `https://wallet.lavalex.co`  
-**Change 6 — `web-tax-dian`** queda al final (integra créditos + metas).
+**Change anterior cerrado:** web-credits ✅ (2026-07-12; iteración finanzas 2026-07-15 en `testing`).  
+Prod: `https://wallet.lavalex.co`
 
 ---
 
