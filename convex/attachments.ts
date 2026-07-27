@@ -1,11 +1,14 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import {
+	assertTaxDocumentEditable,
 	requireAttachmentOwnership,
+	requireTaxItemOwnership,
 	requireTransactionOwnership,
 	requireUserId,
 } from "./lib/auth";
 import {
+	MAX_ATTACHMENTS_PER_TAX_ITEM,
 	MAX_ATTACHMENTS_PER_TRANSACTION,
 	MAX_ATTACHMENT_SIZE,
 	mimeTypeValidator,
@@ -27,7 +30,6 @@ export const listByTransaction = query({
 	handler: async (ctx, { transactionId }) => {
 		const userId = await requireUserId(ctx);
 		const transaction = await ctx.db.get(transactionId);
-		// Tras eliminar el movimiento, las suscripciones activas no deben tumbar la UI.
 		if (!transaction || transaction.userId !== userId) {
 			return [];
 		}
@@ -36,6 +38,26 @@ export const listByTransaction = query({
 			.query("attachments")
 			.withIndex("by_entity", (q) =>
 				q.eq("entityType", "transaction").eq("entityId", transactionId),
+			)
+			.collect();
+	},
+});
+
+export const listByTaxItem = query({
+	args: {
+		taxItemId: v.id("taxItems"),
+	},
+	handler: async (ctx, { taxItemId }) => {
+		const userId = await requireUserId(ctx);
+		const item = await ctx.db.get(taxItemId);
+		if (!item || item.userId !== userId) {
+			return [];
+		}
+
+		return await ctx.db
+			.query("attachments")
+			.withIndex("by_entity", (q) =>
+				q.eq("entityType", "taxItem").eq("entityId", taxItemId),
 			)
 			.collect();
 	},
@@ -82,6 +104,48 @@ export const create = mutation({
 	},
 });
 
+export const createForTaxItem = mutation({
+	args: {
+		taxItemId: v.id("taxItems"),
+		storageId: v.id("_storage"),
+		filename: v.string(),
+		mimeType: mimeTypeValidator,
+		size: v.number(),
+	},
+	handler: async (ctx, args) => {
+		const userId = await requireUserId(ctx);
+		const item = await requireTaxItemOwnership(ctx, userId, args.taxItemId);
+		await assertTaxDocumentEditable(ctx, userId, item.documentId);
+
+		if (args.size > MAX_ATTACHMENT_SIZE) {
+			throw new Error("ATTACHMENT_TOO_LARGE");
+		}
+		validateMimeType(args.mimeType);
+
+		const existing = await ctx.db
+			.query("attachments")
+			.withIndex("by_entity", (q) =>
+				q.eq("entityType", "taxItem").eq("entityId", args.taxItemId),
+			)
+			.collect();
+
+		if (existing.length >= MAX_ATTACHMENTS_PER_TAX_ITEM) {
+			throw new Error("Maximum 5 attachments per tax item");
+		}
+
+		return await ctx.db.insert("attachments", {
+			userId,
+			entityType: "taxItem",
+			entityId: args.taxItemId,
+			storageId: args.storageId,
+			filename: args.filename.trim() || "archivo",
+			mimeType: args.mimeType,
+			size: args.size,
+			uploadedAt: Date.now(),
+		});
+	},
+});
+
 export const remove = mutation({
 	args: {
 		attachmentId: v.id("attachments"),
@@ -93,6 +157,15 @@ export const remove = mutation({
 			userId,
 			attachmentId,
 		);
+
+		if (attachment.entityType === "taxItem") {
+			const taxItem = await ctx.db.get(
+				attachment.entityId as import("./_generated/dataModel").Id<"taxItems">,
+			);
+			if (taxItem) {
+				await assertTaxDocumentEditable(ctx, userId, taxItem.documentId);
+			}
+		}
 
 		await ctx.storage.delete(attachment.storageId);
 		await ctx.db.delete(attachmentId);

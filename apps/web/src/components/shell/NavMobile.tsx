@@ -10,6 +10,7 @@ type NavMobileProps = {
 const MORE_ITEMS: Array<{ to: string; label: string; icon: CoreIconName }> = [
 	{ to: "/credits", label: "Créditos", icon: "landmark" },
 	{ to: "/savings", label: "Ahorros", icon: "piggy-bank" },
+	{ to: "/tax", label: "Declaración de renta", icon: "file-text" },
 	{ to: "/categories", label: "Categorías", icon: "tags" },
 	{ to: "/budgets", label: "Presupuestos y Gastos fijos", icon: "badge-dollar-sign" },
 	{ to: "/reports", label: "Reportes", icon: "chart-line" },

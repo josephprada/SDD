@@ -290,14 +290,14 @@ export function CreditDetailRoute() {
 		<div className="credits-page animate-stagger">
 			<header className="credits-header">
 				<div>
-					<Link to="/credits" className="credit-detail-back">
-						<CoreIcon name="chevron-left" size={16} /> Créditos
-					</Link>
 					<h1 className="page-title">{credit.name}</h1>
 					<p className="page-subtitle">
 						{credit.lender} — {CREDIT_STATUS_LABELS[credit.status]}
 					</p>
 				</div>
+				<Link to="/credits" className="credit-detail-back">
+					<CoreIcon name="chevron-left" size={16} /> Créditos
+				</Link>
 			</header>
 
 			<section

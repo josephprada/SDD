@@ -93,4 +93,4 @@ apps/web/src/components/shell/Nav*.tsx # entrada Renta / Tax
 | 0 Research | `research.md` | ✅ |
 | 1 Design | `design.md`, `data-model.md`, `contracts/`, `proposal.md` | ✅ |
 | 1 QA | `quickstart.md` | ✅ |
-| 2 Tasks | `tasks.md` | ⏳ `/speckit-tasks` |
+| 2 Tasks | `tasks.md` | ✅ |

@@ -289,3 +289,75 @@ export function validatePaidInstallmentsCount(
 	}
 	return paid;
 }
+
+export const taxSectionValidator = v.union(
+	v.literal("assets"),
+	v.literal("liabilities"),
+	v.literal("income"),
+	v.literal("deductions"),
+	v.literal("exempt"),
+);
+
+export const taxStatusValidator = v.union(
+	v.literal("draft"),
+	v.literal("review"),
+	v.literal("filed"),
+);
+
+export const taxSourceTypeValidator = v.union(
+	v.literal("account"),
+	v.literal("credit"),
+	v.literal("income_category"),
+	v.literal("expense_category"),
+	v.literal("credit_interest"),
+);
+
+export const MAX_TAX_ITEM_DESCRIPTION = 200;
+export const MAX_TAX_ITEM_NOTES = 500;
+export const MAX_TAX_DOCUMENT_NOTES = 1000;
+export const MAX_ATTACHMENTS_PER_TAX_ITEM = 5;
+
+export function validateTaxYear(taxYear: number): number {
+	const maxYear = new Date().getFullYear() + 1;
+	if (!Number.isInteger(taxYear) || taxYear < 2000 || taxYear > maxYear) {
+		throw new Error("TAX_YEAR_INVALID");
+	}
+	return taxYear;
+}
+
+export function validateTaxItemDescription(description: string): string {
+	const trimmed = validateNonEmptyName(description);
+	if (trimmed.length > MAX_TAX_ITEM_DESCRIPTION) {
+		throw new Error("Description must be at most 200 characters");
+	}
+	return trimmed;
+}
+
+export function validateTaxItemNotes(notes?: string): string | undefined {
+	if (!notes?.trim()) return undefined;
+	const trimmed = notes.trim();
+	if (trimmed.length > MAX_TAX_ITEM_NOTES) {
+		throw new Error("Notes must be at most 500 characters");
+	}
+	return trimmed;
+}
+
+export function validateTaxDocumentNotes(notes?: string): string | undefined {
+	if (!notes?.trim()) return undefined;
+	const trimmed = notes.trim();
+	if (trimmed.length > MAX_TAX_DOCUMENT_NOTES) {
+		throw new Error("Notes must be at most 1000 characters");
+	}
+	return trimmed;
+}
+
+export function validateOptionalEstimatedAmount(
+	value: number | null | undefined,
+	field: string,
+): number | undefined {
+	if (value === null || value === undefined) return undefined;
+	if (!Number.isInteger(value) || value < 0) {
+		throw new Error(`${field} must be a non-negative integer`);
+	}
+	return value;
+}

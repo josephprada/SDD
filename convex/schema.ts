@@ -22,6 +22,9 @@ import {
 	savingsGoalSnapshotValidator,
 	scheduleModeValidator,
 	setupStatusValidator,
+	taxSectionValidator,
+	taxSourceTypeValidator,
+	taxStatusValidator,
 } from "./lib/validators";
 
 const accountTypeValidator = v.union(
@@ -147,8 +150,8 @@ export default defineSchema({
 
 	attachments: defineTable({
 		userId: v.id("users"),
-		entityType: v.literal("transaction"),
-		entityId: v.id("transactions"),
+		entityType: v.union(v.literal("transaction"), v.literal("taxItem")),
+		entityId: v.string(),
 		storageId: v.id("_storage"),
 		filename: v.string(),
 		mimeType: mimeTypeValidator,
@@ -340,4 +343,36 @@ export default defineSchema({
 		.index("by_goal", ["goalId"])
 		.index("by_transaction", ["transactionId"])
 		.index("by_source_transaction", ["sourceTransactionId"]),
+
+	taxDocuments: defineTable({
+		userId: v.id("users"),
+		taxYear: v.number(),
+		status: taxStatusValidator,
+		estimatedTaxableIncome: v.optional(v.number()),
+		estimatedTaxDue: v.optional(v.number()),
+		notes: v.optional(v.string()),
+		filedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_user_year", ["userId", "taxYear"]),
+
+	taxItems: defineTable({
+		userId: v.id("users"),
+		documentId: v.id("taxDocuments"),
+		section: taxSectionValidator,
+		category: v.string(),
+		description: v.string(),
+		amount: v.number(),
+		notes: v.optional(v.string()),
+		sourceType: v.optional(taxSourceTypeValidator),
+		sourceId: v.optional(v.string()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_document", ["documentId"])
+		.index("by_document_section", ["documentId", "section"])
+		.index("by_user", ["userId"])
+		.index("by_document_source", ["documentId", "sourceType", "sourceId"]),
 });

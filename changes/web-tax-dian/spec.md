@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-22
 
-**Status**: Draft
+**Status**: ✅ Completado (v1.0 — organizador DIAN, 2026-07-27)
 
 **Change**: web-tax-dian (Change 6)
 

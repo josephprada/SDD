@@ -61,9 +61,9 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change en curso: web-tax-dian (Change 6)
+## Change cerrado: web-tax-dian ✅ (Change 6 — 2026-07-27)
 
-Rama: `feat/web-tax-dian` (desde `testing`).
+Rama histórica: `feat/web-tax-dian` — merge `testing` + `main` (prod).
 
 | Artefacto | Ruta |
 |-----------|------|
@@ -75,14 +75,13 @@ Rama: `feat/web-tax-dian` (desde `testing`).
 | Data model | `changes/web-tax-dian/data-model.md` |
 | Quickstart QA | `changes/web-tax-dian/quickstart.md` |
 | Contracts | `changes/web-tax-dian/contracts/` |
-| Tasks | `changes/web-tax-dian/tasks.md` *(pendiente `/speckit-tasks`)* |
+| Tasks | `changes/web-tax-dian/tasks.md` |
 
 **Alcance v1:** organizador anual DIAN (secciones, rubros, adjuntos, sugerencias, export) — **sin** motor UVT ni Muisca.
 
 **Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Change anterior cerrado:** web-credits ✅ (2026-07-12; iteración finanzas 2026-07-15 en `testing`).  
-Prod: `https://wallet.lavalex.co`
+**Roadmap actual:** Changes 1–6 cerrados. Prod: `https://wallet.lavalex.co`
 
 ---
 

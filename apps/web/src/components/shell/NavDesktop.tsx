@@ -92,6 +92,15 @@ export function NavDesktop() {
 					Ahorros
 				</NavLink>
 				<NavLink
+					to="/tax"
+					className={({ isActive }) =>
+						`sidebar-link${isActive ? " sidebar-link--active" : ""}`
+					}
+				>
+					<CoreIcon name="file-text" size={18} />
+					Declaración de renta
+				</NavLink>
+				<NavLink
 					to="/reports"
 					className={({ isActive }) =>
 						`sidebar-link${isActive ? " sidebar-link--active" : ""}`

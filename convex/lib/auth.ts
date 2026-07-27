@@ -83,3 +83,39 @@ export async function requireSavingsGoalOwnership(
 	}
 	return goal;
 }
+
+export async function requireTaxDocumentOwnership(
+	ctx: Ctx,
+	userId: Id<"users">,
+	documentId: Id<"taxDocuments">,
+) {
+	const document = await ctx.db.get(documentId);
+	if (!document || document.userId !== userId) {
+		throw new Error("Tax document not found");
+	}
+	return document;
+}
+
+export async function requireTaxItemOwnership(
+	ctx: Ctx,
+	userId: Id<"users">,
+	itemId: Id<"taxItems">,
+) {
+	const item = await ctx.db.get(itemId);
+	if (!item || item.userId !== userId) {
+		throw new Error("Tax item not found");
+	}
+	return item;
+}
+
+export async function assertTaxDocumentEditable(
+	ctx: Ctx,
+	userId: Id<"users">,
+	documentId: Id<"taxDocuments">,
+) {
+	const document = await requireTaxDocumentOwnership(ctx, userId, documentId);
+	if (document.status === "filed") {
+		throw new Error("TAX_FILED_READONLY");
+	}
+	return document;
+}

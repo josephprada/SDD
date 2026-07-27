@@ -566,13 +566,14 @@ packages/jp-ds/
    - **Destinos/rubros** del desembolso (trazabilidad del uso del capital)
    - **Fondo aislado**: cuenta escrow vinculada, dashboard sin mezclar nómina
    - Simulador de pago anticipado; metas de ahorro con aportes
-7. **Change 6: web-tax-dian — Declaración de Renta (DIAN)** ← *último del roadmap actual*
-   - Items por sección DIAN
+7. ✅ **Change 6: web-tax-dian — Declaración de Renta (DIAN)** (completado 2026-07-27, merge `testing` + `main`)
+   - Items por sección DIAN (Patrimonio, Deudas, Ingresos, Deducciones, Rentas exentas)
    - Adjuntos (imágenes y PDFs) por rubro
-   - Auto-poblar desde transacciones, cuentas y **créditos/préstamos**
-   - Exportación para presentación
+   - Auto-poblar desde transacciones, cuentas y créditos/préstamos
+   - Exportación CSV/PDF/JSON; estados draft/review/filed
+   - Organizador v1 (sin UVT/Muisca)
 
-> **Orden (2026-07-05):** DIAN va al final porque la declaración debe consolidar todo el dominio financiero, incluidos créditos y préstamos (Change 5).
+> **Roadmap v1 cerrado (2026-07-27):** Changes 1–6 entregados. Iteraciones futuras fuera de este ciclo SDD.
 
 ---
 

@@ -10,6 +10,7 @@ import "./styles/core.css";
 import "./styles/settings.css";
 import "./styles/budgets-reports.css";
 import "./styles/credits-savings.css";
+import "./styles/tax.css";
 import "./styles/login-brand.css";
 import "./index.css";
 

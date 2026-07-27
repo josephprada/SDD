@@ -25,6 +25,8 @@ import { TransactionsRoute } from "./transactions";
 import { CreditsRoute } from "./credits";
 import { CreditDetailRoute } from "./credit-detail";
 import { SavingsRoute } from "./savings";
+import { TaxRoute } from "./tax";
+import { TaxDetailRoute } from "./tax-detail";
 
 function AuthGate({ children }: { children: React.ReactNode }) {
 	const { isAuthenticated, isLoading } = useConvexAuth();
@@ -127,6 +129,8 @@ export const router = createBrowserRouter([
 					{ path: "credits", element: <CreditsRoute /> },
 					{ path: "credits/:id", element: <CreditDetailRoute /> },
 					{ path: "savings", element: <SavingsRoute /> },
+					{ path: "tax", element: <TaxRoute /> },
+					{ path: "tax/:documentId", element: <TaxDetailRoute /> },
 					{ path: "settings", element: <SettingsRoute /> },
 				],
 			},

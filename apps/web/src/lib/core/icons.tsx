@@ -13,6 +13,7 @@ import {
 	CircleHelp,
 	CircleUserRound,
 	CloudUpload,
+	Download,
 	Edit3,
 	Ellipsis,
 	FileSpreadsheet,
@@ -67,6 +68,7 @@ export type CoreIconName =
 	| "image"
 	| "x"
 	| "cloud-upload"
+	| "download"
 	| "archive"
 	| "circle-alert"
 	| "circle-help"
@@ -104,6 +106,7 @@ const iconMap: Record<CoreIconName, LucideIcon> = {
 	image: Image,
 	x: X,
 	"cloud-upload": CloudUpload,
+	download: Download,
 	archive: Archive,
 	"circle-alert": CircleAlert,
 	"circle-help": CircleHelp,

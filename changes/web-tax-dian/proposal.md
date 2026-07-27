@@ -1,10 +1,11 @@
 # Propuesta: Change 6 — Web Tax DIAN (Declaración de Renta)
 
 **Versión**: 1.0.0  
-**Estado**: Planificado  
+**Estado**: Completado ✅ (v1.0 — 2026-07-27)  
 **Change**: web-tax-dian  
 **Creado**: 2026-07-22  
-**Rama**: `feat/web-tax-dian` (desde `testing`)
+**Cerrado**: 2026-07-27  
+**Rama**: `feat/web-tax-dian` → `testing` → `main`
 
 ---
 
