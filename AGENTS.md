@@ -61,27 +61,24 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change cerrado: web-tax-dian ✅ (Change 6 — 2026-07-27)
+## Change en curso: mcp-access (Change 7)
 
-Rama histórica: `feat/web-tax-dian` — merge `testing` + `main` (prod).
+Rama: `feat/mcp-access` (desde `testing`).
 
 | Artefacto | Ruta |
 |-----------|------|
-| Spec | `changes/web-tax-dian/spec.md` |
-| Propuesta | `changes/web-tax-dian/proposal.md` |
-| Plan | `changes/web-tax-dian/plan.md` |
-| Diseño técnico | `changes/web-tax-dian/design.md` |
-| Research | `changes/web-tax-dian/research.md` |
-| Data model | `changes/web-tax-dian/data-model.md` |
-| Quickstart QA | `changes/web-tax-dian/quickstart.md` |
-| Contracts | `changes/web-tax-dian/contracts/` |
-| Tasks | `changes/web-tax-dian/tasks.md` |
+| Spec | `changes/mcp-access/spec.md` |
+| Propuesta | `changes/mcp-access/proposal.md` |
+| Plan | `changes/mcp-access/plan.md` *(pendiente `/speckit-plan`)* |
+| Diseño técnico | `changes/mcp-access/design.md` *(pendiente)* |
+| Tasks | `changes/mcp-access/tasks.md` *(pendiente)* |
 
-**Alcance v1:** organizador anual DIAN (secciones, rubros, adjuntos, sugerencias, export) — **sin** motor UVT ni Muisca.
+**Alcance:** tokens PAT en Ajustes + servidor MCP (remoto VPS + stdio) sobre el dominio financiero — Opción D (monorepo, sin repo aparte).
 
 **Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Roadmap actual:** Changes 1–6 cerrados. Prod: `https://wallet.lavalex.co`
+**Change anterior cerrado:** web-tax-dian ✅ (2026-07-27; merge `testing` + `main`).  
+Prod: `https://wallet.lavalex.co`
 
 ---
 

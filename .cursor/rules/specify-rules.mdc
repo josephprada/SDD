@@ -4,5 +4,6 @@ alwaysApply: true
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read `changes/web-tax-dian/design.md`.
+shell commands, and other important information, read `changes/mcp-access/proposal.md`
+and `changes/mcp-access/spec.md`. After `/speckit-plan`, prefer `changes/mcp-access/design.md`.
 <!-- SPECKIT END -->

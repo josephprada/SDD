@@ -1,8 +1,8 @@
 # JP-WALLET — Especificación del Proyecto
 
-**Versión**: 0.6.0 (Adjuntos + Configuración + Panel de Resultados + reorganización de changes)
+**Versión**: 0.7.0 (MCP Access — tokens de agente + gateway MCP)
 **Estado**: En Revisión
-**Última actualización**: 2026-06-21
+**Última actualización**: 2026-07-27
 
 ---
 
@@ -11,7 +11,7 @@
 **Nombre del Proyecto**: JP-WALLET
 **Tipo**: Aplicación Web de Finanzas Personales
 
-**Visión Central**: Una aplicación de finanzas personales que combina registro de gastos, gestión de presupuestos y control de cuentas. Los usuarios registran sus transacciones de forma manual y visualizan reportes para entender sus hábitos financieros.
+**Visión Central**: Una aplicación de finanzas personales que combina registro de gastos, gestión de presupuestos y control de cuentas. Los usuarios registran sus transacciones de forma manual y visualizan reportes para entender sus hábitos financieros. Además, pueden conectar **cualquier LLM o agente compatible con MCP** (Claude, Gemini, OpenAI, Cursor, OpenClaw, etc.) para consultar y operar sus finanzas con lenguaje natural, bajo tokens de acceso con permisos explícitos.
 
 **Usuarios Objetivo**: Usuario individual que gestiona sus finanzas personales. A futuro, soporte para grupos compartidos (gastos divididos).
 
@@ -31,7 +31,8 @@
 | **Ruteo** | React Router v6/v7 | Simple, suficiente para ~10 pantallas |
 | **Notificaciones** | Diferido a v2 | Web Push cuando se necesite |
 | **Offline** | Diferido a v2 | No crítico en VPS con conexión permanente |
-| **Despliegue** | Docker Compose + Caddy (VPS) | Reproducible, auto-HTTPS con Let's Encrypt |
+| **Despliegue** | Nginx + Certbot (VPS) + Convex Cloud | SPA estática; backend managed; MCP remoto en el mismo VPS |
+| **Agentes (MCP)** | Servidor MCP en monorepo (`apps/mcp-server`) | Interoperable con cualquier cliente MCP; auth por PAT |
 
 ---
 
@@ -88,7 +89,8 @@
 │   └── Gastos compartidos
 └── Configuración
     ├── Perfil de usuario
-    ├── Preferencias (tema, moneda)
+    ├── Preferencias (tema, agrupación, idioma, notificaciones)
+    ├── Acceso para agentes / MCP (tokens, scopes, conexión)
     └── Estado de sincronización
 ```
 
@@ -250,8 +252,24 @@
 | Gestión de categorías | Crear, editar, archivar categorías (interfaz dedicada) |
 | Idioma | Español (default) |
 | Notificaciones | Activar/desactivar alertas y recordatorios |
+| Acceso para agentes (MCP) | Crear, listar y revocar tokens de acceso con scopes |
 | Exportar datos | Descarga completa (PDF, CSV, JSON) |
 | Eliminar cuenta | Borrar cuenta y todos los datos asociados |
+
+### 4.13 Acceso MCP para agentes LLM
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| Tokens personales (PAT) | Generados en Ajustes; secreto visible una sola vez; solo hash en servidor |
+| Scopes | Lectura/escritura por dominio (transacciones, cuentas, presupuestos, créditos, ahorros, renta) + destructivo opt-in |
+| MCP remoto | URL pública HTTPS para conectar cualquier cliente MCP compatible |
+| MCP local (stdio) | Mismo adaptador usable en clientes de escritorio con el mismo token |
+| Consultas en lenguaje natural | Overview, reportes, listados y análisis vía tools/resources |
+| Escritura controlada | Crear/editar presupuestos, metas, movimientos, etc. según scopes |
+| Auditoría | Registro de operaciones realizadas con cada token |
+| Caducidad y revocación | Expiry opcional; revocación inmediata desde Ajustes |
+
+**Arquitectura (Opción D):** tokens y autorización en el backend de producto; adaptador MCP en el monorepo; proceso remoto en el VPS. El LLM externo razona; JP-WALLET aporta datos y acciones. Sin chat embebido en la web en este ciclo.
 
 ---
 
@@ -262,7 +280,7 @@
 
 ### 5.2 Schema Convex
 
-Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `creditCapitalAbonos`, `creditDestinations`, `savingsGoals`, `savingsContributions`, `attachments`, `userPreferences`
+Tablas: `users`, `accounts`, `transactions`, `categories`, `budgets`, `splitGroups`, `splitExpenses`, `taxDocuments`, `taxItems`, `taxImages`, `credits`, `creditPayments`, `creditCapitalAbonos`, `creditDestinations`, `savingsGoals`, `savingsContributions`, `attachments`, `userPreferences`, `apiTokens`, `apiAuditLog`
 
 ### 5.3 Transacciones Recurrentes
 
@@ -446,6 +464,33 @@ interface UserPreferences {
 }
 ```
 
+### 5.8 Acceso para agentes (MCP)
+
+```typescript
+interface ApiToken {
+  id: string;
+  userId: string;
+  name: string;
+  tokenPrefix: string;      // visible en UI (p. ej. jpw_ab12…)
+  tokenHash: string;        // nunca el secreto en claro
+  scopes: string[];         // read/write por dominio + destructive
+  expiresAt?: timestamp;
+  lastUsedAt?: timestamp;
+  revokedAt?: timestamp;
+  createdAt: timestamp;
+}
+
+interface ApiAuditLog {
+  id: string;
+  userId: string;
+  tokenId: string;
+  action: string;
+  success: boolean;
+  summary?: string;         // args redactados
+  createdAt: timestamp;
+}
+```
+
 ---
 
 ## 6. Arquitectura de Despliegue
@@ -457,7 +502,8 @@ VPS Hostinger (69.6.234.237)
 ├── Nginx (reverse proxy, TLS Let's Encrypt)
 │   ├── lavalex.co / www        → /var/www/lavalex (sitio existente)
 │   ├── jarvis.lavalex.co       → OpenClaw :18789
-│   └── wallet.lavalex.co       → /var/www/jp-wallet (JP-WALLET)
+│   ├── wallet.lavalex.co       → /var/www/jp-wallet (JP-WALLET SPA)
+│   └── mcp.wallet.lavalex.co   → MCP server JP-WALLET (proceso local)
 ├── GitHub Actions              → build + rsync + nginx reload (push main)
 └── Convex Cloud prod           → https://cheery-bass-870.convex.cloud
 ```
@@ -470,8 +516,10 @@ VPS Hostinger (69.6.234.237)
 |---------|---------|
 | Identidad | Google OAuth (ID token validado server-side en Convex) |
 | Sesión | JWT firmado tras validar token de Google |
-| API Tokens | No aplica (no hay API externa por ahora) |
-| Datos en tránsito | HTTPS vía Caddy |
+| API Tokens (PAT) | Tokens personales para agentes MCP; secreto una sola vez; solo hash en servidor; scopes + expiry + revocación |
+| Canal agentes | MCP remoto (HTTPS) + stdio local opcional; nunca `CONVEX_DEPLOY_KEY` como identidad de usuario |
+| Auditoría | Log de operaciones autenticadas por PAT |
+| Datos en tránsito | HTTPS (Nginx + Certbot) |
 | Datos en reposo | Convex maneja encriptación |
 
 ### 7.1 Flujo de Auth (Google OAuth)
@@ -572,8 +620,14 @@ packages/jp-ds/
    - Auto-poblar desde transacciones, cuentas y créditos/préstamos
    - Exportación CSV/PDF/JSON; estados draft/review/filed
    - Organizador v1 (sin UVT/Muisca)
+8. **Change 7: mcp-access — Acceso MCP para agentes LLM** ← *en curso*
+   - Tokens personales (PAT) desde Ajustes: scopes, caducidad, revocación, auditoría
+   - Servidor MCP en monorepo (`apps/mcp-server`): remoto HTTPS + stdio local
+   - Tools/resources sobre el dominio financiero (lectura → escritura controlada)
+   - Deploy en VPS (`mcp.wallet.lavalex.co`); conexión fácil a Claude / Gemini / OpenAI / Cursor / OpenClaw
+   - Arquitectura Opción D (sin repo aparte; sin chat embebido en este ciclo)
 
-> **Roadmap v1 cerrado (2026-07-27):** Changes 1–6 entregados. Iteraciones futuras fuera de este ciclo SDD.
+> **Roadmap v1 cerrado (2026-07-27):** Changes 1–6 entregados. **Ciclo v1.1:** Change 7 (`mcp-access`) abre el canal de agentes.
 
 ---
 
