@@ -4,6 +4,7 @@ alwaysApply: true
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read `changes/mcp-access/proposal.md`
-and `changes/mcp-access/spec.md`. After `/speckit-plan`, prefer `changes/mcp-access/design.md`.
+shell commands, and other important information, read
+`changes/mcp-access/plan.md` and `changes/mcp-access/design.md`
+(also `proposal.md`, `spec.md`, `research.md`, `data-model.md`).
 <!-- SPECKIT END -->

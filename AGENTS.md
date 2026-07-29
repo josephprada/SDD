@@ -69,9 +69,13 @@ Rama: `feat/mcp-access` (desde `testing`).
 |-----------|------|
 | Spec | `changes/mcp-access/spec.md` |
 | Propuesta | `changes/mcp-access/proposal.md` |
-| Plan | `changes/mcp-access/plan.md` *(pendiente `/speckit-plan`)* |
-| Diseño técnico | `changes/mcp-access/design.md` *(pendiente)* |
-| Tasks | `changes/mcp-access/tasks.md` *(pendiente)* |
+| Plan | `changes/mcp-access/plan.md` |
+| Diseño técnico | `changes/mcp-access/design.md` |
+| Research | `changes/mcp-access/research.md` |
+| Data model | `changes/mcp-access/data-model.md` |
+| Quickstart QA | `changes/mcp-access/quickstart.md` |
+| Contracts | `changes/mcp-access/contracts/` |
+| Tasks | `changes/mcp-access/tasks.md` |
 
 **Alcance:** tokens PAT en Ajustes + servidor MCP (remoto VPS + stdio) sobre el dominio financiero — Opción D (monorepo, sin repo aparte).
 
