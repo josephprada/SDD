@@ -97,3 +97,81 @@ jobs:
             sudo nginx -t
             sudo systemctl reload nginx
             echo "Deploy OK: https://wallet.lavalex.co"
+
+      - name: Derive Convex Site URL for MCP
+        id: convex_site
+        env:
+          VITE_CONVEX_URL: ${{ secrets.VITE_CONVEX_URL_PROD }}
+        run: |
+          set -euo pipefail
+          cloud="${VITE_CONVEX_URL%/}"
+          if [[ "$cloud" == *.convex.cloud ]]; then
+            site="${cloud%.convex.cloud}.convex.site"
+          elif [[ "$cloud" == *.cloud ]]; then
+            site="${cloud%.cloud}.site"
+          else
+            echo "Unexpected VITE_CONVEX_URL_PROD shape: ${cloud%%/*}://…" >&2
+            exit 1
+          fi
+          echo "site_url=$site" >> "$GITHUB_OUTPUT"
+          echo "MCP CONVEX_SITE_URL derived (cloud→site)"
+
+      - name: Ensure MCP directory on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            sudo mkdir -p /opt/jp-wallet/mcp-server/nginx
+            sudo chown -R "$(id -un):$(id -un)" /opt/jp-wallet
+
+      - name: Sync MCP server to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "apps/mcp-server/*,scripts/vps-deploy-mcp.sh,changes/web-deploy/templates/nginx/mcp.wallet.lavalex.co.conf"
+          target: "/opt/jp-wallet/mcp-server-staging"
+          overwrite: true
+
+      - name: Install and restart MCP on VPS
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          username: ${{ secrets.VPS_SSH_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: CONVEX_SITE_URL
+          script: |
+            set -euo pipefail
+            STAGING="/opt/jp-wallet/mcp-server-staging"
+            DEST="/opt/jp-wallet/mcp-server"
+            sudo mkdir -p "$DEST/nginx"
+            # appleboy scp preserves relative paths under target
+            if [[ -d "$STAGING/apps/mcp-server" ]]; then
+              rsync -a --delete "$STAGING/apps/mcp-server/" "$DEST/"
+            else
+              rsync -a --delete "$STAGING/" "$DEST/"
+            fi
+            if [[ -f "$STAGING/scripts/vps-deploy-mcp.sh" ]]; then
+              cp "$STAGING/scripts/vps-deploy-mcp.sh" "$DEST/vps-deploy-mcp.sh"
+            elif [[ -f "$STAGING/vps-deploy-mcp.sh" ]]; then
+              cp "$STAGING/vps-deploy-mcp.sh" "$DEST/vps-deploy-mcp.sh"
+            fi
+            CONF_SRC=$(find "$STAGING" -name 'mcp.wallet.lavalex.co.conf' | head -1)
+            if [[ -n "${CONF_SRC:-}" ]]; then
+              cp "$CONF_SRC" "$DEST/nginx/mcp.wallet.lavalex.co.conf"
+            fi
+            chmod +x "$DEST/vps-deploy-mcp.sh"
+            export CONVEX_SITE_URL="${CONVEX_SITE_URL}"
+            sudo --preserve-env=CONVEX_SITE_URL "$DEST/vps-deploy-mcp.sh"
+            echo "MCP Deploy OK"
+            echo "Fallback: https://wallet.lavalex.co/mcp-healthz"
+            echo "Primary (needs DNS): https://mcp.wallet.lavalex.co/healthz"
+        env:
+          CONVEX_SITE_URL: ${{ steps.convex_site.outputs.site_url }}

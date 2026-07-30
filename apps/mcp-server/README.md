@@ -274,18 +274,32 @@ sudo nginx -t && sudo systemctl reload nginx
 curl https://mcp.wallet.lavalex.co/healthz
 ```
 
-### Actualizar (deploy manual v1)
+### Actualizar
+
+Desde `main`, el workflow `Deploy Production` sincroniza `apps/mcp-server` a
+`/opt/jp-wallet/mcp-server`, ejecuta `scripts/vps-deploy-mcp.sh` (systemd +
+Nginx) y deja un **fallback** en `https://wallet.lavalex.co/mcp` mientras el
+DNS de `mcp.wallet.lavalex.co` no exista.
+
+Manual:
 
 ```bash
-cd /opt/jp-wallet/SDD
-git pull
-bun install --frozen-lockfile
-sudo systemctl restart jp-wallet-mcp
+# En el VPS, tras rsync/copia del paquete:
+export CONVEX_SITE_URL=https://tu-deployment.convex.site
+sudo --preserve-env=CONVEX_SITE_URL /opt/jp-wallet/mcp-server/vps-deploy-mcp.sh
 ```
 
-CI automatizado (build + rsync + restart) queda documentado como pendiente de
-fase D en `changes/mcp-access/tasks.md` (T043); este README cubre el
-procedimiento manual mínimo para producción.
+**DNS requerido (Hostinger → lavalex.co):**
+
+| Tipo | Host | Valor |
+|------|------|-------|
+| A | `mcp.wallet` | `69.6.234.237` |
+
+Hasta que propague, usa el fallback:
+
+```json
+{ "url": "https://wallet.lavalex.co/mcp", "headers": { "Authorization": "Bearer jpw_…" } }
+```
 
 ---
 
