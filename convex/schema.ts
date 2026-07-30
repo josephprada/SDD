@@ -11,6 +11,7 @@ import {
 } from "./lib/preferences";
 import {
 	abonoRecalcEffectValidator,
+	apiScopeValidator,
 	creditPaymentStatusValidator,
 	creditProfileValidator,
 	creditStatusValidator,
@@ -375,4 +376,32 @@ export default defineSchema({
 		.index("by_document_section", ["documentId", "section"])
 		.index("by_user", ["userId"])
 		.index("by_document_source", ["documentId", "sourceType", "sourceId"]),
+
+	apiTokens: defineTable({
+		userId: v.id("users"),
+		name: v.string(),
+		tokenPrefix: v.string(),
+		tokenHash: v.string(),
+		scopes: v.array(apiScopeValidator),
+		expiresAt: v.optional(v.number()),
+		lastUsedAt: v.optional(v.number()),
+		revokedAt: v.optional(v.number()),
+		createdAt: v.number(),
+		updatedAt: v.number(),
+	})
+		.index("by_user", ["userId"])
+		.index("by_token_hash", ["tokenHash"])
+		.index("by_user_created", ["userId", "createdAt"]),
+
+	apiAuditLog: defineTable({
+		userId: v.id("users"),
+		tokenId: v.id("apiTokens"),
+		action: v.string(),
+		success: v.boolean(),
+		errorCode: v.optional(v.string()),
+		summary: v.optional(v.string()),
+		createdAt: v.number(),
+	})
+		.index("by_user_created", ["userId", "createdAt"])
+		.index("by_token_created", ["tokenId", "createdAt"]),
 });

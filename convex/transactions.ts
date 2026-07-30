@@ -92,7 +92,7 @@ export async function enrichTransaction(
 	};
 }
 
-async function applyBalanceDeltas(
+export async function applyBalanceDeltas(
 	ctx: MutationCtx,
 	deltas: ReturnType<typeof getBalanceDeltas>,
 	userId: Id<"users">,
@@ -110,7 +110,7 @@ async function applyBalanceDeltas(
 	}
 }
 
-async function validateTransactionInput(
+export async function validateTransactionInput(
 	ctx: QueryCtx,
 	userId: Id<"users">,
 	input: TransactionLike & { categoryId: Id<"categories"> },
@@ -481,52 +481,55 @@ export const reorderWithinDate = mutation({
 	},
 });
 
+export async function removeTransactionForUser(
+	ctx: MutationCtx,
+	userId: Id<"users">,
+	transactionId: Id<"transactions">,
+) {
+	const transaction = await requireTransactionOwnership(
+		ctx,
+		userId,
+		transactionId,
+	);
+
+	const attachments = await ctx.db
+		.query("attachments")
+		.withIndex("by_entity", (q) =>
+			q.eq("entityType", "transaction").eq("entityId", transactionId),
+		)
+		.collect();
+
+	for (const attachment of attachments) {
+		await ctx.storage.delete(attachment.storageId);
+		await ctx.db.delete(attachment._id);
+	}
+
+	const deltas = getBalanceDeltas({
+		type: transaction.type,
+		amount: transaction.amount,
+		accountId: transaction.accountId,
+		toAccountId: transaction.toAccountId,
+	});
+	await applyBalanceDeltas(ctx, invertDeltas(deltas), userId, {
+		allowArchivedReversal: true,
+	});
+
+	await clearFixedExpensePaymentForDeletedTransaction(ctx, userId, transaction);
+
+	await revertCreditPaymentForTransaction(ctx, userId, transactionId);
+
+	await revertSavingsContributionForTransaction(ctx, userId, transactionId);
+
+	await ctx.db.delete(transactionId);
+}
+
 export const remove = mutation({
 	args: {
 		transactionId: v.id("transactions"),
 	},
 	handler: async (ctx, { transactionId }) => {
 		const userId = await requireUserId(ctx);
-		const transaction = await requireTransactionOwnership(
-			ctx,
-			userId,
-			transactionId,
-		);
-
-		const attachments = await ctx.db
-			.query("attachments")
-			.withIndex("by_entity", (q) =>
-				q.eq("entityType", "transaction").eq("entityId", transactionId),
-			)
-			.collect();
-
-		for (const attachment of attachments) {
-			await ctx.storage.delete(attachment.storageId);
-			await ctx.db.delete(attachment._id);
-		}
-
-		const deltas = getBalanceDeltas({
-			type: transaction.type,
-			amount: transaction.amount,
-			accountId: transaction.accountId,
-			toAccountId: transaction.toAccountId,
-		});
-		await applyBalanceDeltas(ctx, invertDeltas(deltas), userId, {
-			allowArchivedReversal: true,
-		});
-
-		await clearFixedExpensePaymentForDeletedTransaction(
-			ctx,
-			userId,
-			transaction,
-		);
-
-		await revertCreditPaymentForTransaction(ctx, userId, transactionId);
-
-		await revertSavingsContributionForTransaction(ctx, userId, transactionId);
-
-		await ctx.db.delete(transactionId);
-
+		await removeTransactionForUser(ctx, userId, transactionId);
 		return null;
 	},
 });

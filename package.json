@@ -3,15 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "workspaces": ["apps/*", "packages/*"],
-  "scripts": {
-    "dev": "bun run --filter @jp-wallet/web dev",
-    "build": "bun run --filter @jp-wallet/web build",
-    "convex:codegen": "convex codegen",
-    "convex:setup-jwt": "node scripts/setup-convex-jwt.mjs",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
-  },
+	"scripts": {
+		"dev": "bun run --filter @jp-wallet/web dev",
+		"build": "bun run --filter @jp-wallet/web build",
+		"mcp:dev": "bun run --filter @jp-wallet/mcp-server dev",
+		"mcp:stdio": "bun run --filter @jp-wallet/mcp-server start:stdio",
+		"convex:codegen": "convex codegen",
+		"convex:setup-jwt": "node scripts/setup-convex-jwt.mjs",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write .",
+		"format": "biome format --write ."
+	},
   "dependencies": {
     "@auth/core": "^0.37.0",
     "@convex-dev/auth": "^0.0.80",

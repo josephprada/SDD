@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-27
 
-**Status**: Planificado (2026-07-29)
+**Status**: Implementado (pendiente QA — 2026-07-29)
 
 **Change**: mcp-access (Change 7)
 

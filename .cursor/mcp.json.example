@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "jp-wallet": {
+      "url": "http://127.0.0.1:3100/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:JP_WALLET_TOKEN}"
+      }
+    }
+  }
+}

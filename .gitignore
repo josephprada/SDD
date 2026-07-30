@@ -26,5 +26,9 @@ deploy-keys/
 *.sln
 *.sw?
 
+# MCP local (puede contener tokens vía env; ejemplo sí se versiona)
+.cursor/mcp.json
+!.cursor/mcp.json.example
+
 # TypeScript
 *.tsbuildinfo

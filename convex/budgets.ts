@@ -107,7 +107,7 @@ async function enrichBudget(
 	};
 }
 
-async function validateExpenseCategories(
+export async function validateExpenseCategories(
 	ctx: QueryCtx,
 	userId: Id<"users">,
 	categoryIds: Id<"categories">[],
@@ -132,7 +132,7 @@ async function validateExpenseCategories(
 	}
 }
 
-async function assertCategoriesAvailableForPeriod(
+export async function assertCategoriesAvailableForPeriod(
 	ctx: QueryCtx,
 	userId: Id<"users">,
 	periodKey: string,

@@ -73,9 +73,11 @@
 
 ## Checklist cierre change
 
-- [ ] A tokens + Settings
-- [ ] B MCP read remoto
-- [ ] C write + destructive confirm
-- [ ] D stdio + rate limit + docs deploy VPS
-- [ ] `bun run lint` + `bun run build`
-- [ ] Quickstart pasando en ambiente de prueba
+- [x] A tokens + Settings
+- [x] B MCP read remoto
+- [x] C write + destructive confirm
+- [x] D stdio + rate limit + docs deploy VPS
+- [x] `bun run lint` (archivos del change) + `bun run build` web + mcp typecheck
+- [ ] Quickstart pasando en ambiente de prueba **(pendiente prueba manual del usuario)**
+
+> **2026-07-29:** Implementación completa en `feat/mcp-access`. Listo para QA local: `bunx convex dev` + `bun dev` + `CONVEX_SITE_URL=… bun run mcp:dev`.

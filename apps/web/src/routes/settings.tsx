@@ -1,18 +1,16 @@
 import { BrandLogoMark } from "@app/components/brand/BrandLogoMark";
+import { PushPermissionBanner } from "@app/components/notifications/PushPermissionBanner";
+import { ApiAccessSection } from "@app/components/settings/ApiAccessSection";
 import { AppearanceSection } from "@app/components/settings/AppearanceSection";
 import { GroupingPicker } from "@app/components/settings/GroupingPicker";
 import { LanguagePicker } from "@app/components/settings/LanguagePicker";
 import { NotificationsToggle } from "@app/components/settings/NotificationsToggle";
-import { PushPermissionBanner } from "@app/components/notifications/PushPermissionBanner";
 import { PreferenceRow } from "@app/components/settings/PreferenceRow";
 import { ProfileEditor } from "@app/components/settings/ProfileEditor";
 import { useAuth } from "@app/lib/auth/useAuth";
 import { usePreferencesStore } from "@app/stores/preferences";
-import {
-	GROUPING_LABELS,
-	THEME_MODE_LABELS,
-} from "@jp-ds/index";
 import { Button } from "@jp-ds";
+import { GROUPING_LABELS, THEME_MODE_LABELS } from "@jp-ds/index";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -47,55 +45,63 @@ export function SettingsRoute() {
 			</div>
 
 			<div className="card-stagger settings-sections">
-			<section className="settings-section">
-				<h2 className="settings-section__title">Perfil</h2>
-				<ProfileEditor />
-			</section>
+				<section className="settings-section">
+					<h2 className="settings-section__title">Perfil</h2>
+					<ProfileEditor />
+				</section>
 
-			<AppearanceSection />
+				<AppearanceSection />
 
-			<section className="settings-section">
-				<h2 className="settings-section__title">Preferencias</h2>
-				<div className="settings-card glass">
-					<PreferenceRow
-						title="Agrupación"
-						subtitle="Período por defecto del resumen"
-						value={GROUPING_LABELS[defaultGrouping]}
-						onClick={() => setGroupingOpen(true)}
-					/>
-					<PreferenceRow
-						title="Idioma"
-						subtitle="Interfaz de la aplicación"
-						value="Español"
-						onClick={() => setLanguageOpen(true)}
-					/>
-					<PreferenceRow
-						title="Modo"
-						subtitle="Tema visual actual"
-						value={THEME_MODE_LABELS[mode]}
-						as="div"
-					/>
-					<div className="settings-row glass">
-						<NotificationsToggle />
+				<section className="settings-section">
+					<h2 className="settings-section__title">Preferencias</h2>
+					<div className="settings-card glass">
+						<PreferenceRow
+							title="Agrupación"
+							subtitle="Período por defecto del resumen"
+							value={GROUPING_LABELS[defaultGrouping]}
+							onClick={() => setGroupingOpen(true)}
+						/>
+						<PreferenceRow
+							title="Idioma"
+							subtitle="Interfaz de la aplicación"
+							value="Español"
+							onClick={() => setLanguageOpen(true)}
+						/>
+						<PreferenceRow
+							title="Modo"
+							subtitle="Tema visual actual"
+							value={THEME_MODE_LABELS[mode]}
+							as="div"
+						/>
+						<div className="settings-row glass">
+							<NotificationsToggle />
+						</div>
+						<PushPermissionBanner />
 					</div>
-					<PushPermissionBanner />
-				</div>
-			</section>
+				</section>
 
-			{session ? (
-				<div
-					className="settings-sign-out show-mobile"
-					style={{ marginTop: "var(--space-6)" }}
-				>
-					<Button variant="secondary" fullWidth onClick={handleSignOut}>
-						Cerrar sesión
-					</Button>
-				</div>
-			) : null}
+				<ApiAccessSection />
+
+				{session ? (
+					<div
+						className="settings-sign-out show-mobile"
+						style={{ marginTop: "var(--space-6)" }}
+					>
+						<Button variant="secondary" fullWidth onClick={handleSignOut}>
+							Cerrar sesión
+						</Button>
+					</div>
+				) : null}
 			</div>
 
-			<GroupingPicker open={groupingOpen} onClose={() => setGroupingOpen(false)} />
-			<LanguagePicker open={languageOpen} onClose={() => setLanguageOpen(false)} />
+			<GroupingPicker
+				open={groupingOpen}
+				onClose={() => setGroupingOpen(false)}
+			/>
+			<LanguagePicker
+				open={languageOpen}
+				onClose={() => setLanguageOpen(false)}
+			/>
 		</div>
 	);
 }

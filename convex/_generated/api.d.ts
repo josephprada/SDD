@@ -9,6 +9,9 @@
  */
 
 import type * as accounts from "../accounts.js";
+import type * as agentGateway from "../agentGateway.js";
+import type * as apiAudit from "../apiAudit.js";
+import type * as apiTokens from "../apiTokens.js";
 import type * as attachments from "../attachments.js";
 import type * as auth from "../auth.js";
 import type * as budgets from "../budgets.js";
@@ -25,6 +28,8 @@ import type * as fixedExpenseContext from "../fixedExpenseContext.js";
 import type * as fixedExpenses from "../fixedExpenses.js";
 import type * as http from "../http.js";
 import type * as lib_accounts from "../lib/accounts.js";
+import type * as lib_apiScopes from "../lib/apiScopes.js";
+import type * as lib_apiTokenAuth from "../lib/apiTokenAuth.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_balance from "../lib/balance.js";
 import type * as lib_creditAbonoReplay from "../lib/creditAbonoReplay.js";
@@ -79,6 +84,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   accounts: typeof accounts;
+  agentGateway: typeof agentGateway;
+  apiAudit: typeof apiAudit;
+  apiTokens: typeof apiTokens;
   attachments: typeof attachments;
   auth: typeof auth;
   budgets: typeof budgets;
@@ -95,6 +103,8 @@ declare const fullApi: ApiFromModules<{
   fixedExpenses: typeof fixedExpenses;
   http: typeof http;
   "lib/accounts": typeof lib_accounts;
+  "lib/apiScopes": typeof lib_apiScopes;
+  "lib/apiTokenAuth": typeof lib_apiTokenAuth;
   "lib/auth": typeof lib_auth;
   "lib/balance": typeof lib_balance;
   "lib/creditAbonoReplay": typeof lib_creditAbonoReplay;

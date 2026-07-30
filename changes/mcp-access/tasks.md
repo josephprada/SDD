@@ -26,11 +26,11 @@
 
 **Purpose**: Scaffold del package MCP y constantes compartidas sin schema aún.
 
-- [ ] T001 Crear workspace `apps/mcp-server/` con `package.json` (`@jp-wallet/mcp-server`), `tsconfig.json` y `README.md` stub; registrar en workspaces raíz si hace falta (`package.json`)
-- [ ] T002 [P] Crear stubs `apps/mcp-server/src/index.ts`, `http.ts`, `stdio.ts`, `convexClient.ts`, `resources.ts` y carpeta `apps/mcp-server/src/tools/`
-- [ ] T003 [P] Crear catálogo de scopes + defaults + labels ES en `convex/lib/apiScopes.ts` (espejo tipado usable desde web vía contrato o re-export)
-- [ ] T004 [P] Crear helpers de hash/generate token (SHA-256 + prefijo `jpw_`, pepper opcional `API_TOKEN_PEPPER`) en `convex/lib/apiTokenAuth.ts`
-- [ ] T005 [P] Crear tipos/presets de UI para scopes y snippets en `apps/web/src/lib/mcp/types.ts`
+- [x] T001 Crear workspace `apps/mcp-server/` con `package.json` (`@jp-wallet/mcp-server`), `tsconfig.json` y `README.md` stub; registrar en workspaces raíz si hace falta (`package.json`)
+- [x] T002 [P] Crear stubs `apps/mcp-server/src/index.ts`, `http.ts`, `stdio.ts`, `convexClient.ts`, `resources.ts` y carpeta `apps/mcp-server/src/tools/`
+- [x] T003 [P] Crear catálogo de scopes + defaults + labels ES en `convex/lib/apiScopes.ts` (espejo tipado usable desde web vía contrato o re-export)
+- [x] T004 [P] Crear helpers de hash/generate token (SHA-256 + prefijo `jpw_`, pepper opcional `API_TOKEN_PEPPER`) en `convex/lib/apiTokenAuth.ts`
+- [x] T005 [P] Crear tipos/presets de UI para scopes y snippets en `apps/web/src/lib/mcp/types.ts`
 
 **Checkpoint**: Package MCP importable; scopes/hash helpers listos; sin UI ni schema.
 
@@ -42,12 +42,12 @@
 
 **⚠️ CRITICAL**: No empezar US hasta completar esta fase.
 
-- [ ] T006 Extender `convex/schema.ts` — tablas `apiTokens` y `apiAuditLog` con indexes `by_user`, `by_token_hash`, `by_user_created`, `by_token_created` (ver `data-model.md`)
-- [ ] T007 [P] Extender `convex/lib/validators.ts` — validator de `apiScope` / lista de scopes
-- [ ] T008 [P] Crear stubs `convex/apiTokens.ts`, `convex/apiAudit.ts`, `convex/agentGateway.ts`
-- [ ] T009 Implementar `authenticateApiToken` / `assertScope` / `recordAudit` en `convex/lib/apiTokenAuth.ts` (lookup hash, revoked/expired, lastUsedAt)
-- [ ] T010 Registrar `POST /agent/v1/rpc` en `convex/http.ts` — parse Bearer, body `{ tool, args, confirm? }`, respuesta JSON ok/error según `contracts/agent-gateway.md` (dispatch aún stub `not_implemented`)
-- [ ] T011 Verificar `bunx convex codegen` / `convex dev` sin errores de schema tras T006–T010
+- [x] T006 Extender `convex/schema.ts` — tablas `apiTokens` y `apiAuditLog` con indexes `by_user`, `by_token_hash`, `by_user_created`, `by_token_created` (ver `data-model.md`)
+- [x] T007 [P] Extender `convex/lib/validators.ts` — validator de `apiScope` / lista de scopes
+- [x] T008 [P] Crear stubs `convex/apiTokens.ts`, `convex/apiAudit.ts`, `convex/agentGateway.ts`
+- [x] T009 Implementar `authenticateApiToken` / `assertScope` / `recordAudit` en `convex/lib/apiTokenAuth.ts` (lookup hash, revoked/expired, lastUsedAt)
+- [x] T010 Registrar `POST /agent/v1/rpc` en `convex/http.ts` — parse Bearer, body `{ tool, args, confirm? }`, respuesta JSON ok/error según `contracts/agent-gateway.md` (dispatch aún stub `not_implemented`)
+- [x] T011 Verificar `bunx convex codegen` / `convex dev` sin errores de schema tras T006–T010
 
 **Checkpoint**: Foundation ready — user stories pueden comenzar.
 
@@ -61,13 +61,13 @@
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US1] Implementar `apiTokens.create` / `list` / `revoke` en `convex/apiTokens.ts` según `contracts/api-tokens.md` (max 10 activos, default `DEFAULT_READ_SCOPES`, plaintext solo en create)
-- [ ] T013 [US1] Implementar `apiAudit.listRecent` en `convex/apiAudit.ts`
-- [ ] T014 [P] [US1] Crear `CreateApiTokenDialog.tsx` en `apps/web/src/components/settings/` (nombre, presets scopes, expiry 30/90/nunca)
-- [ ] T015 [P] [US1] Crear `TokenSecretOnceDialog.tsx` en `apps/web/src/components/settings/` (mostrar/copiar `jpw_…` + warning)
-- [ ] T016 [US1] Crear `ApiAccessSection.tsx` en `apps/web/src/components/settings/` — lista tokens (prefijo, scopes, status, lastUsed, revoke) + CTA crear + lista audit reciente
-- [ ] T017 [US1] Montar sección en `apps/web/src/routes/settings.tsx` + estilos mobile-first reutilizando `settings-*` / JP-DS
-- [ ] T018 [US1] Wire errores amigables (`formatConvexError` o equivalente) en create/revoke
+- [x] T012 [US1] Implementar `apiTokens.create` / `list` / `revoke` en `convex/apiTokens.ts` según `contracts/api-tokens.md` (max 10 activos, default `DEFAULT_READ_SCOPES`, plaintext solo en create)
+- [x] T013 [US1] Implementar `apiAudit.listRecent` en `convex/apiAudit.ts`
+- [x] T014 [P] [US1] Crear `CreateApiTokenDialog.tsx` en `apps/web/src/components/settings/` (nombre, presets scopes, expiry 30/90/nunca)
+- [x] T015 [P] [US1] Crear `TokenSecretOnceDialog.tsx` en `apps/web/src/components/settings/` (mostrar/copiar `jpw_…` + warning)
+- [x] T016 [US1] Crear `ApiAccessSection.tsx` en `apps/web/src/components/settings/` — lista tokens (prefijo, scopes, status, lastUsed, revoke) + CTA crear + lista audit reciente
+- [x] T017 [US1] Montar sección en `apps/web/src/routes/settings.tsx` + estilos mobile-first reutilizando `settings-*` / JP-DS
+- [x] T018 [US1] Wire errores amigables (`formatConvexError` o equivalente) en create/revoke
 
 **Checkpoint**: US1 usable en `/settings` sin MCP aún; create+revoke verificables con curl al gateway (401 tras revoke).
 
@@ -81,12 +81,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T019 [P] [US2] Implementar `apps/web/src/lib/mcp/connectionSnippets.ts` — templates remoto (URL + Authorization) y local stdio (placeholder env)
-- [ ] T020 [US2] Mostrar snippets copiables en `ApiAccessSection.tsx` (tras crear token o panel ayuda) — Claude/Cursor/genérico
-- [ ] T021 [US2] Implementar `apps/mcp-server/src/convexClient.ts` — `POST` a `CONVEX_SITE_URL/agent/v1/rpc` reenviando Bearer
-- [ ] T022 [US2] Implementar HTTP MCP Streamable + Bearer passthrough en `apps/mcp-server/src/http.ts` + entry `apps/mcp-server/src/index.ts` (`--http --port`)
-- [ ] T023 [US2] Añadir `GET /healthz` sin auth en el servidor MCP
-- [ ] T024 [US2] Documentar env (`CONVEX_SITE_URL`, `PORT`, `JP_WALLET_TOKEN` para stdio futuro) y uso local en `apps/mcp-server/README.md`
+- [x] T019 [P] [US2] Implementar `apps/web/src/lib/mcp/connectionSnippets.ts` — templates remoto (URL + Authorization) y local stdio (placeholder env)
+- [x] T020 [US2] Mostrar snippets copiables en `ApiAccessSection.tsx` (tras crear token o panel ayuda) — Claude/Cursor/genérico
+- [x] T021 [US2] Implementar `apps/mcp-server/src/convexClient.ts` — `POST` a `CONVEX_SITE_URL/agent/v1/rpc` reenviando Bearer
+- [x] T022 [US2] Implementar HTTP MCP Streamable + Bearer passthrough en `apps/mcp-server/src/http.ts` + entry `apps/mcp-server/src/index.ts` (`--http --port`)
+- [x] T023 [US2] Añadir `GET /healthz` sin auth en el servidor MCP
+- [x] T024 [US2] Documentar env (`CONVEX_SITE_URL`, `PORT`, `JP_WALLET_TOKEN` para stdio futuro) y uso local en `apps/mcp-server/README.md`
 
 **Checkpoint**: Cliente MCP descubre servidor; auth inválida falla; snippets en Settings.
 
@@ -100,12 +100,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T025 [US3] Implementar dispatch read en `convex/agentGateway.ts` — mapa tool→handler + scope check + audit (`get_financial_overview`, `list_transactions`, `get_spending_summary`, `list_accounts`, `list_categories`, `list_budgets`, `list_credits`, `list_savings_goals`, `list_tax_documents`, `get_tax_document`)
-- [ ] T026 [US3] Conectar `http.ts` RPC al dispatch real (reemplazar stub `not_implemented` para tools read)
-- [ ] T027 [P] [US3] Registrar tools read en `apps/mcp-server/src/tools/read.ts` (schemas Zod/JSON + llamadas `convexClient`)
-- [ ] T028 [P] [US3] Implementar resources `jpwallet://overview`, `jpwallet://budgets/active`, `jpwallet://credits/active` en `apps/mcp-server/src/resources.ts`
-- [ ] T029 [US3] Wire tools/resources en el server MCP (`index.ts` / `http.ts`)
-- [ ] T030 [US3] Asegurar errores `forbidden`/`unauthorized` mapeados a respuestas MCP `isError` sin stack traces
+- [x] T025 [US3] Implementar dispatch read en `convex/agentGateway.ts` — mapa tool→handler + scope check + audit (`get_financial_overview`, `list_transactions`, `get_spending_summary`, `list_accounts`, `list_categories`, `list_budgets`, `list_credits`, `list_savings_goals`, `list_tax_documents`, `get_tax_document`)
+- [x] T026 [US3] Conectar `http.ts` RPC al dispatch real (reemplazar stub `not_implemented` para tools read)
+- [x] T027 [P] [US3] Registrar tools read en `apps/mcp-server/src/tools/read.ts` (schemas Zod/JSON + llamadas `convexClient`)
+- [x] T028 [P] [US3] Implementar resources `jpwallet://overview`, `jpwallet://budgets/active`, `jpwallet://credits/active` en `apps/mcp-server/src/resources.ts`
+- [x] T029 [US3] Wire tools/resources en el server MCP (`index.ts` / `http.ts`)
+- [x] T030 [US3] Asegurar errores `forbidden`/`unauthorized` mapeados a respuestas MCP `isError` sin stack traces
 
 **Checkpoint**: MVP A+B completo — preguntar “cómo voy este mes” con datos reales vía agente.
 
@@ -119,9 +119,9 @@
 
 ### Implementation for User Story 4
 
-- [ ] T031 [US4] Handlers `upsert_budget`, `create_savings_goal`, `contribute_to_goal` en `convex/agentGateway.ts` (reutilizar mutations existentes; validar COP)
-- [ ] T032 [P] [US4] Registrar tools write budgets/savings en `apps/mcp-server/src/tools/write-plans.ts`
-- [ ] T033 [US4] Audit success/fail para estas tools; rechazar args incompletos con `validation`
+- [x] T031 [US4] Handlers `upsert_budget`, `create_savings_goal`, `contribute_to_goal` en `convex/agentGateway.ts` (reutilizar mutations existentes; validar COP)
+- [x] T032 [P] [US4] Registrar tools write budgets/savings en `apps/mcp-server/src/tools/write-plans.ts`
+- [x] T033 [US4] Audit success/fail para estas tools; rechazar args incompletos con `validation`
 
 **Checkpoint**: quickstart §Fase C parcial (presupuestos/ahorros).
 
@@ -135,12 +135,12 @@
 
 ### Implementation for User Story 5
 
-- [ ] T034 [US5] Handlers `create_transaction`, `update_transaction` en `convex/agentGateway.ts` (`write:transactions`)
-- [ ] T035 [US5] Handlers destructivos (`delete_transaction`, y archive/remove acordados en `contracts/mcp-tools.md`) — requieren `destructive` + `confirm: true`
-- [ ] T036 [US5] Handlers tax write `create_tax_item` / `update_tax_item` con guard `filed` → `conflict` en `convex/agentGateway.ts`
-- [ ] T037 [P] [US5] Opcional fase C: writes `accounts`/`categories` mínimos si caben en contrato; si no, documentar diferido en `contracts/mcp-tools.md`
-- [ ] T038 [P] [US5] Registrar tools write/destructive en `apps/mcp-server/src/tools/write-ops.ts`
-- [ ] T039 [US5] Verificar audit en denegaciones de scope y confirmation_required
+- [x] T034 [US5] Handlers `create_transaction`, `update_transaction` en `convex/agentGateway.ts` (`write:transactions`)
+- [x] T035 [US5] Handlers destructivos (`delete_transaction`, y archive/remove acordados en `contracts/mcp-tools.md`) — requieren `destructive` + `confirm: true`
+- [x] T036 [US5] Handlers tax write `create_tax_item` / `update_tax_item` con guard `filed` → `conflict` en `convex/agentGateway.ts`
+- [x] T037 [P] [US5] Opcional fase C: writes `accounts`/`categories` mínimos si caben en contrato; si no, documentar diferido en `contracts/mcp-tools.md`
+- [x] T038 [P] [US5] Registrar tools write/destructive en `apps/mcp-server/src/tools/write-ops.ts`
+- [x] T039 [US5] Verificar audit en denegaciones de scope y confirmation_required
 
 **Checkpoint**: CRUD controlado vía MCP; paridad reglas UI en tax filed.
 
@@ -150,15 +150,15 @@
 
 **Purpose**: Stdio, rate limit, deploy VPS, docs, QA cierre.
 
-- [ ] T040 Implementar transporte stdio en `apps/mcp-server/src/stdio.ts` + flag `--stdio` leyendo `JP_WALLET_TOKEN`
-- [ ] T041 Actualizar snippets stdio reales en `apps/web/src/lib/mcp/connectionSnippets.ts` y README MCP
-- [ ] T042 Rate limit 60 rpm/token en `apps/mcp-server` (memoria) y respuesta `429` / code `rate_limited` alineada al gateway
-- [ ] T043 [P] Documentar deploy VPS (systemd/Nginx `mcp.wallet.lavalex.co`, env, healthcheck) en `apps/mcp-server/README.md` y/o `changes/mcp-access/quickstart.md`
-- [ ] T044 [P] Documentar `API_TOKEN_PEPPER` en `.env.example` / docs Convex del change
-- [ ] T045 [P] Prompts MCP opcionales `monthly_review` / `savings_plan` en `apps/mcp-server/src/prompts.ts` (si tiempo; si no, marcar diferido en README)
-- [ ] T046 Actualizar `AGENTS.md` / `changes/mcp-access/plan.md` Phase Outputs tasks ✅; proposal estado si aplica
-- [ ] T047 `bun run lint` + `bun run build` (+ build mcp-server) limpios
-- [ ] T048 Ejecutar checklist `changes/mcp-access/quickstart.md` end-to-end y anotar resultado
+- [x] T040 Implementar transporte stdio en `apps/mcp-server/src/stdio.ts` + flag `--stdio` leyendo `JP_WALLET_TOKEN`
+- [x] T041 Actualizar snippets stdio reales en `apps/web/src/lib/mcp/connectionSnippets.ts` y README MCP
+- [x] T042 Rate limit 60 rpm/token en `apps/mcp-server` (memoria) y respuesta `429` / code `rate_limited` alineada al gateway
+- [x] T043 [P] Documentar deploy VPS (systemd/Nginx `mcp.wallet.lavalex.co`, env, healthcheck) en `apps/mcp-server/README.md` y/o `changes/mcp-access/quickstart.md`
+- [x] T044 [P] Documentar `API_TOKEN_PEPPER` en `.env.example` / docs Convex del change
+- [x] T045 [P] Prompts MCP opcionales `monthly_review` / `savings_plan` en `apps/mcp-server/src/prompts.ts` (si tiempo; si no, marcar diferido en README)
+- [x] T046 Actualizar `AGENTS.md` / `changes/mcp-access/plan.md` Phase Outputs tasks ✅; proposal estado si aplica
+- [x] T047 `bun run lint` + `bun run build` (+ build mcp-server) limpios
+- [x] T048 Ejecutar checklist `changes/mcp-access/quickstart.md` end-to-end y anotar resultado
 
 **Checkpoint**: Change 7 completo Opción D listo para merge a `testing` cuando se pida.
 

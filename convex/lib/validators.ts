@@ -351,6 +351,25 @@ export function validateTaxDocumentNotes(notes?: string): string | undefined {
 	return trimmed;
 }
 
+export const apiScopeValidator = v.union(
+	v.literal("read:dashboard"),
+	v.literal("read:transactions"),
+	v.literal("write:transactions"),
+	v.literal("read:accounts"),
+	v.literal("write:accounts"),
+	v.literal("read:categories"),
+	v.literal("write:categories"),
+	v.literal("read:budgets"),
+	v.literal("write:budgets"),
+	v.literal("read:credits"),
+	v.literal("write:credits"),
+	v.literal("read:savings"),
+	v.literal("write:savings"),
+	v.literal("read:tax"),
+	v.literal("write:tax"),
+	v.literal("destructive"),
+);
+
 export function validateOptionalEstimatedAmount(
 	value: number | null | undefined,
 	field: string,
