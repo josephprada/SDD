@@ -1,12 +1,13 @@
 # Propuesta: Change 7 — MCP Access (Acceso para agentes LLM)
 
 **Versión**: 1.0.0  
-**Estado**: Implementado (pendiente QA usuario)  
+**Estado**: Completado ✅ (v1.0 — 2026-07-29)  
 **Change**: mcp-access  
 **Creado**: 2026-07-27  
 **Planificado**: 2026-07-29  
 **Implementado**: 2026-07-29  
-**Rama**: `feat/mcp-access` (desde `testing`)
+**Cerrado**: 2026-07-29  
+**Rama**: `feat/mcp-access` → `testing` → `main`
 
 ---
 

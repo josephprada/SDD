@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-27
 
-**Status**: Implementado (pendiente QA — 2026-07-29)
+**Status**: ✅ Completado (v1.0 — MCP Access, 2026-07-29)
 
 **Change**: mcp-access (Change 7)
 

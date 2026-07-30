@@ -32,16 +32,17 @@ No confundir ambos. Para colores, tipografía, glassmorphism, motion o component
 
 ```
 apps/web/           # App Vite + React (alias @app/*)
-packages/jp-ds/     # Design system JP-DS (alias @jp-ds/*)
+apps/mcp-server/    # Servidor MCP (@jp-wallet/mcp-server)
+packages/jp-ds/     # Design system (tokens CSS, componentes, motion)
 convex/             # Backend Convex (alias @convex/* desde apps/web)
 ├── tokens/         # CSS custom properties (color, typography, spacing, dark.css)
-├── components/     # Button, Input, IconButton, Avatar, Spinner
+├── components/     # Button, Input, IconButton, Avatar, Spinner, Checkbox, Radio
 └── src/motion/     # Motion tokens (fuente de verdad TS)
 ```
 
 La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex/_generated/api`.
 
-**Scripts raíz:** `bun dev` · `bun build` · `bun lint`
+**Scripts raíz:** `bun dev` · `bun build` · `bun lint` · `bun run mcp:dev`
 
 ---
 
@@ -61,9 +62,9 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change en curso: mcp-access (Change 7)
+## Change cerrado: mcp-access ✅ (Change 7 — 2026-07-29)
 
-Rama: `feat/mcp-access` (desde `testing`).
+Rama histórica: `feat/mcp-access` — merge `testing` + `main` (prod).
 
 | Artefacto | Ruta |
 |-----------|------|
@@ -77,12 +78,11 @@ Rama: `feat/mcp-access` (desde `testing`).
 | Contracts | `changes/mcp-access/contracts/` |
 | Tasks | `changes/mcp-access/tasks.md` |
 
-**Alcance:** tokens PAT en Ajustes + servidor MCP (remoto VPS + stdio) sobre el dominio financiero — Opción D (monorepo, sin repo aparte).
+**Alcance v1:** PATs en Ajustes + gateway `/agent/v1/rpc` + `apps/mcp-server` (HTTP/stdio) — Opción D.
 
 **Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Change anterior cerrado:** web-tax-dian ✅ (2026-07-27; merge `testing` + `main`).  
-Prod: `https://wallet.lavalex.co`
+**Roadmap:** Changes 1–7 cerrados. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
 
 ---
 

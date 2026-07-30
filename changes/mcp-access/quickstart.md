@@ -78,6 +78,6 @@
 - [x] C write + destructive confirm
 - [x] D stdio + rate limit + docs deploy VPS
 - [x] `bun run lint` (archivos del change) + `bun run build` web + mcp typecheck
-- [ ] Quickstart pasando en ambiente de prueba **(pendiente prueba manual del usuario)**
+- [x] Quickstart pasando en ambiente de prueba **(QA local + MCP Cursor OK 2026-07-29)**
 
-> **2026-07-29:** Implementación completa en `feat/mcp-access`. Listo para QA local: `bunx convex dev` + `bun dev` + `CONVEX_SITE_URL=… bun run mcp:dev`.
+> **2026-07-29:** Change 7 cerrado. Merge `testing` + `main` (prod). MCP VPS: `mcp.wallet.lavalex.co`.

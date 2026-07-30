@@ -3,8 +3,6 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read
-`changes/mcp-access/plan.md` and `changes/mcp-access/design.md`
-(also `proposal.md`, `spec.md`, `research.md`, `data-model.md`).
+Roadmap Changes 1–7 cerrados. Para el último change ver `changes/mcp-access/design.md`
+y `AGENTS.md`. Nuevo change: crear `changes/<id>/` y actualizar este contexto.
 <!-- SPECKIT END -->

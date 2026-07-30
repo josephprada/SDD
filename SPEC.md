@@ -572,7 +572,7 @@ packages/jp-ds/
 - [x] Transacciones recurrentes → **Sí**
 - [x] Modo offline → **Diferido a v2**
 - [x] Formatos de exportación → **PDF, CSV**
-- [x] Integración con IA → **No por ahora**
+- [x] Integración con IA → **Sí (MCP Access — agentes externos vía PAT)**
 - [x] Autenticación biométrica → **No, ahora Google OAuth**
 - [x] Despliegue → **VPS Hostinger con Docker Compose + Caddy**
 - [x] Voz/STT → **No por ahora**
@@ -620,14 +620,14 @@ packages/jp-ds/
    - Auto-poblar desde transacciones, cuentas y créditos/préstamos
    - Exportación CSV/PDF/JSON; estados draft/review/filed
    - Organizador v1 (sin UVT/Muisca)
-8. **Change 7: mcp-access — Acceso MCP para agentes LLM** ← *en curso*
+8. ✅ **Change 7: mcp-access — Acceso MCP para agentes LLM** (completado 2026-07-29, merge `testing` + `main`)
    - Tokens personales (PAT) desde Ajustes: scopes, caducidad, revocación, auditoría
    - Servidor MCP en monorepo (`apps/mcp-server`): remoto HTTPS + stdio local
    - Tools/resources sobre el dominio financiero (lectura → escritura controlada)
    - Deploy en VPS (`mcp.wallet.lavalex.co`); conexión fácil a Claude / Gemini / OpenAI / Cursor / OpenClaw
    - Arquitectura Opción D (sin repo aparte; sin chat embebido en este ciclo)
 
-> **Roadmap v1 cerrado (2026-07-27):** Changes 1–6 entregados. **Ciclo v1.1:** Change 7 (`mcp-access`) abre el canal de agentes.
+> **Roadmap v1.1 cerrado (2026-07-29):** Changes 1–7 entregados (MCP Access en prod).
 
 ---
 
