@@ -143,6 +143,8 @@ cat >"$SUDOERS_FILE" <<EOF
 # JP-WALLET deploy — web + MCP
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
+$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/rm -rf /var/www/jp-wallet.prev
+$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/cp -a /var/www/jp-wallet /var/www/jp-wallet.prev
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/cp -a /var/www/jp-wallet.prev/. /var/www/jp-wallet/
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/rm -rf /var/www/jp-wallet/*
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/chown -R nginx\:nginx /var/www/jp-wallet

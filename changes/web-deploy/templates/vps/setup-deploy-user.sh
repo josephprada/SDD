@@ -42,6 +42,8 @@ cat > "$SUDOERS_FILE" <<EOF
 # JP-WALLET deploy — permisos mínimos para CI
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
+$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/rm -rf ${WEB_ROOT}.prev
+$DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/cp -a ${WEB_ROOT} ${WEB_ROOT}.prev
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/cp -a ${WEB_ROOT}.prev/. ${WEB_ROOT}/
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/rm -rf ${WEB_ROOT}/*
 $DEPLOY_USER ALL=(ALL) NOPASSWD: /bin/chown -R nginx\:nginx ${WEB_ROOT}
