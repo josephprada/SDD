@@ -3,6 +3,7 @@
 import { v } from "convex/values";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import webpush from "web-push";
+import { internal } from "./_generated/api";
 import { internalAction } from "./_generated/server";
 
 export const sendEmailWithReport = internalAction({
@@ -161,7 +162,7 @@ export const sendPush = internalAction({
 		body: v.string(),
 		url: v.string(),
 	},
-	handler: async (_ctx, args) => {
+	handler: async (ctx, args) => {
 		const publicKey = process.env.VAPID_PUBLIC_KEY;
 		const privateKey = process.env.VAPID_PRIVATE_KEY;
 		const subject = process.env.VAPID_SUBJECT ?? "mailto:support@wallet.lavalex.co";
@@ -196,6 +197,12 @@ export const sendPush = internalAction({
 					gone.push(sub.endpoint);
 				}
 			}
+		}
+
+		if (gone.length > 0) {
+			await ctx.runMutation(internal.notifications.removePushByEndpoints, {
+				endpoints: gone,
+			});
 		}
 
 		return { ok: true, gone };

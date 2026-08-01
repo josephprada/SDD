@@ -13,7 +13,7 @@ bun dev          # apps/web
 
 Para MCP local: `bun run mcp:dev` + token con `read:budgets`.
 
-Para push: `VITE_VAPID_PUBLIC_KEY` en web + `VAPID_*` en Convex.
+Para push: `VITE_VAPID_PUBLIC_KEY` en web + `VAPID_*` en Convex. Si faltan keys, el envío se omite (log); endpoints 404/410 se eliminan de `pushSubscriptions`.
 
 ## Checklist manual
 

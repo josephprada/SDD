@@ -1,9 +1,13 @@
 import { TransactionForm } from "@app/components/transactions/TransactionForm";
 import { ConfirmDialog } from "@app/components/ui/ConfirmDialog";
 import { Modal } from "@app/components/ui/Modal";
+import {
+	uploadAttachmentFile,
+} from "@app/components/attachments/AttachmentUploader";
 import { toDateInputValue } from "@app/lib/format/date";
 import { useTransactionModalStore } from "@app/stores/transactionModal";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
@@ -29,6 +33,8 @@ export function TransactionModalHost() {
 	const createTx = useMutation(api.transactions.create);
 	const updateTx = useMutation(api.transactions.update);
 	const removeTx = useMutation(api.transactions.remove);
+	const generateUploadUrl = useMutation(api.attachments.generateUploadUrl);
+	const createAttachment = useMutation(api.attachments.create);
 	const [loading, setLoading] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	const [submitError, setSubmitError] = useState("");
@@ -65,12 +71,34 @@ export function TransactionModalHost() {
 		}
 	};
 
+	const uploadPendingFiles = async (
+		transactionId: Id<"transactions">,
+		files: File[],
+	) => {
+		const errors: string[] = [];
+		for (const file of files) {
+			try {
+				await uploadAttachmentFile(
+					file,
+					transactionId,
+					() => generateUploadUrl({}),
+					(args) => createAttachment(args),
+				);
+			} catch (e) {
+				errors.push(
+					e instanceof Error ? e.message : `Error al subir ${file.name}`,
+				);
+			}
+		}
+		return errors;
+	};
+
 	const handleDelete = async () => {
 		if (!editingTx) return;
 		const transactionId = editingTx._id;
 		setLoading(true);
 		try {
-			// Cerrar primero para saltar queries reactivas del id borrado.
+			// Cerrar confirm primero (unlock nested), luego modal, luego borrar.
 			setConfirmDelete(false);
 			handleClose();
 			await removeTx({ transactionId });
@@ -120,7 +148,8 @@ export function TransactionModalHost() {
 							setLoading(true);
 							setSubmitError("");
 							try {
-								await createTx(values);
+								const { pendingFiles: _pf, ...payload } = values;
+								await createTx(payload);
 								handleClose();
 							} catch (e) {
 								setSubmitError(
@@ -158,7 +187,8 @@ export function TransactionModalHost() {
 								setLoading(true);
 								setSubmitError("");
 								try {
-									await updateTx({ transactionId: editingTx._id, ...values });
+									const { pendingFiles: _pf, ...payload } = values;
+									await updateTx({ transactionId: editingTx._id, ...payload });
 									handleClose();
 								} catch (e) {
 									setSubmitError(
@@ -185,7 +215,21 @@ export function TransactionModalHost() {
 							setLoading(true);
 							setSubmitError("");
 							try {
-								await createTx(values);
+								const { pendingFiles = [], ...payload } = values;
+								const transactionId = await createTx(payload);
+								if (pendingFiles.length > 0 && transactionId) {
+									const uploadErrors = await uploadPendingFiles(
+										transactionId as Id<"transactions">,
+										pendingFiles,
+									);
+									if (uploadErrors.length > 0) {
+										setSubmitError(
+											`Movimiento guardado, pero falló un adjunto: ${uploadErrors[0]}`,
+										);
+										setLoading(false);
+										return;
+									}
+								}
 								handleClose();
 							} catch (e) {
 								setSubmitError(

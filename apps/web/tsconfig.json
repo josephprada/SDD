@@ -23,5 +23,5 @@
     }
   },
   "include": ["src", "../../convex/_generated", "../../convex/env.d.ts"],
-  "exclude": ["src/sw.ts"]
+  "exclude": ["src/sw.ts", "src/**/*.test.ts"]
 }

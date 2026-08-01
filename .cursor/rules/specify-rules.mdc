@@ -4,6 +4,6 @@ alwaysApply: true
 
 <!-- SPECKIT START -->
 Change activo: **app-polish-fixes** (Change 8) — rama `feat/app-polish-fixes`.
-Tasks: `changes/app-polish-fixes/tasks.md` (T001–T044).
-Siguiente: `/speckit-implement`.
+Implementación en curso: proyección, overlay lock, toasts, adjuntos create, MCP fijos, Playwright scaffold.
+Tasks: `changes/app-polish-fixes/tasks.md`.
 <!-- SPECKIT END -->

@@ -25,6 +25,7 @@ import {
 	requireTransactionOwnership,
 } from "./lib/auth";
 import { getBalanceDeltas, invertDeltas } from "./lib/balance";
+import { listUpcomingFixedExpensesForUser } from "./lib/fixedExpenseUpcoming";
 import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./lib/period";
 import {
 	countsForPersonalFinance,
@@ -392,6 +393,32 @@ async function toolListBudgets(
 				notes: budget.notes,
 			};
 		}),
+	);
+}
+
+async function toolListFixedExpenses(
+	ctx: MutationCtx,
+	userId: Id<"users">,
+	args: Record<string, unknown>,
+) {
+	const bounds = bogotaMonthBounds();
+	const periodStart = asOptionalNumber(args.periodStart) ?? bounds.start;
+	const periodEnd = asOptionalNumber(args.periodEnd) ?? bounds.end;
+	const limit = asOptionalNumber(args.limit) ?? 50;
+
+	if (periodEnd < periodStart) {
+		throw new AgentGatewayError(
+			"validation",
+			"periodEnd must be >= periodStart",
+		);
+	}
+
+	return listUpcomingFixedExpensesForUser(
+		ctx,
+		userId,
+		periodStart,
+		periodEnd,
+		limit,
 	);
 }
 
@@ -896,6 +923,10 @@ const TOOL_DEFINITIONS: Record<string, ToolDefinition> = {
 	list_budgets: {
 		scopes: ["read:budgets"],
 		handler: toolListBudgets,
+	},
+	list_fixed_expenses: {
+		scopes: ["read:budgets"],
+		handler: toolListFixedExpenses,
 	},
 	list_credits: {
 		scopes: ["read:credits"],

@@ -430,7 +430,12 @@
 	color: var(--color-danger);
 }
 
-.metric-card__projected {
+.metric-card__label--primary {
+	font-size: var(--text-sm);
+	color: var(--color-text-secondary);
+}
+
+.metric-card__secondary {
 	display: block;
 	margin-top: 2px;
 	font-size: var(--text-xs);
@@ -438,7 +443,7 @@
 	line-height: 1.35;
 }
 
-.metric-card__projected-value {
+.metric-card__secondary-value {
 	font-weight: var(--font-semibold);
 	color: var(--color-text-muted);
 	font-family: var(--font-mono);
@@ -517,18 +522,37 @@
 	border-top: 1px solid var(--color-border);
 }
 
-.month-overview__net--projected {
+.month-overview__net--primary-projection {
+	margin-top: var(--space-1);
+	padding-top: var(--space-3);
+	border-top: 1px solid var(--color-border);
+}
+
+.month-overview__net--secondary {
 	margin-top: var(--space-2);
 	padding-top: var(--space-2);
 	border-top: none;
 }
 
-.month-overview__net-projected {
-	font-size: var(--text-base);
-	font-weight: var(--font-semibold);
+.month-overview__net--secondary .month-overview__label,
+.month-overview__net--secondary .tx-amount {
+	font-size: var(--text-xs);
 	color: var(--color-text-muted);
+	font-weight: var(--font-medium);
+}
+
+.month-overview__label--primary {
+	font-size: var(--text-sm);
+	font-weight: var(--font-semibold);
+	color: var(--color-text-secondary);
+}
+
+.month-overview__primary-value {
+	font-size: clamp(1rem, 4vw, var(--text-lg));
+	font-weight: var(--font-bold);
 	font-family: var(--font-mono);
 	font-style: var(--font-mono-style, normal);
+	line-height: 1.2;
 }
 
 .month-switcher {
@@ -1922,6 +1946,24 @@
 	display: flex;
 	flex-direction: column;
 	gap: var(--space-2);
+}
+
+.attachment-pending-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+}
+
+.attachment-pending-list li {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	font-size: var(--text-sm);
+	color: var(--color-text-secondary);
 }
 
 .attachment-list {

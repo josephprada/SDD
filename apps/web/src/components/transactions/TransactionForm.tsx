@@ -2,7 +2,11 @@ import {
 	AttachmentList,
 	useAttachmentCount,
 } from "@app/components/attachments/AttachmentList";
-import { AttachmentUploader } from "@app/components/attachments/AttachmentUploader";
+import {
+	ATTACHMENT_MAX_FILES,
+	AttachmentUploader,
+	validateAttachmentFile,
+} from "@app/components/attachments/AttachmentUploader";
 import { BudgetThresholdAlert } from "@app/components/budgets/BudgetThresholdAlert";
 import { CategoryChoice } from "@app/components/ui/CategoryChoice";
 import { FieldError } from "@app/components/ui/FieldError";
@@ -13,7 +17,7 @@ import { fromDateInputValue, formatShortDate, toDateInputValue } from "@app/lib/
 import { periodKeyFromDate } from "@app/lib/period";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 import { api } from "@convex/_generated/api";
-import { Input, Checkbox } from "@jp-ds";
+import { Input, Checkbox, Button } from "@jp-ds";
 import { useQuery } from "convex/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -47,6 +51,7 @@ type TransactionFormProps = {
 			destinationId: Id<"creditDestinations">;
 		};
 		fixedExpenseId?: Id<"fixedExpenses">;
+		pendingFiles?: File[];
 	}) => void;
 	onCancel: () => void;
 	onDelete?: () => void;
@@ -105,7 +110,10 @@ export function TransactionForm({
 		Id<"fixedExpenses"> | ""
 	>("");
 	const [error, setError] = useState("");
+	const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+	const [pendingFileError, setPendingFileError] = useState("");
 	const amountInputRef = useRef<HTMLInputElement>(null);
+	const pendingFileInputRef = useRef<HTMLInputElement>(null);
 	const attachmentCount = useAttachmentCount(transactionId);
 
 	const filteredCategories = categories.filter(
@@ -281,6 +289,7 @@ export function TransactionForm({
 	]);
 
 	useEffect(() => {
+		if (transactionId) return;
 		const input = amountInputRef.current;
 		if (!input) return;
 
@@ -292,7 +301,7 @@ export function TransactionForm({
 		});
 
 		return () => cancelAnimationFrame(frame);
-	}, []);
+	}, [transactionId]);
 
 	const handleAmountChange = (raw: string) => {
 		setAmount(formatCOPInputFromRaw(raw));
@@ -406,6 +415,7 @@ export function TransactionForm({
 				isFixedExpenseFlow && !isCreditPaymentFlow && !isFundExpenseFlow
 					? (resolvedFixedExpenseId as Id<"fixedExpenses">)
 					: undefined,
+			pendingFiles: transactionId ? undefined : pendingFiles,
 		});
 	};
 
@@ -719,7 +729,7 @@ export function TransactionForm({
 			/>
 
 			{transactionId ? (
-				<div className="attachments-section">
+				<div className="attachments-section" data-testid="attachments-section">
 					<span className="jp-input-label">Adjuntos</span>
 					<AttachmentList transactionId={transactionId} />
 					<AttachmentUploader
@@ -727,7 +737,64 @@ export function TransactionForm({
 						currentCount={attachmentCount}
 					/>
 				</div>
-			) : null}
+			) : (
+				<div className="attachments-section" data-testid="attachments-section">
+					<span className="jp-input-label">Adjuntos</span>
+					{pendingFiles.length > 0 ? (
+						<ul className="attachment-pending-list">
+							{pendingFiles.map((file) => (
+								<li key={`${file.name}-${file.size}-${file.lastModified}`}>
+									<span>{file.name}</span>
+									<button
+										type="button"
+										className="link-accent"
+										onClick={() =>
+											setPendingFiles((prev) =>
+												prev.filter((f) => f !== file),
+											)
+										}
+									>
+										Quitar
+									</button>
+								</li>
+							))}
+						</ul>
+					) : null}
+					<input
+						ref={pendingFileInputRef}
+						type="file"
+						accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+						className="sr-only"
+						id="pending-attachment-upload"
+						data-testid="attach-file-input"
+						onChange={(e) => {
+							const file = e.target.files?.[0];
+							if (!file) return;
+							const validationError = validateAttachmentFile(
+								file,
+								pendingFiles.length,
+							);
+							if (validationError) {
+								setPendingFileError(validationError);
+								return;
+							}
+							setPendingFileError("");
+							setPendingFiles((prev) => [...prev, file]);
+							e.target.value = "";
+						}}
+					/>
+					<Button
+						type="button"
+						variant="secondary"
+						disabled={pendingFiles.length >= ATTACHMENT_MAX_FILES}
+						data-testid="attach-file-button"
+						onClick={() => pendingFileInputRef.current?.click()}
+					>
+						Adjuntar archivo
+					</Button>
+					<FieldError message={pendingFileError} />
+				</div>
+			)}
 
 				<FieldError message={error || serverError} />
 			</div>

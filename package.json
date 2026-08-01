@@ -12,7 +12,9 @@
 		"convex:setup-jwt": "node scripts/setup-convex-jwt.mjs",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write .",
-		"format": "biome format --write ."
+		"format": "biome format --write .",
+		"test:e2e": "bun run --filter @jp-wallet/web test:e2e",
+		"test:e2e:ui": "bun run --filter @jp-wallet/web test:e2e:ui"
 	},
   "dependencies": {
     "@auth/core": "^0.37.0",

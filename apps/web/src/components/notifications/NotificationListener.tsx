@@ -9,6 +9,35 @@ const TYPE_LABELS: Record<string, string> = {
 	period_report: "Reporte",
 };
 
+const CURSOR_KEY = "jpw:notif-toast-cursor";
+
+function notificationKey(item: {
+	type: string;
+	referenceId: string;
+	sentAt: number;
+}): string {
+	return `${item.type}:${item.referenceId}:${item.sentAt}`;
+}
+
+function loadPersistedKeys(): Set<string> {
+	try {
+		const raw = sessionStorage.getItem(CURSOR_KEY);
+		if (!raw) return new Set();
+		const parsed = JSON.parse(raw) as string[];
+		return new Set(Array.isArray(parsed) ? parsed : []);
+	} catch {
+		return new Set();
+	}
+}
+
+function persistKeys(keys: Set<string>): void {
+	try {
+		sessionStorage.setItem(CURSOR_KEY, JSON.stringify([...keys].slice(-50)));
+	} catch {
+		// ignore quota / private mode
+	}
+}
+
 export function NotificationListener() {
 	const { isAuthenticated } = useConvexAuth();
 	const recent = useQuery(
@@ -16,12 +45,23 @@ export function NotificationListener() {
 		isAuthenticated ? { limit: 5 } : "skip",
 	);
 	const show = useToastStore((s) => s.show);
-	const seenRef = useRef<Set<string>>(new Set());
+	const seenRef = useRef<Set<string>>(loadPersistedKeys());
+	const seededRef = useRef(false);
 
 	useEffect(() => {
 		if (!recent) return;
+
+		if (!seededRef.current) {
+			for (const item of recent) {
+				seenRef.current.add(notificationKey(item));
+			}
+			persistKeys(seenRef.current);
+			seededRef.current = true;
+			return;
+		}
+
 		for (const item of recent) {
-			const key = `${item.type}:${item.referenceId}:${item.sentAt}`;
+			const key = notificationKey(item);
 			if (seenRef.current.has(key)) continue;
 			seenRef.current.add(key);
 			show({
@@ -35,6 +75,7 @@ export function NotificationListener() {
 				url: item.type === "period_report" ? "/reports" : "/budgets",
 			});
 		}
+		persistKeys(seenRef.current);
 	}, [recent, show]);
 
 	return null;

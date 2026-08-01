@@ -24,10 +24,10 @@
 
 **Purpose**: Arnés Playwright y scripts sin tocar aún la lógica de producto.
 
-- [ ] T001 Añadir `@playwright/test` como devDependency en `apps/web/package.json` (o raíz workspaces) e instalar browsers documentado en README/e2e
-- [ ] T002 [P] Crear `apps/web/playwright.config.ts` — `baseURL`, projects desktop (~1280) + mobile (≤430), según `contracts/playwright-e2e.md`
-- [ ] T003 [P] Crear carpeta `apps/web/e2e/` con stub `e2e/.gitkeep` y `e2e/fixtures/auth.ts` (storageState / skip claro si faltan env `E2E_*`)
-- [ ] T004 [P] Añadir scripts `test:e2e` y `test:e2e:ui` en `package.json` raíz (y/o `apps/web/package.json`)
+- [x] T001 Añadir `@playwright/test` como devDependency en `apps/web/package.json` (o raíz workspaces) e instalar browsers documentado en README/e2e
+- [x] T002 [P] Crear `apps/web/playwright.config.ts` — `baseURL`, projects desktop (~1280) + mobile (≤430), según `contracts/playwright-e2e.md`
+- [x] T003 [P] Crear carpeta `apps/web/e2e/` con stub `e2e/.gitkeep` y `e2e/fixtures/auth.ts` (storageState / skip claro si faltan env `E2E_*`)
+- [x] T004 [P] Añadir scripts `test:e2e` y `test:e2e:ui` en `package.json` raíz (y/o `apps/web/package.json`)
 
 **Checkpoint**: `bun run test:e2e` arranca (aunque 0 tests o skip por auth).
 
@@ -39,11 +39,11 @@
 
 **⚠️ CRITICAL**: Completar antes de US2/US3 (recomendado también antes de E2E de modal).
 
-- [ ] T005 Crear helper de ref-count `lockBodyScroll` / `unlockBodyScroll` en `apps/web/src/lib/core/bodyScrollLock.ts` (o path alineado a `lib/core/`)
-- [ ] T006 Integrar el helper en `apps/web/src/components/ui/Modal.tsx` (reemplazar set directo de `document.body.style.overflow`)
-- [ ] T007 Integrar el mismo helper en `apps/web/src/components/ui/ConfirmDialog.tsx`
-- [ ] T008 Añadir timeout fallback de unmount en `apps/web/src/lib/core/useOverlayAnimation.ts` si no llega `animationend` (genie stuck)
-- [ ] T009 [P] (Opcional) Unit test del ref-count en `apps/web/src/lib/core/bodyScrollLock.test.ts` o `convex`-style `bun:test` si el helper es puro
+- [x] T005 Crear helper de ref-count `lockBodyScroll` / `unlockBodyScroll` en `apps/web/src/lib/core/bodyScrollLock.ts` (o path alineado a `lib/core/`)
+- [x] T006 Integrar el helper en `apps/web/src/components/ui/Modal.tsx` (reemplazar set directo de `document.body.style.overflow`)
+- [x] T007 Integrar el mismo helper en `apps/web/src/components/ui/ConfirmDialog.tsx`
+- [x] T008 Añadir timeout fallback de unmount en `apps/web/src/lib/core/useOverlayAnimation.ts` si no llega `animationend` (genie stuck)
+- [x] T009 [P] (Opcional) Unit test del ref-count en `apps/web/src/lib/core/bodyScrollLock.test.ts` o `convex`-style `bun:test` si el helper es puro
 
 **Checkpoint**: Abrir Modal+Confirm anidados y cerrar ambos deja `overflow` restaurado; genie no deja overlay fantasma tras timeout.
 
@@ -57,15 +57,15 @@
 
 ### Tests for User Story 1
 
-- [ ] T010 [P] [US1] Escribir E2E `apps/web/e2e/dashboard-fixed-projection.spec.ts` (cálculo + jerarquía DOM/CSS primaria) — debe fallar antes del fix
+- [x] T010 [P] [US1] Escribir E2E `apps/web/e2e/dashboard-fixed-projection.spec.ts` (cálculo + jerarquía DOM/CSS primaria) — debe fallar antes del fix
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Corregir fórmula en `apps/web/src/routes/home.tsx` — `projectedValue = totalBalance - pendingFixedExpenses` (no `net - …`)
-- [ ] T012 [US1] Pasar `totalBalance` (o proyección ya calculada) a `MonthOverview` y corregir fórmula en `apps/web/src/components/dashboard/MonthOverview.tsx`
-- [ ] T013 [US1] Ajustar `MetricCard` / markup en `apps/web/src/components/dashboard/MetricCard.tsx` para soportar proyección primaria + neto secundario cuando P&gt;0 (`contracts/dashboard-projection.md`)
-- [ ] T014 [US1] Actualizar estilos en `apps/web/src/styles/core.css` (`.metric-card__*`, `.month-overview__*`) — proyección tipografía primaria; neto muted/secundario; tokens JP-DS
-- [ ] T015 [US1] Verificar viewport móvil overview + desktop metrics; ocultar proyección si P=0
+- [x] T011 [US1] Corregir fórmula en `apps/web/src/routes/home.tsx` — `projectedValue = totalBalance - pendingFixedExpenses` (no `net - …`)
+- [x] T012 [US1] Pasar `totalBalance` (o proyección ya calculada) a `MonthOverview` y corregir fórmula en `apps/web/src/components/dashboard/MonthOverview.tsx`
+- [x] T013 [US1] Ajustar `MetricCard` / markup en `apps/web/src/components/dashboard/MetricCard.tsx` para soportar proyección primaria + neto secundario cuando P&gt;0 (`contracts/dashboard-projection.md`)
+- [x] T014 [US1] Actualizar estilos en `apps/web/src/styles/core.css` (`.metric-card__*`, `.month-overview__*`) — proyección tipografía primaria; neto muted/secundario; tokens JP-DS
+- [x] T015 [US1] Verificar viewport móvil overview + desktop metrics; ocultar proyección si P=0
 
 **Checkpoint**: US1 usable en Home sin tocar modal/MCP.
 
@@ -79,13 +79,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T016 [P] [US2] Escribir E2E `apps/web/e2e/home-edit-transaction.spec.ts` — open desde Home, assert URL no `/transactions`
+- [x] T016 [P] [US2] Escribir E2E `apps/web/e2e/home-edit-transaction.spec.ts` — open desde Home, assert URL no `/transactions`
 
 ### Implementation for User Story 2
 
-- [ ] T017 [US2] Auditar `apps/web/src/components/dashboard/RecentTransactionsList.tsx` + `home.tsx` + `stores/transactionModal.ts` — garantizar solo `openEdit(id)` sin `navigate`
-- [ ] T018 [US2] Revisar `apps/web/src/components/transactions/TransactionModalHost.tsx` + `Shell.tsx` — cierre limpio store; sin deep-link accidental a `/transactions` desde Home
-- [ ] T019 [US2] Asegurar cleanup de query params / overlays al cerrar desde Home en `TransactionModalHost.tsx`
+- [x] T017 [US2] Auditar `apps/web/src/components/dashboard/RecentTransactionsList.tsx` + `home.tsx` + `stores/transactionModal.ts` — garantizar solo `openEdit(id)` sin `navigate`
+- [x] T018 [US2] Revisar `apps/web/src/components/transactions/TransactionModalHost.tsx` + `Shell.tsx` — cierre limpio store; sin deep-link accidental a `/transactions` desde Home
+- [x] T019 [US2] Asegurar cleanup de query params / overlays al cerrar desde Home en `TransactionModalHost.tsx`
 
 **Checkpoint**: Flujo Home → edit → close estable en desktop (base para US3).
 
@@ -103,8 +103,8 @@
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Ordenar flujo delete en `TransactionModalHost.tsx` — confirm close → modal close → unlock (usar helper T005)
-- [ ] T022 [US3] Verificar ciclos open→delete→close repetidos no acumulan locks; ajustar ConfirmDialog/Modal si hace falta
+- [x] T021 [US3] Ordenar flujo delete en `TransactionModalHost.tsx` — confirm close → modal close → unlock (usar helper T005)
+- [x] T022 [US3] Verificar ciclos open→delete→close repetidos no acumulan locks; ajustar ConfirmDialog/Modal si hace falta
 
 **Checkpoint**: US2+US3 verdes en móvil real o Playwright mobile.
 
@@ -118,11 +118,11 @@
 
 ### Tests for User Story 4
 
-- [ ] T023 [P] [US4] Escribir/ampliar E2E assert `activeElement` ≠ amount input en edit (`apps/web/e2e/…` o spec dedicado)
+- [x] T023 [P] [US4] Escribir/ampliar E2E assert `activeElement` ≠ amount input en edit (`apps/web/e2e/…` o spec dedicado)
 
 ### Implementation for User Story 4
 
-- [ ] T024 [US4] Condicionar autofocus en `apps/web/src/components/transactions/TransactionForm.tsx` — solo create (`!transactionId`); edit sin `focus()`/`select()` al monto
+- [x] T024 [US4] Condicionar autofocus en `apps/web/src/components/transactions/TransactionForm.tsx` — solo create (`!transactionId`); edit sin `focus()`/`select()` al monto
 
 **Checkpoint**: Edit revisable sin teclado saltando al monto.
 
@@ -136,10 +136,10 @@
 
 ### Implementation for User Story 5
 
-- [ ] T025 [US5] Cambiar `apps/web/src/components/notifications/NotificationListener.tsx` — seed `seenRef` / cursor en primer fetch **sin** toast; solo deltas posteriores (`contracts/notifications.md`)
-- [ ] T026 [P] [US5] Persistir cursor opcional en `sessionStorage` desde el listener o helper `apps/web/src/lib/notifications/toastCursor.ts`
-- [ ] T027 [US5] En `convex/notificationActions.ts` — al resultado `gone`, eliminar/desactivar suscripción en `pushSubscriptions`
-- [ ] T028 [P] [US5] Auditar `apps/web/src/lib/push/registerPush.ts`, `apps/web/src/sw.ts` y env VAPID; documentar gaps en `changes/app-polish-fixes/quickstart.md` / notas de design si iOS limitado
+- [x] T025 [US5] Cambiar `apps/web/src/components/notifications/NotificationListener.tsx` — seed `seenRef` / cursor en primer fetch **sin** toast; solo deltas posteriores (`contracts/notifications.md`)
+- [x] T026 [P] [US5] Persistir cursor opcional en `sessionStorage` desde el listener o helper `apps/web/src/lib/notifications/toastCursor.ts`
+- [x] T027 [US5] En `convex/notificationActions.ts` — al resultado `gone`, eliminar/desactivar suscripción en `pushSubscriptions`
+- [x] T028 [P] [US5] Auditar `apps/web/src/lib/push/registerPush.ts`, `apps/web/src/sw.ts` y env VAPID; documentar gaps en `changes/app-polish-fixes/quickstart.md` / notas de design si iOS limitado
 - [ ] T029 [US5] (Opcional E2E) Smoke “no toasts al load” en `apps/web/e2e/notifications-toast.spec.ts` si fixtures lo permiten
 
 **Checkpoint**: Login/recarga silenciosa; path push verificado o limitaciones documentadas.
@@ -154,13 +154,13 @@
 
 ### Tests for User Story 6
 
-- [ ] T030 [P] [US6] E2E `apps/web/e2e/create-transaction-attachments.spec.ts` — control adjuntar visible en create
+- [x] T030 [P] [US6] E2E `apps/web/e2e/create-transaction-attachments.spec.ts` — control adjuntar visible en create
 
 ### Implementation for User Story 6
 
-- [ ] T031 [US6] Exponer sección adjuntos sin `transactionId` en `TransactionForm.tsx` (cola local de `File[]`)
-- [ ] T032 [US6] Extender `AttachmentUploader.tsx` y/o host para modo “pending files” (mismos MIME/size que edit)
-- [ ] T033 [US6] En `TransactionModalHost.tsx` (create path) — tras `createTx`, subir pending files y manejar error parcial con feedback
+- [x] T031 [US6] Exponer sección adjuntos sin `transactionId` en `TransactionForm.tsx` (cola local de `File[]`)
+- [x] T032 [US6] Extender `AttachmentUploader.tsx` y/o host para modo “pending files” (mismos MIME/size que edit)
+- [x] T033 [US6] En `TransactionModalHost.tsx` (create path) — tras `createTx`, subir pending files y manejar error parcial con feedback
 
 **Checkpoint**: Create+adjunto en un solo flujo.
 
@@ -174,9 +174,9 @@
 
 ### Implementation for User Story 7
 
-- [ ] T034 [US7] Implementar handler `list_fixed_expenses` en `convex/agentGateway.ts` reutilizando lógica de `fixedExpenses.listUpcomingForPeriod` (`contracts/mcp-fixed-expenses.md`)
-- [ ] T035 [US7] Registrar tool en catálogo/dispatch del gateway + scope `read:budgets`
-- [ ] T036 [P] [US7] Registrar tool en `apps/mcp-server/src/tools/read.ts` (+ wire en index/http si aplica)
+- [x] T034 [US7] Implementar handler `list_fixed_expenses` en `convex/agentGateway.ts` reutilizando lógica de `fixedExpenses.listUpcomingForPeriod` (`contracts/mcp-fixed-expenses.md`)
+- [x] T035 [US7] Registrar tool en catálogo/dispatch del gateway + scope `read:budgets`
+- [x] T036 [P] [US7] Registrar tool en `apps/mcp-server/src/tools/read.ts` (+ wire en index/http si aplica)
 - [ ] T037 [P] [US7] Actualizar docs contrato espejo si hace falta (`changes/mcp-access/contracts/mcp-tools.md` nota de extensión o solo change 8)
 
 **Checkpoint**: Agente obtiene `pendingTotal` coherente con Home.
@@ -191,9 +191,9 @@
 
 ### Implementation for User Story 8
 
-- [ ] T038 [US8] Completar fixtures auth + README corto en `apps/web/e2e/README.md` (comando, env, storageState)
-- [ ] T039 [US8] Asegurar cobertura E2E-01…E2E-04 (y E2E-05 si estable) según `contracts/playwright-e2e.md`
-- [ ] T040 [US8] Actualizar `changes/app-polish-fixes/quickstart.md` con comandos reales post-implementación
+- [x] T038 [US8] Completar fixtures auth + README corto en `apps/web/e2e/README.md` (comando, env, storageState)
+- [x] T039 [US8] Asegurar cobertura E2E-01…E2E-04 (y E2E-05 si estable) según `contracts/playwright-e2e.md`
+- [x] T040 [US8] Actualizar `changes/app-polish-fixes/quickstart.md` con comandos reales post-implementación
 
 **Checkpoint**: US8 cierra el change a nivel calidad automatizada UI.
 

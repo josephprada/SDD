@@ -1,3 +1,4 @@
+import { lockBodyScroll, unlockBodyScroll } from "@app/lib/core/bodyScrollLock";
 import type { GenieOriginRect } from "@app/lib/motion/genieModal";
 import { useGenieOverlay } from "@app/lib/motion/useGenieOverlay";
 import { Button } from "@jp-ds";
@@ -65,12 +66,11 @@ export function ConfirmDialog({
 			if (e.key === "Escape") onCancel();
 		};
 
-		const previousOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
+		lockBodyScroll();
 		document.addEventListener("keydown", onKey);
 
 		return () => {
-			document.body.style.overflow = previousOverflow;
+			unlockBodyScroll();
 			document.removeEventListener("keydown", onKey);
 		};
 	}, [mounted, onCancel]);

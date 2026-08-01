@@ -99,6 +99,27 @@ export function buildReadToolDefs(
 			siteUrl,
 		}),
 		makeRpcTool({
+			name: "list_fixed_expenses",
+			description:
+				"Lista gastos fijos pendientes en un período y el pendingTotal (suma completa). Misma semántica que el dashboard “Si pagas fijos”. Requiere scope read:budgets.",
+			inputShape: {
+				periodStart: z
+					.number()
+					.optional()
+					.describe("Inicio del período (epoch ms). Default: mes actual."),
+				periodEnd: z
+					.number()
+					.optional()
+					.describe("Fin del período (epoch ms). Default: mes actual."),
+				limit: z
+					.number()
+					.optional()
+					.describe("Máximo de ítems en la lista (no afecta pendingTotal)."),
+			},
+			getToken,
+			siteUrl,
+		}),
+		makeRpcTool({
 			name: "list_credits",
 			description: "Lista créditos del usuario. Requiere scope read:credits.",
 			inputShape: {

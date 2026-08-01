@@ -15,7 +15,7 @@ import {
 	hasValidPaymentTransaction,
 	reconcileFixedExpensePayment,
 } from "./lib/fixedExpensePayments";
-import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./lib/period";
+import { periodKeyFromTimestamp } from "./lib/period";
 import {
 	appliesToPeriodKey,
 	assertAppliesToPeriodKey,
@@ -25,6 +25,7 @@ import {
 	resolveFixedExpensePaymentDate,
 	resolveFixedExpensePaymentPeriodKey,
 } from "./lib/fixedExpensePaymentDate";
+import { listUpcomingFixedExpensesForUser } from "./lib/fixedExpenseUpcoming";
 import { registerFixedExpensePayment } from "./lib/fixedExpenseTransaction";
 import { resolveUserPreferences } from "./lib/preferences";
 import {
@@ -130,80 +131,37 @@ export const listUpcomingForPeriod = query({
 	},
 	handler: async (ctx, { periodStart, periodEnd, limit = 3 }) => {
 		const userId = await requireUserId(ctx);
-		const items = await ctx.db
-			.query("fixedExpenses")
-			.withIndex("by_user_active", (q) =>
-				q.eq("userId", userId).eq("active", true),
-			)
-			.collect();
+		const result = await listUpcomingFixedExpensesForUser(
+			ctx,
+			userId,
+			periodStart,
+			periodEnd,
+			limit,
+		);
 
-		type UpcomingEntry = FixedExpenseListItem & {
-			dueDate: number;
-			isOverdue: boolean;
-		};
-
-		const now = Date.now();
-		const upcoming: UpcomingEntry[] = [];
-		let pendingTotal = 0;
-		const viewingPeriodKey = periodKeyFromTimestamp(periodStart);
-
-		for (const item of items) {
-			if (item.onlyPeriodKey) {
-				const { start, end } = periodKeyToMonthRange(item.onlyPeriodKey);
-				if (end < periodStart || start > periodEnd) continue;
-				const dueTs = dueTimestampForPeriodKey(
-					item.dayOfMonth,
-					item.onlyPeriodKey,
-				);
-				if (dueTs < periodStart || dueTs > periodEnd) continue;
-				if (
-					await hasValidPaymentTransaction(ctx, item, item.onlyPeriodKey)
-				) {
-					continue;
-				}
-
-				pendingTotal += item.amount;
-				const enriched = await enrichFixedExpense(
-					ctx,
-					item,
-					item.onlyPeriodKey,
-				);
-				upcoming.push({
+		// Preserve previous shape: enriched FixedExpenseListItem fields for UI widgets.
+		const enrichedItems = await Promise.all(
+			result.items.map(async (row) => {
+				const doc = await ctx.db.get(row.id);
+				if (!doc) return null;
+				const viewingPeriodKey = periodKeyFromTimestamp(periodStart);
+				const periodKey = doc.onlyPeriodKey ?? viewingPeriodKey;
+				const enriched = await enrichFixedExpense(ctx, doc, periodKey);
+				return {
 					...enriched,
-					dueDate: dueTs,
-					isOverdue: dueTs < now,
-					nextDueDate: dueTs,
-					isPaidCurrentPeriod: false,
-				});
-				continue;
-			}
-
-			if (!appliesToPeriodKey(item, viewingPeriodKey)) continue;
-
-			const dueTs = dueTimestampForPeriodKey(
-				item.dayOfMonth,
-				viewingPeriodKey,
-			);
-			if (dueTs < periodStart || dueTs > periodEnd) continue;
-
-			const enriched = await enrichFixedExpense(ctx, item, viewingPeriodKey);
-			if (enriched.isPaidCurrentPeriod) continue;
-
-			pendingTotal += item.amount;
-			upcoming.push({
-				...enriched,
-				dueDate: dueTs,
-				isOverdue: dueTs < now,
-				nextDueDate: dueTs,
-				isPaidCurrentPeriod: false,
-			});
-		}
-
-		upcoming.sort((a, b) => a.dueDate - b.dueDate);
+					dueDate: row.dueDate,
+					isOverdue: row.isOverdue,
+					nextDueDate: row.dueDate,
+					isPaidCurrentPeriod: false as const,
+				};
+			}),
+		);
 
 		return {
-			items: upcoming.slice(0, Math.max(1, Math.min(limit, 10))),
-			pendingTotal,
+			items: enrichedItems.filter(
+				(item): item is NonNullable<typeof item> => item !== null,
+			),
+			pendingTotal: result.pendingTotal,
 		};
 	},
 });

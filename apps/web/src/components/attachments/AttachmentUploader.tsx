@@ -7,7 +7,55 @@ import { useRef, useState } from "react";
 
 const MAX_SIZE = 10 * 1024 * 1024;
 const MAX_FILES = 5;
-const ALLOWED = ["image/jpeg", "image/png", "application/pdf"];
+const ALLOWED = ["image/jpeg", "image/png", "application/pdf"] as const;
+
+export const ATTACHMENT_MAX_SIZE = MAX_SIZE;
+export const ATTACHMENT_MAX_FILES = MAX_FILES;
+export const ATTACHMENT_ALLOWED_TYPES: readonly string[] = ALLOWED;
+
+export function validateAttachmentFile(
+	file: File,
+	currentCount: number,
+): string | null {
+	if (!ALLOWED.includes(file.type as (typeof ALLOWED)[number])) {
+		return "Solo se permiten JPEG, PNG y PDF";
+	}
+	if (file.size > MAX_SIZE) {
+		return "El archivo supera 10 MB";
+	}
+	if (currentCount >= MAX_FILES) {
+		return "Máximo 5 adjuntos por movimiento";
+	}
+	return null;
+}
+
+export async function uploadAttachmentFile(
+	file: File,
+	transactionId: Id<"transactions">,
+	generateUploadUrl: () => Promise<string>,
+	createAttachment: (args: {
+		transactionId: Id<"transactions">;
+		storageId: Id<"_storage">;
+		filename: string;
+		mimeType: "image/jpeg" | "image/png" | "application/pdf";
+		size: number;
+	}) => Promise<unknown>,
+): Promise<void> {
+	const uploadUrl = await generateUploadUrl();
+	const result = await fetch(uploadUrl, {
+		method: "POST",
+		headers: { "Content-Type": file.type },
+		body: file,
+	});
+	const { storageId } = (await result.json()) as { storageId: Id<"_storage"> };
+	await createAttachment({
+		transactionId,
+		storageId,
+		filename: file.name,
+		mimeType: file.type as "image/jpeg" | "image/png" | "application/pdf",
+		size: file.size,
+	});
+}
 
 type AttachmentUploaderProps = {
 	transactionId: Id<"transactions">;
@@ -28,36 +76,21 @@ export function AttachmentUploader({
 		if (!files?.length) return;
 		const file = files[0];
 
-		if (!ALLOWED.includes(file.type)) {
-			setError("Solo se permiten JPEG, PNG y PDF");
-			return;
-		}
-		if (file.size > MAX_SIZE) {
-			setError("El archivo supera 10 MB");
-			return;
-		}
-		if (currentCount >= MAX_FILES) {
-			setError("Máximo 5 adjuntos por movimiento");
+		const validationError = validateAttachmentFile(file, currentCount);
+		if (validationError) {
+			setError(validationError);
 			return;
 		}
 
 		setError("");
 		setUploading(true);
 		try {
-			const uploadUrl = await generateUploadUrl({});
-			const result = await fetch(uploadUrl, {
-				method: "POST",
-				headers: { "Content-Type": file.type },
-				body: file,
-			});
-			const { storageId } = await result.json();
-			await createAttachment({
+			await uploadAttachmentFile(
+				file,
 				transactionId,
-				storageId,
-				filename: file.name,
-				mimeType: file.type as "image/jpeg" | "image/png" | "application/pdf",
-				size: file.size,
-			});
+				() => generateUploadUrl({}),
+				(args) => createAttachment(args),
+			);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Error al subir archivo");
 		} finally {

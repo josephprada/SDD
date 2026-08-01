@@ -1,4 +1,5 @@
 import { CoreIcon } from "@app/lib/core/icons";
+import { lockBodyScroll, unlockBodyScroll } from "@app/lib/core/bodyScrollLock";
 import type { GenieOriginRect } from "@app/lib/motion/genieModal";
 import { useGenieOverlay } from "@app/lib/motion/useGenieOverlay";
 import { IconButton } from "@jp-ds";
@@ -58,12 +59,11 @@ export function Modal({
 			if (e.key === "Escape") onClose();
 		};
 
-		const previousOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
+		lockBodyScroll();
 		document.addEventListener("keydown", onKey);
 
 		return () => {
-			document.body.style.overflow = previousOverflow;
+			unlockBodyScroll();
 			document.removeEventListener("keydown", onKey);
 		};
 	}, [mounted, onClose]);

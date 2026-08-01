@@ -137,6 +137,7 @@ export function HomeRoute() {
 				<MonthOverview
 					income={overview.monthlyIncome}
 					expense={overview.monthlyExpense}
+					availableBalance={overview.totalBalance}
 					pendingFixedExpenses={pendingFixedExpenses}
 					grouping={defaultGrouping}
 					anchor={anchor}
@@ -162,8 +163,15 @@ export function HomeRoute() {
 					label={periodNetLabel(defaultGrouping)}
 					value={net}
 					signed
-					projectedValue={
-						pendingFixedExpenses > 0 ? net - pendingFixedExpenses : undefined
+					highlightLabel={
+						pendingFixedExpenses > 0
+							? "Si pagas fijos pendientes"
+							: undefined
+					}
+					highlightValue={
+						pendingFixedExpenses > 0
+							? overview.totalBalance - pendingFixedExpenses
+							: undefined
 					}
 				/>
 			</div>

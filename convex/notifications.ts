@@ -82,6 +82,21 @@ export const unsubscribePush = mutation({
 	},
 });
 
+export const removePushByEndpoints = internalMutation({
+	args: { endpoints: v.array(v.string()) },
+	handler: async (ctx, { endpoints }) => {
+		for (const endpoint of endpoints) {
+			const existing = await ctx.db
+				.query("pushSubscriptions")
+				.withIndex("by_endpoint", (q) => q.eq("endpoint", endpoint))
+				.unique();
+			if (existing) {
+				await ctx.db.delete(existing._id);
+			}
+		}
+	},
+});
+
 export const dispatch = internalMutation({
 	args: {
 		userId: v.id("users"),

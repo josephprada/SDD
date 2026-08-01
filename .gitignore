@@ -32,3 +32,9 @@ deploy-keys/
 
 # TypeScript
 *.tsbuildinfo
+
+# Playwright
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/e2e/.auth/

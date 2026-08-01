@@ -6,6 +6,8 @@ import { PeriodSwitcher } from "./PeriodSwitcher";
 type MonthOverviewProps = {
 	income: number;
 	expense: number;
+	/** Disponible (totalBalance) — base de “Si pagas fijos pendientes”. */
+	availableBalance?: number;
 	pendingFixedExpenses?: number;
 	grouping?: GroupingId;
 	anchor?: Date;
@@ -17,6 +19,7 @@ type MonthOverviewProps = {
 export function MonthOverview({
 	income,
 	expense,
+	availableBalance,
 	pendingFixedExpenses = 0,
 	grouping = "month",
 	anchor,
@@ -25,7 +28,11 @@ export function MonthOverview({
 	showSwitcher = false,
 }: MonthOverviewProps) {
 	const net = income - expense;
-	const projectedNet = net - pendingFixedExpenses;
+	const showProjection =
+		pendingFixedExpenses > 0 && availableBalance !== undefined;
+	const projectedAfterFixed = showProjection
+		? availableBalance - pendingFixedExpenses
+		: undefined;
 	const max = Math.max(income, expense, 1);
 	const incomePct = Math.round((income / max) * 100);
 	const expensePct = Math.round((expense / max) * 100);
@@ -78,27 +85,43 @@ export function MonthOverview({
 				</div>
 			</div>
 
-			<div className="month-overview__net">
+			{showProjection && projectedAfterFixed !== undefined ? (
+				<div
+					className="month-overview__net month-overview__net--primary-projection"
+					data-testid="month-overview-projection"
+				>
+					<span className="month-overview__label month-overview__label--primary">
+						Si pagas fijos pendientes
+					</span>
+					<span
+						className={`month-overview__primary-value${
+							projectedAfterFixed < 0
+								? " tx-amount--expense"
+								: " tx-amount--transfer"
+						}`}
+						data-testid="month-overview-projected-value"
+					>
+						{projectedAfterFixed < 0 ? "−" : "+"}
+						{formatCOP(Math.abs(projectedAfterFixed))}
+					</span>
+				</div>
+			) : null}
+
+			<div
+				className={`month-overview__net${
+					showProjection ? " month-overview__net--secondary" : ""
+				}`}
+				data-testid="month-overview-net"
+			>
 				<span className="month-overview__label">{periodNetLabel(grouping)}</span>
 				<span
 					className={`tx-amount${net < 0 ? " tx-amount--expense" : " tx-amount--transfer"}`}
+					data-testid="month-overview-net-value"
 				>
 					{net < 0 ? "−" : "+"}
 					{formatCOP(Math.abs(net))}
 				</span>
 			</div>
-
-			{pendingFixedExpenses > 0 ? (
-				<div className="month-overview__net month-overview__net--projected">
-					<span className="month-overview__label">
-						Si pagas fijos pendientes
-					</span>
-					<span className="month-overview__net-projected">
-						{projectedNet < 0 ? "−" : "+"}
-						{formatCOP(Math.abs(projectedNet))}
-					</span>
-				</div>
-			) : null}
 		</section>
 	);
 }
