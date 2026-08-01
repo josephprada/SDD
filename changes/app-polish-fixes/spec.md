@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-01
 
-**Status**: Draft
+**Status**: ✅ Completado (v1.0 — App Polish Fixes, 2026-08-01)
 
 **Change**: app-polish-fixes (Change 8)
 

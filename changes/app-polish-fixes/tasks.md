@@ -99,7 +99,7 @@
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] Escribir E2E móvil `apps/web/e2e/mobile-delete-scroll.spec.ts` (o proyecto mobile en config) — delete + assert scroll/unlock
+- [x] T020 [P] [US3] Escribir E2E móvil `apps/web/e2e/mobile-delete-scroll.spec.ts` (o proyecto mobile en config) — delete + assert scroll/unlock
 
 ### Implementation for User Story 3
 
@@ -140,7 +140,7 @@
 - [x] T026 [P] [US5] Persistir cursor opcional en `sessionStorage` desde el listener o helper `apps/web/src/lib/notifications/toastCursor.ts`
 - [x] T027 [US5] En `convex/notificationActions.ts` — al resultado `gone`, eliminar/desactivar suscripción en `pushSubscriptions`
 - [x] T028 [P] [US5] Auditar `apps/web/src/lib/push/registerPush.ts`, `apps/web/src/sw.ts` y env VAPID; documentar gaps en `changes/app-polish-fixes/quickstart.md` / notas de design si iOS limitado
-- [ ] T029 [US5] (Opcional E2E) Smoke “no toasts al load” en `apps/web/e2e/notifications-toast.spec.ts` si fixtures lo permiten
+- [x] T029 [US5] (Opcional E2E) Smoke “no toasts al load” en `apps/web/e2e/notifications-toast.spec.ts` si fixtures lo permiten
 
 **Checkpoint**: Login/recarga silenciosa; path push verificado o limitaciones documentadas.
 
@@ -177,7 +177,7 @@
 - [x] T034 [US7] Implementar handler `list_fixed_expenses` en `convex/agentGateway.ts` reutilizando lógica de `fixedExpenses.listUpcomingForPeriod` (`contracts/mcp-fixed-expenses.md`)
 - [x] T035 [US7] Registrar tool en catálogo/dispatch del gateway + scope `read:budgets`
 - [x] T036 [P] [US7] Registrar tool en `apps/mcp-server/src/tools/read.ts` (+ wire en index/http si aplica)
-- [ ] T037 [P] [US7] Actualizar docs contrato espejo si hace falta (`changes/mcp-access/contracts/mcp-tools.md` nota de extensión o solo change 8)
+- [x] T037 [P] [US7] Actualizar docs contrato espejo si hace falta (`changes/mcp-access/contracts/mcp-tools.md` nota de extensión o solo change 8)
 
 **Checkpoint**: Agente obtiene `pendingTotal` coherente con Home.
 
@@ -203,10 +203,10 @@
 
 **Purpose**: Cierre SDD, lint/build, contexto agentes.
 
-- [ ] T041 [P] Actualizar `AGENTS.md` / `.cursor/rules/specify-rules.mdc` — Change 8 implementado / checklist remaining
-- [ ] T042 [P] Marcar checklist QA en `changes/app-polish-fixes/quickstart.md` tras pasada manual
-- [ ] T043 Ejecutar `bun run lint` + `bun run build` y corregir regresiones del change
-- [ ] T044 Revisar `changes/app-polish-fixes/design.md` si hubo desviaciones (notas breves)
+- [x] T041 [P] Actualizar `AGENTS.md` / `.cursor/rules/specify-rules.mdc` — Change 8 implementado / checklist remaining
+- [x] T042 [P] Marcar checklist QA en `changes/app-polish-fixes/quickstart.md` tras pasada manual
+- [x] T043 Ejecutar `bun run lint` + `bun run build` y corregir regresiones del change
+- [x] T044 Revisar `changes/app-polish-fixes/design.md` si hubo desviaciones (notas breves)
 
 ---
 

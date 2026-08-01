@@ -3,7 +3,6 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-Change activo: **app-polish-fixes** (Change 8) — rama `feat/app-polish-fixes`.
-Implementación en curso: proyección, overlay lock, toasts, adjuntos create, MCP fijos, Playwright scaffold.
-Tasks: `changes/app-polish-fixes/tasks.md`.
+Roadmap Changes 1–8 cerrados. Último: `changes/app-polish-fixes/` (2026-08-01).
+Nuevo change: crear `changes/<id>/` y actualizar este contexto + `AGENTS.md`.
 <!-- SPECKIT END -->

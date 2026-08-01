@@ -42,7 +42,7 @@ convex/             # Backend Convex (alias @convex/* desde apps/web)
 
 La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex/_generated/api`.
 
-**Scripts raíz:** `bun dev` · `bun build` · `bun lint` · `bun run mcp:dev`
+**Scripts raíz:** `bun dev` · `bun build` · `bun lint` · `bun run mcp:dev` · `bun run test:e2e`
 
 ---
 
@@ -62,30 +62,24 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
-## Change activo: app-polish-fixes (Change 8)
+## Change cerrado: app-polish-fixes ✅ (Change 8 — 2026-08-01)
 
-Rama: `feat/app-polish-fixes` (base `testing`).
+Rama histórica: `feat/app-polish-fixes` — merge `testing` + `main` (prod).
 
 | Artefacto | Ruta |
 |-----------|------|
 | Spec | `changes/app-polish-fixes/spec.md` |
 | Plan | `changes/app-polish-fixes/plan.md` |
-| Propuesta | `changes/app-polish-fixes/proposal.md` |
-| Diseño técnico | `changes/app-polish-fixes/design.md` |
-| Research | `changes/app-polish-fixes/research.md` |
-| Data model | `changes/app-polish-fixes/data-model.md` |
-| Quickstart QA | `changes/app-polish-fixes/quickstart.md` |
-| Contracts | `changes/app-polish-fixes/contracts/` |
+| Diseño | `changes/app-polish-fixes/design.md` |
 | Tasks | `changes/app-polish-fixes/tasks.md` |
-| Checklist | `changes/app-polish-fixes/checklists/requirements.md` |
 
-**Alcance v1:** Corrección proyección “Si pagas fijos pendientes” (disponible − fijos) con **mayor jerarquía visual que el neto**; modal/scroll de movimientos desde Home; sin autofocus en monto al editar; reparación toasts/push; adjuntos al crear movimiento; MCP `list_fixed_expenses` / `pendingTotal`; arnés **Playwright** para E2E/UI de estos escenarios.
+**Alcance v1:** Proyección disponible − fijos (jerarquía visual); modal/scroll movimientos; autofocus; toasts/push; adjuntos en create; MCP `list_fixed_expenses`; Playwright E2E scaffold.
 
 **Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Roadmap:** Changes 1–7 cerrados · Change 8 tasks listos. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
+**Roadmap:** Changes 1–8 cerrados. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
 
-**Siguiente:** `/speckit-implement` (empezar por Phase 1–2 + US1 MVP).
+Nuevo change: crear `changes/<id>/` y actualizar este contexto.
 
 ---
 

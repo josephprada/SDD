@@ -1,10 +1,11 @@
 # Propuesta: Change 8 — App Polish Fixes
 
 **Versión**: 1.0.0  
-**Estado**: Planificado  
+**Estado**: Completado ✅  
 **Change**: app-polish-fixes  
 **Creado**: 2026-08-01  
-**Rama**: `feat/app-polish-fixes` → `testing` → `main` (cuando se pida)
+**Cerrado**: 2026-08-01  
+**Rama**: `feat/app-polish-fixes` → `testing` → `main`
 
 ---
 

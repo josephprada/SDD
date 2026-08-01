@@ -48,6 +48,7 @@ import type * as lib_fixedExpensePaymentDate from "../lib/fixedExpensePaymentDat
 import type * as lib_fixedExpensePayments from "../lib/fixedExpensePayments.js";
 import type * as lib_fixedExpensePeriod from "../lib/fixedExpensePeriod.js";
 import type * as lib_fixedExpenseTransaction from "../lib/fixedExpenseTransaction.js";
+import type * as lib_fixedExpenseUpcoming from "../lib/fixedExpenseUpcoming.js";
 import type * as lib_fixedExpenses from "../lib/fixedExpenses.js";
 import type * as lib_notifications from "../lib/notifications.js";
 import type * as lib_period from "../lib/period.js";
@@ -123,6 +124,7 @@ declare const fullApi: ApiFromModules<{
   "lib/fixedExpensePayments": typeof lib_fixedExpensePayments;
   "lib/fixedExpensePeriod": typeof lib_fixedExpensePeriod;
   "lib/fixedExpenseTransaction": typeof lib_fixedExpenseTransaction;
+  "lib/fixedExpenseUpcoming": typeof lib_fixedExpenseUpcoming;
   "lib/fixedExpenses": typeof lib_fixedExpenses;
   "lib/notifications": typeof lib_notifications;
   "lib/period": typeof lib_period;
