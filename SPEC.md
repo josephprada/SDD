@@ -626,8 +626,15 @@ packages/jp-ds/
    - Tools/resources sobre el dominio financiero (lectura → escritura controlada)
    - Deploy en VPS (`mcp.wallet.lavalex.co`); conexión fácil a Claude / Gemini / OpenAI / Cursor / OpenClaw
    - Arquitectura Opción D (sin repo aparte; sin chat embebido en este ciclo)
+9. 🚧 **Change 8: app-polish-fixes — Polish UX + notificaciones + MCP fijos** (plan 2026-08-01, rama `feat/app-polish-fixes`)
+   - Proyección “Si pagas fijos pendientes” = disponible − fijos pendientes, **más prominente que el neto**
+   - Modal de movimiento desde Home sin navegar; scroll móvil tras eliminar
+   - Sin autofocus en monto al editar; adjuntos también al crear
+   - Reparar spam de toasts al entrar y entrega push a bandeja del móvil
+   - MCP: `list_fixed_expenses` + `pendingTotal`
+   - Arnés Playwright (E2E/UI) para los escenarios del change
 
-> **Roadmap v1.1 cerrado (2026-07-29):** Changes 1–7 entregados (MCP Access en prod).
+> **Roadmap:** Changes 1–7 en prod. Change 8 planificado (pendiente tasks + implement).
 
 ---
 

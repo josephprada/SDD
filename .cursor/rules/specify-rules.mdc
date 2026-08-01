@@ -3,6 +3,7 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-Roadmap Changes 1–7 cerrados. Para el último change ver `changes/mcp-access/design.md`
-y `AGENTS.md`. Nuevo change: crear `changes/<id>/` y actualizar este contexto.
+Change activo: **app-polish-fixes** (Change 8) — rama `feat/app-polish-fixes`.
+Plan: `changes/app-polish-fixes/plan.md` · Design: `changes/app-polish-fixes/design.md`.
+Siguiente: `/speckit-tasks`.
 <!-- SPECKIT END -->
