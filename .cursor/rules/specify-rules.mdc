@@ -4,6 +4,6 @@ alwaysApply: true
 
 <!-- SPECKIT START -->
 Change activo: **app-polish-fixes** (Change 8) — rama `feat/app-polish-fixes`.
-Plan: `changes/app-polish-fixes/plan.md` · Design: `changes/app-polish-fixes/design.md`.
-Siguiente: `/speckit-tasks`.
+Tasks: `changes/app-polish-fixes/tasks.md` (T001–T044).
+Siguiente: `/speckit-implement`.
 <!-- SPECKIT END -->

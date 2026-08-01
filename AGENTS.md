@@ -76,15 +76,16 @@ Rama: `feat/app-polish-fixes` (base `testing`).
 | Data model | `changes/app-polish-fixes/data-model.md` |
 | Quickstart QA | `changes/app-polish-fixes/quickstart.md` |
 | Contracts | `changes/app-polish-fixes/contracts/` |
+| Tasks | `changes/app-polish-fixes/tasks.md` |
 | Checklist | `changes/app-polish-fixes/checklists/requirements.md` |
 
 **Alcance v1:** Corrección proyección “Si pagas fijos pendientes” (disponible − fijos) con **mayor jerarquía visual que el neto**; modal/scroll de movimientos desde Home; sin autofocus en monto al editar; reparación toasts/push; adjuntos al crear movimiento; MCP `list_fixed_expenses` / `pendingTotal`; arnés **Playwright** para E2E/UI de estos escenarios.
 
 **Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
 
-**Roadmap:** Changes 1–7 cerrados · Change 8 en plan. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
+**Roadmap:** Changes 1–7 cerrados · Change 8 tasks listos. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
 
-**Siguiente:** `/speckit-tasks` → `tasks.md` → implementar.
+**Siguiente:** `/speckit-implement` (empezar por Phase 1–2 + US1 MVP).
 
 ---
 
