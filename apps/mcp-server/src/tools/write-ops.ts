@@ -74,7 +74,17 @@ export function buildWriteOpsToolDefs(
 				"Crea un item dentro de un documento de impuestos. Requiere scope write:tax.",
 			inputShape: {
 				documentId: z.string(),
-				concept: z.string(),
+				section: z
+					.enum(["assets", "liabilities", "income", "deductions", "exempt"])
+					.describe("Sección DIAN del item."),
+				category: z
+					.string()
+					.describe(
+						"Categoría dentro de la sección (ej. salarios, inmuebles).",
+					),
+				description: z
+					.string()
+					.describe("Concepto / descripción del item."),
 				amount: z
 					.number()
 					.int()
@@ -91,7 +101,11 @@ export function buildWriteOpsToolDefs(
 				"Actualiza un item de impuestos existente. Rechazado (conflict) si el documento padre está en estado 'filed'. Requiere scope write:tax.",
 			inputShape: {
 				itemId: z.string(),
-				concept: z.string().optional(),
+				section: z
+					.enum(["assets", "liabilities", "income", "deductions", "exempt"])
+					.optional(),
+				category: z.string().optional(),
+				description: z.string().optional(),
 				amount: z.number().int().positive().optional(),
 				notes: z.string().optional(),
 			},

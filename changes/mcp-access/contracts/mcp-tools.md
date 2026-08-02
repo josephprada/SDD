@@ -46,7 +46,13 @@ Todos los tools pasan por `POST /agent/v1/rpc`. Tipos de args en JSON Schema / Z
 ### `list_budgets`
 
 - **Scopes**: `read:budgets`
-- **Args**: `{ period?: string }`
+- **Args**: `{ period?: string }` (ej. `'2026-08'`; alias gateway: `periodKey`)
+
+### `list_fixed_expenses`
+
+- **Scopes**: `read:budgets`
+- **Args**: `{ periodStart?: number; periodEnd?: number; limit?: number }`
+- **Returns**: `{ items, pendingTotal }` (misma semántica dashboard)
 
 ### `list_credits`
 
@@ -86,15 +92,35 @@ Todos los tools pasan por `POST /agent/v1/rpc`. Tipos de args en JSON Schema / Z
 ### `upsert_budget`
 
 - **Scopes**: `write:budgets`
-- **Args**: categoría + límite + período según contrato budgets existente
+- **Args (MCP público)**: `{ categoryId: string; limit: number; period: string; budgetId?: string }`
+  - Crear: `categoryId` + `limit` + `period` (ej. `'2026-08'`)
+  - Actualizar: `budgetId` + `categoryId` + `limit` (`period` no se usa)
+- **Gateway**: acepta también aliases internos `categoryIds[]` / `amount` / `periodKey` / `id`. El singular `categoryId` se envuelve a `categoryIds: [categoryId]`.
 
-### `create_savings_goal` / `contribute_to_goal`
+### `create_savings_goal`
 
 - **Scopes**: `write:savings`
+- **Args**: `{ name: string; targetAmount: number; targetDate?: number }`
+- **Gateway**: `targetDate` → campo `deadline`
 
-### `create_tax_item` / `update_tax_item`
+### `contribute_to_goal`
+
+- **Scopes**: `write:savings`
+- **Args**: `{ goalId: string; amount: number; fromAccountId?: string; contributedAt?: number; notes?: string }`
+- **Gateway**: `contributedAt` default `Date.now()`; `fromAccountId` requerido si la meta tiene cuenta vinculada
+
+### `create_tax_item`
 
 - **Scopes**: `write:tax`
+- **Args**: `{ documentId; section; category; description; amount; notes? }`
+- **Gateway**: también acepta `concept` como alias de `description`
+- **Conflict**: document `filed` → `conflict`
+
+### `update_tax_item`
+
+- **Scopes**: `write:tax`
+- **Args**: `{ itemId; section?; category?; description?; amount?; notes? }`
+- **Gateway**: `concept` alias de `description`
 - **Conflict**: document `filed` → `conflict`
 
 ---

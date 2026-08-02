@@ -19,19 +19,27 @@ export function buildWritePlanToolDefs(
 		makeRpcTool({
 			name: "upsert_budget",
 			description:
-				"Crea o actualiza un presupuesto por categoría y período. Requiere scope write:budgets.",
+				"Crea o actualiza un presupuesto por categoría y período. Requiere scope write:budgets. Para crear: categoryId + limit + period. Para actualizar: budgetId + categoryId + limit (period se ignora).",
 			inputShape: {
 				budgetId: z
 					.string()
 					.optional()
 					.describe("Si se provee, actualiza el presupuesto existente."),
-				categoryId: z.string(),
+				categoryId: z
+					.string()
+					.describe(
+						"ID de categoría de gasto (se mapea a categoryIds: [categoryId] en el backend).",
+					),
 				limit: z
 					.number()
 					.int()
 					.positive()
-					.describe("Límite en COP (entero, > 0)."),
-				period: z.string().describe("Período del presupuesto (ej. '2026-07')."),
+					.describe("Límite en COP (entero, > 0). Alias interno: amount."),
+				period: z
+					.string()
+					.describe(
+						"Período del presupuesto (ej. '2026-08'). Requerido al crear. Alias interno: periodKey.",
+					),
 			},
 			getToken,
 			siteUrl,
@@ -49,7 +57,9 @@ export function buildWritePlanToolDefs(
 				targetDate: z
 					.number()
 					.optional()
-					.describe("Fecha objetivo (epoch ms)."),
+					.describe(
+						"Fecha objetivo (epoch ms). Alias interno del campo deadline.",
+					),
 			},
 			getToken,
 			siteUrl,
@@ -57,7 +67,7 @@ export function buildWritePlanToolDefs(
 		makeRpcTool({
 			name: "contribute_to_goal",
 			description:
-				"Registra un aporte a una meta de ahorro existente. Requiere scope write:savings.",
+				"Registra un aporte a una meta de ahorro existente. Requiere scope write:savings. Si la meta tiene cuenta vinculada, fromAccountId es obligatorio.",
 			inputShape: {
 				goalId: z.string(),
 				amount: z
@@ -65,6 +75,17 @@ export function buildWritePlanToolDefs(
 					.int()
 					.positive()
 					.describe("Monto del aporte en COP (entero, > 0)."),
+				fromAccountId: z
+					.string()
+					.optional()
+					.describe(
+						"Cuenta origen del aporte. Requerido si la meta tiene cuenta de ahorro vinculada.",
+					),
+				contributedAt: z
+					.number()
+					.optional()
+					.describe("Fecha del aporte (epoch ms). Default: ahora."),
+				notes: z.string().optional(),
 			},
 			getToken,
 			siteUrl,

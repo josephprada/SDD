@@ -26,7 +26,12 @@ import {
 } from "./lib/auth";
 import { getBalanceDeltas, invertDeltas } from "./lib/balance";
 import { listUpcomingFixedExpensesForUser } from "./lib/fixedExpenseUpcoming";
-import { periodKeyFromTimestamp, periodKeyToMonthRange } from "./lib/period";
+import {
+	type GroupingId,
+	periodKeyFromTimestamp,
+	periodKeyToMonthRange,
+	periodRangeForGrouping,
+} from "./lib/period";
 import {
 	countsForPersonalFinance,
 	excludedPersonalFinanceAccountIds,
@@ -159,16 +164,42 @@ function bogotaMonthBounds(referenceMs: number = Date.now()): {
 	start: number;
 	end: number;
 } {
+	return bogotaPeriodBounds("month", referenceMs);
+}
+
+/** Period bounds in absolute ms for America/Bogota wall-clock calendar. */
+function bogotaPeriodBounds(
+	grouping: GroupingId,
+	referenceMs: number = Date.now(),
+): { start: number; end: number } {
 	const bogotaWallClockMs = referenceMs + BOGOTA_OFFSET_MINUTES * 60_000;
 	const bogotaDate = new Date(bogotaWallClockMs);
-	const year = bogotaDate.getUTCFullYear();
-	const month = bogotaDate.getUTCMonth();
-	const startWallClockMs = Date.UTC(year, month, 1, 0, 0, 0, 0);
-	const endWallClockMs = Date.UTC(year, month + 1, 0, 23, 59, 59, 999);
+	const anchor = new Date(
+		bogotaDate.getUTCFullYear(),
+		bogotaDate.getUTCMonth(),
+		bogotaDate.getUTCDate(),
+		12,
+		0,
+		0,
+		0,
+	);
+	const range = periodRangeForGrouping(grouping, anchor);
 	return {
-		start: startWallClockMs - BOGOTA_OFFSET_MINUTES * 60_000,
-		end: endWallClockMs - BOGOTA_OFFSET_MINUTES * 60_000,
+		start: range.start - BOGOTA_OFFSET_MINUTES * 60_000,
+		end: range.end - BOGOTA_OFFSET_MINUTES * 60_000,
 	};
+}
+
+function asOptionalGrouping(value: unknown): GroupingId | undefined {
+	if (
+		value === "week" ||
+		value === "month" ||
+		value === "quarter" ||
+		value === "semester"
+	) {
+		return value;
+	}
+	return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -182,10 +213,11 @@ async function toolGetFinancialOverview(
 ) {
 	const periodStart = asOptionalNumber(args.periodStart);
 	const periodEnd = asOptionalNumber(args.periodEnd);
+	const grouping = asOptionalGrouping(args.period);
 	const bounds =
 		periodStart !== undefined && periodEnd !== undefined
 			? { start: periodStart, end: periodEnd }
-			: bogotaMonthBounds();
+			: bogotaPeriodBounds(grouping ?? "month");
 
 	const accounts = await ctx.db
 		.query("accounts")
@@ -242,8 +274,10 @@ async function toolListTransactions(
 	userId: Id<"users">,
 	args: Record<string, unknown>,
 ) {
-	const dateFrom = asOptionalNumber(args.dateFrom);
-	const dateTo = asOptionalNumber(args.dateTo);
+	// MCP schema uses from/to; gateway historically used dateFrom/dateTo.
+	const dateFrom =
+		asOptionalNumber(args.dateFrom) ?? asOptionalNumber(args.from);
+	const dateTo = asOptionalNumber(args.dateTo) ?? asOptionalNumber(args.to);
 	const accountId = asOptionalId<"accounts">(args.accountId);
 	const categoryId = asOptionalId<"categories">(args.categoryId);
 	const limit = clampLimit(asOptionalNumber(args.limit), 50, 100);
@@ -353,7 +387,9 @@ async function toolListBudgets(
 	userId: Id<"users">,
 	args: Record<string, unknown>,
 ) {
-	const rawPeriodKey = asOptionalString(args.periodKey);
+	// MCP schema uses `period`; gateway historically used `periodKey`.
+	const rawPeriodKey =
+		asOptionalString(args.periodKey) ?? asOptionalString(args.period);
 	const periodKey = rawPeriodKey
 		? validatePeriodKey(rawPeriodKey)
 		: periodKeyFromTimestamp(bogotaMonthBounds().start);
@@ -660,17 +696,52 @@ async function toolUpdateTransaction(
 	return { transactionId };
 }
 
+/**
+ * Normalizes MCP-facing upsert_budget args into the internal budget shape.
+ * Public MCP schema uses singular `categoryId` / `limit` / `period` / `budgetId`;
+ * Convex stores `categoryIds[]` / `amount` / `periodKey` / `_id`.
+ */
+function resolveBudgetCategoryIds(
+	args: Record<string, unknown>,
+): Id<"categories">[] {
+	if (Array.isArray(args.categoryIds)) {
+		return asIdArray<"categories">(args.categoryIds, "categoryIds");
+	}
+	if (typeof args.categoryId === "string" && args.categoryId.length > 0) {
+		return [asId<"categories">(args.categoryId, "categoryId")];
+	}
+	throw new AgentGatewayError(
+		"validation",
+		"categoryId (string) or categoryIds (non-empty array) is required",
+	);
+}
+
+function resolveBudgetAmount(args: Record<string, unknown>): number {
+	if (args.amount !== undefined) {
+		return validatePositiveCopAmount(asNumber(args.amount, "amount"));
+	}
+	if (args.limit !== undefined) {
+		return validatePositiveCopAmount(asNumber(args.limit, "limit"));
+	}
+	throw new AgentGatewayError(
+		"validation",
+		"limit or amount is required (COP integer > 0)",
+	);
+}
+
 async function toolUpsertBudget(
 	ctx: MutationCtx,
 	userId: Id<"users">,
 	args: Record<string, unknown>,
 ) {
-	const categoryIds = asIdArray<"categories">(args.categoryIds, "categoryIds");
-	const amount = validatePositiveCopAmount(asNumber(args.amount, "amount"));
+	const categoryIds = resolveBudgetCategoryIds(args);
+	const amount = resolveBudgetAmount(args);
 	const notes = asOptionalString(args.notes)
 		?.trim()
 		.slice(0, MAX_BUDGET_NOTES_LENGTH);
-	const id = asOptionalId<"budgets">(args.id);
+	const id =
+		asOptionalId<"budgets">(args.id) ??
+		asOptionalId<"budgets">(args.budgetId);
 
 	await validateExpenseCategories(ctx, userId, categoryIds);
 
@@ -695,7 +766,10 @@ async function toolUpsertBudget(
 		return { budgetId: id };
 	}
 
-	const periodKey = validatePeriodKey(asString(args.periodKey, "periodKey"));
+	const periodRaw = args.periodKey ?? args.period;
+	const periodKey = validatePeriodKey(
+		asString(periodRaw, args.periodKey !== undefined ? "periodKey" : "period"),
+	);
 	await assertCategoriesAvailableForPeriod(ctx, userId, periodKey, categoryIds);
 	const now = Date.now();
 	const budgetId = await ctx.db.insert("budgets", {
@@ -719,7 +793,9 @@ async function toolCreateSavingsGoal(
 	const targetAmount = validatePositiveCopAmount(
 		asNumber(args.targetAmount, "targetAmount"),
 	);
-	const deadline = asOptionalNumber(args.deadline);
+	// MCP schema uses `targetDate`; Convex field is `deadline`.
+	const deadline =
+		asOptionalNumber(args.deadline) ?? asOptionalNumber(args.targetDate);
 	const accountId = asOptionalId<"accounts">(args.accountId);
 	const notes = validateCreditNotes(asOptionalString(args.notes));
 
@@ -750,7 +826,11 @@ async function toolContributeToGoal(
 ) {
 	const goalId = asId<"savingsGoals">(args.goalId, "goalId");
 	const amount = validatePositiveCopAmount(asNumber(args.amount, "amount"));
-	const contributedAt = asNumber(args.contributedAt, "contributedAt");
+	// MCP schema omits contributedAt; default to now so agents can contribute with goalId+amount.
+	const contributedAt =
+		asOptionalNumber(args.contributedAt) ??
+		asOptionalNumber(args.date) ??
+		Date.now();
 	const fromAccountId = asOptionalId<"accounts">(args.fromAccountId);
 	const notes = validateCreditNotes(asOptionalString(args.notes));
 
@@ -805,8 +885,10 @@ async function toolCreateTaxItem(
 	const documentId = asId<"taxDocuments">(args.documentId, "documentId");
 	const section = asTaxSection(args.section);
 	const category = asString(args.category, "category");
+	// MCP historically used `concept`; domain field is `description`.
+	const descriptionRaw = args.description ?? args.concept;
 	const description = validateTaxItemDescription(
-		asString(args.description, "description"),
+		asString(descriptionRaw, args.description !== undefined ? "description" : "concept"),
 	);
 	const amount = validatePositiveCopAmount(asNumber(args.amount, "amount"));
 	const notes = validateTaxItemNotes(asOptionalString(args.notes));
@@ -851,9 +933,18 @@ async function toolUpdateTaxItem(
 		category,
 		updatedAt: Date.now(),
 	};
-	if (args.description !== undefined) {
+	const descriptionRaw =
+		args.description !== undefined
+			? args.description
+			: args.concept !== undefined
+				? args.concept
+				: undefined;
+	if (descriptionRaw !== undefined) {
 		patch.description = validateTaxItemDescription(
-			asString(args.description, "description"),
+			asString(
+				descriptionRaw,
+				args.description !== undefined ? "description" : "concept",
+			),
 		);
 	}
 	if (args.amount !== undefined) {
