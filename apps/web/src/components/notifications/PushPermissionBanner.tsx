@@ -31,10 +31,10 @@ function messageForTestResult(result: TestPushResult): string {
 		case "notifications_disabled":
 			return "Las notificaciones generales están desactivadas en Ajustes.";
 		case "all_gone":
-			return "La suscripción ya no es válida (410). Desactiva y vuelve a Activar push.";
+			return "Suscripción obsoleta (tras cambio de claves). Pulsa Activar push de nuevo.";
 		case "send_failed": {
 			const detail = result.detail ? `: ${result.detail}` : "";
-			return `El envío falló${detail}. Suele ser VAPID despareado o endpoint inválido.`;
+			return `El envío falló${detail}. Desactiva y vuelve a Activar push.`;
 		}
 		case "unauthenticated":
 			return "Sesión no válida. Vuelve a iniciar sesión.";
@@ -90,9 +90,26 @@ export function PushPermissionBanner() {
 		setBusy(true);
 		setMessage(null);
 		try {
+			// Refresh subscription against current VAPID before sending.
+			const refreshed = await registerPushSubscription(convex);
+			if (!refreshed) {
+				setPushEnabled(false);
+				await updatePrefs({ pushEnabled: false });
+				setMessage(
+					"No se pudo renovar la suscripción. Activa push de nuevo y concede permiso.",
+				);
+				return;
+			}
+			setPushEnabled(true);
+			await updatePrefs({ pushEnabled: true });
+
 			const result = (await sendTestPush({})) as TestPushResult;
 			setMessage(messageForTestResult(result));
-			if (result.status === "all_gone" || result.status === "no_subscription") {
+			if (
+				result.status === "all_gone" ||
+				result.status === "no_subscription" ||
+				result.status === "send_failed"
+			) {
 				setPushEnabled(false);
 				await updatePrefs({ pushEnabled: false });
 			}

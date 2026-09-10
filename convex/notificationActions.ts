@@ -216,16 +216,25 @@ async function deliverWebPush(args: {
 				payload,
 			);
 			sent += 1;
-		} catch (err: unknown) {
-			const status = (err as { statusCode?: number }).statusCode;
-			const message = err instanceof Error ? err.message : "push_send_failed";
-			if (status === 404 || status === 410) {
-				gone.push(sub.endpoint);
-			} else {
-				console.warn("web-push send failed", { status, message });
-				failures.push({ statusCode: status, message });
+			} catch (err: unknown) {
+				const status = (err as { statusCode?: number }).statusCode;
+				const message = err instanceof Error ? err.message : "push_send_failed";
+				// 404/410 = expired endpoint. 401/403/400 = often VAPID mismatch
+				// after key rotation — drop the stale subscription.
+				if (
+					status === 404 ||
+					status === 410 ||
+					status === 400 ||
+					status === 401 ||
+					status === 403
+				) {
+					gone.push(sub.endpoint);
+					console.warn("web-push dropping subscription", { status, message });
+				} else {
+					console.warn("web-push send failed", { status, message });
+					failures.push({ statusCode: status, message });
+				}
 			}
-		}
 	}
 
 	if (gone.length > 0 && args.onGone) {

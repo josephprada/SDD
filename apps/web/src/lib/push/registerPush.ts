@@ -12,6 +12,21 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 	return arr;
 }
 
+function applicationServerKeysMatch(
+	subscription: PushSubscription,
+	vapidPublicKey: string,
+): boolean {
+	const existingKey = subscription.options.applicationServerKey;
+	if (!existingKey) return false;
+	const expected = urlBase64ToUint8Array(vapidPublicKey);
+	const actual = new Uint8Array(existingKey);
+	if (actual.byteLength !== expected.byteLength) return false;
+	for (let i = 0; i < actual.byteLength; i++) {
+		if (actual[i] !== expected[i]) return false;
+	}
+	return true;
+}
+
 export async function registerPushSubscription(
 	convex: ConvexReactClient,
 ): Promise<boolean> {
@@ -28,12 +43,28 @@ export async function registerPushSubscription(
 
 	const reg = await navigator.serviceWorker.ready;
 	const existing = await reg.pushManager.getSubscription();
+
+	// After VAPID rotation, reusing an old PushSubscription causes send failures
+	// ("unexpected response code") because the endpoint was bound to the old key.
+	if (existing && !applicationServerKeysMatch(existing, VAPID_KEY)) {
+		try {
+			await convex.mutation(api.notifications.unsubscribePush, {
+				endpoint: existing.endpoint,
+			});
+		} catch {
+			// Best-effort server cleanup; local unsubscribe still required.
+		}
+		await existing.unsubscribe();
+	}
+
+	const current = await reg.pushManager.getSubscription();
 	const sub =
-		existing ??
-		(await reg.pushManager.subscribe({
-			userVisibleOnly: true,
-			applicationServerKey: urlBase64ToUint8Array(VAPID_KEY) as BufferSource,
-		}));
+		current && applicationServerKeysMatch(current, VAPID_KEY)
+			? current
+			: await reg.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: urlBase64ToUint8Array(VAPID_KEY) as BufferSource,
+				});
 
 	const json = sub.toJSON();
 	if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false;
