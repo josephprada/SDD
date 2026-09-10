@@ -3,6 +3,6 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-Roadmap Changes 1–8 cerrados. Último: `changes/app-polish-fixes/` (2026-08-01).
-Nuevo change: crear `changes/<id>/` y actualizar este contexto + `AGENTS.md`.
+Change activo: `changes/notifications-polish/` (Change 9 — 2026-09-10).
+Rama: `feat/notifications-polish`. Changes 1–8 cerrados en prod.
 <!-- SPECKIT END -->

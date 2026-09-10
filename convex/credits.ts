@@ -1328,8 +1328,8 @@ export const processReminders = internalMutation({
 						referenceId: refId,
 						channels: ["in_app", "push"],
 						payload: {
-							title: `Cuota crédito: ${credit.name}`,
-							body: `Cuota #${payment.installmentNumber} vence ${offset === 0 ? "hoy" : `en ${offset} días`} — ${payment.totalDue.toLocaleString("es-CO")} COP`,
+							title: `${credit.name} · cuota #${payment.installmentNumber}`,
+							body: `${payment.totalDue.toLocaleString("es-CO")} COP ${offset === 0 ? "vence hoy" : offset === 1 ? "vence mañana" : `vence en ${offset} días`}. Abre el crédito.`,
 							url: `/credits/${credit._id}`,
 						},
 						dateKey: todayKey,

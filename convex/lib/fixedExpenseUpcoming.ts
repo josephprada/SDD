@@ -53,6 +53,7 @@ export async function listUpcomingFixedExpensesForUser(
 		if (item.onlyPeriodKey) {
 			const { start, end } = periodKeyToMonthRange(item.onlyPeriodKey);
 			if (end < periodStart || start > periodEnd) continue;
+			if (item.skippedPeriodKey === item.onlyPeriodKey) continue;
 			const dueTs = dueTimestampForPeriodKey(
 				item.dayOfMonth,
 				item.onlyPeriodKey,
@@ -68,6 +69,7 @@ export async function listUpcomingFixedExpensesForUser(
 		}
 
 		if (!appliesToPeriodKey(item, viewingPeriodKey)) continue;
+		if (item.skippedPeriodKey === viewingPeriodKey) continue;
 
 		const dueTs = dueTimestampForPeriodKey(item.dayOfMonth, viewingPeriodKey);
 		if (dueTs < periodStart || dueTs > periodEnd) continue;

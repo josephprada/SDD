@@ -416,13 +416,13 @@ export const checkThresholdAfterTransaction = internalMutation({
 				type: "budget_threshold",
 				referenceId: budget._id as string,
 				channels: ["in_app", "push"],
-				payload: {
-					title: `Presupuesto ${label}`,
-					body: `Has alcanzado el ${pct}% del límite (${status === "danger" ? "superado" : "alerta"})`,
-					url: "/budgets",
-					emailSubject: `Alerta de presupuesto — ${label}`,
-					emailHtml: `<p>Tu presupuesto <strong>${label}</strong> está al <strong>${pct}%</strong>.</p>`,
-				},
+					payload: {
+						title: `Presupuesto · ${label}`,
+						body: `Al ${pct}% del límite (${status === "danger" ? "superado" : "alerta 80%+"}). Revisa en Presupuestos.`,
+						url: "/budgets",
+						emailSubject: `Alerta de presupuesto — ${label}`,
+						emailHtml: `<p>Tu presupuesto <strong>${label}</strong> está al <strong>${pct}%</strong>.</p>`,
+					},
 				dateKey,
 				dedupeSuffix: status,
 			});

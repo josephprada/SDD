@@ -3,6 +3,7 @@ import type { ResolvedUserPreferences } from "./preferences";
 
 export type NotificationType =
 	| "fixed_expense_reminder"
+	| "fixed_expense_overdue"
 	| "budget_threshold"
 	| "period_report"
 	| "credit_due";

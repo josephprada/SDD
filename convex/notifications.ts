@@ -24,6 +24,7 @@ const channelValidator = v.union(
 
 const typeValidator = v.union(
 	v.literal("fixed_expense_reminder"),
+	v.literal("fixed_expense_overdue"),
 	v.literal("budget_threshold"),
 	v.literal("period_report"),
 	v.literal("credit_due"),

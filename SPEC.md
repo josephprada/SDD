@@ -633,8 +633,12 @@ packages/jp-ds/
    - Reparar spam de toasts al entrar y entrega push a bandeja del móvil
    - MCP: `list_fixed_expenses` + `pendingTotal`
    - Arnés Playwright (E2E/UI) para los escenarios del change
+10. 🚧 **Change 9: notifications-polish — Polish push + mora fijos + omitir mes** (en curso, `feat/notifications-polish`)
+   - Push OS solo fuera de foreground; copy + deep links
+   - Mora gasto fijo +3 / +6 días sin pagar
+   - Estado “omitir este mes” (fuera de pendientes y notificaciones)
 
-> **Roadmap:** Changes 1–8 en prod (App Polish Fixes cerrado 2026-08-01).
+> **Roadmap:** Changes 1–8 en prod. Change 9 (`notifications-polish`) en curso.
 
 ---
 

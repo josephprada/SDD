@@ -6,16 +6,36 @@ declare let self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
+async function hasForegroundClient(): Promise<boolean> {
+	const clients = await self.clients.matchAll({
+		type: "window",
+		includeUncontrolled: true,
+	});
+	return clients.some((client) => {
+		const windowClient = client as WindowClient;
+		return (
+			windowClient.focused ||
+			windowClient.visibilityState === "visible"
+		);
+	});
+}
+
 self.addEventListener("push", (event) => {
 	const data = event.data?.json() as
 		| { title?: string; body?: string; url?: string }
 		| undefined;
 	event.waitUntil(
-		self.registration.showNotification(data?.title ?? "JP-WALLET", {
-			body: data?.body ?? "",
-			icon: "/icon.svg",
-			data: { url: data?.url ?? "/" },
-		}),
+		(async () => {
+			if (await hasForegroundClient()) {
+				// App visible: in-app toast covers the user; skip OS tray spam.
+				return;
+			}
+			await self.registration.showNotification(data?.title ?? "JP-WALLET", {
+				body: data?.body ?? "",
+				icon: "/icon.svg",
+				data: { url: data?.url ?? "/" },
+			});
+		})(),
 	);
 });
 
@@ -23,13 +43,27 @@ self.addEventListener("notificationclick", (event) => {
 	event.notification.close();
 	const url = (event.notification.data?.url as string | undefined) ?? "/";
 	event.waitUntil(
-		self.clients.matchAll({ type: "window" }).then((clientList) => {
+		(async () => {
+			const clientList = await self.clients.matchAll({
+				type: "window",
+				includeUncontrolled: true,
+			});
 			for (const client of clientList) {
-				if ("focus" in client) {
-					return client.focus();
+				const windowClient = client as WindowClient;
+				if ("navigate" in windowClient && typeof windowClient.navigate === "function") {
+					try {
+						await windowClient.navigate(url);
+					} catch {
+						windowClient.postMessage({ type: "NOTIFICATION_NAV", url });
+					}
+					await windowClient.focus();
+					return;
 				}
+				await windowClient.focus();
+				windowClient.postMessage({ type: "NOTIFICATION_NAV", url });
+				return;
 			}
-			return self.clients.openWindow(url);
-		}),
+			await self.clients.openWindow(url);
+		})(),
 	);
 });
