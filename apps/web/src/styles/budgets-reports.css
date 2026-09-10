@@ -321,15 +321,15 @@
 
 .fixed-expense-card__footer {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	flex-direction: column;
+	align-items: stretch;
 	gap: var(--space-3);
 	margin-top: var(--space-2);
 }
 
 .fixed-expense-card__meta {
 	min-width: 0;
-	flex: 1;
+	width: 100%;
 }
 
 .fixed-expense-card__due,
@@ -345,10 +345,44 @@
 
 .fixed-expense-card__actions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	justify-content: flex-end;
-	flex-shrink: 0;
+	justify-content: flex-start;
 	gap: var(--space-2);
+	width: 100%;
+}
+
+.fixed-expense-card__actions .jp-btn {
+	flex: 1 1 auto;
+	min-width: min(100%, 9.5rem);
+}
+
+.fixed-expense-card__actions .jp-icon-btn {
+	flex: 0 0 auto;
+}
+
+@media (min-width: 640px) {
+	.fixed-expense-card__footer {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.fixed-expense-card__meta {
+		flex: 1;
+		width: auto;
+	}
+
+	.fixed-expense-card__actions {
+		width: auto;
+		flex-shrink: 0;
+		justify-content: flex-end;
+	}
+
+	.fixed-expense-card__actions .jp-btn {
+		flex: 0 0 auto;
+		min-width: 0;
+	}
 }
 
 .reminder-offsets__chips {
