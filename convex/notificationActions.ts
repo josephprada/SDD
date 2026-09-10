@@ -150,6 +150,91 @@ export const sendEmail = internalAction({
 	},
 });
 
+type PushSubscriptionPayload = {
+	endpoint: string;
+	p256dh: string;
+	auth: string;
+};
+
+type PushSendResult =
+	| {
+			skipped: true;
+			skipReason: "vapid_missing";
+			sent: 0;
+			gone: string[];
+			failures: { statusCode?: number; message: string }[];
+	  }
+	| {
+			ok: true;
+			skipped: false;
+			sent: number;
+			gone: string[];
+			failures: { statusCode?: number; message: string }[];
+	  };
+
+async function deliverWebPush(args: {
+	subscriptions: PushSubscriptionPayload[];
+	title: string;
+	body: string;
+	url: string;
+	onGone?: (endpoints: string[]) => Promise<void>;
+}): Promise<PushSendResult> {
+	const publicKey = process.env.VAPID_PUBLIC_KEY;
+	const privateKey = process.env.VAPID_PRIVATE_KEY;
+	const subject = process.env.VAPID_SUBJECT ?? "mailto:support@wallet.lavalex.co";
+
+	if (!publicKey || !privateKey) {
+		console.warn("VAPID keys not set; skipping push");
+		return {
+			skipped: true,
+			skipReason: "vapid_missing",
+			sent: 0,
+			gone: [],
+			failures: [],
+		};
+	}
+
+	webpush.setVapidDetails(subject, publicKey, privateKey);
+
+	const payload = JSON.stringify({
+		title: args.title,
+		body: args.body,
+		url: args.url,
+	});
+
+	const gone: string[] = [];
+	const failures: { statusCode?: number; message: string }[] = [];
+	let sent = 0;
+
+	for (const sub of args.subscriptions) {
+		try {
+			await webpush.sendNotification(
+				{
+					endpoint: sub.endpoint,
+					keys: { p256dh: sub.p256dh, auth: sub.auth },
+				},
+				payload,
+			);
+			sent += 1;
+		} catch (err: unknown) {
+			const status = (err as { statusCode?: number }).statusCode;
+			const message = err instanceof Error ? err.message : "push_send_failed";
+			if (status === 404 || status === 410) {
+				gone.push(sub.endpoint);
+			} else {
+				console.warn("web-push send failed", { status, message });
+				failures.push({ statusCode: status, message });
+			}
+		}
+	}
+
+	if (gone.length > 0 && args.onGone) {
+		await args.onGone(gone);
+	}
+
+	return { ok: true, skipped: false, sent, gone, failures };
+}
+
 export const sendPush = internalAction({
 	args: {
 		subscriptions: v.array(
@@ -163,66 +248,39 @@ export const sendPush = internalAction({
 		body: v.string(),
 		url: v.string(),
 	},
-	handler: async (ctx, args) => {
-		const publicKey = process.env.VAPID_PUBLIC_KEY;
-		const privateKey = process.env.VAPID_PRIVATE_KEY;
-		const subject = process.env.VAPID_SUBJECT ?? "mailto:support@wallet.lavalex.co";
-
-		if (!publicKey || !privateKey) {
-			console.warn("VAPID keys not set; skipping push");
-			return {
-				skipped: true as const,
-				skipReason: "vapid_missing" as const,
-				sent: 0,
-				gone: [] as string[],
-				failures: [] as { statusCode?: number; message: string }[],
-			};
-		}
-
-		webpush.setVapidDetails(subject, publicKey, privateKey);
-
-		const payload = JSON.stringify({
-			title: args.title,
-			body: args.body,
-			url: args.url,
+	handler: async (ctx, args): Promise<PushSendResult> => {
+		return deliverWebPush({
+			...args,
+			onGone: async (endpoints) => {
+				await ctx.runMutation(internal.notifications.removePushByEndpoints, {
+					endpoints,
+				});
+			},
 		});
-
-		const gone: string[] = [];
-		const failures: { statusCode?: number; message: string }[] = [];
-		let sent = 0;
-
-		for (const sub of args.subscriptions) {
-			try {
-				await webpush.sendNotification(
-					{
-						endpoint: sub.endpoint,
-						keys: { p256dh: sub.p256dh, auth: sub.auth },
-					},
-					payload,
-				);
-				sent += 1;
-			} catch (err: unknown) {
-				const status = (err as { statusCode?: number }).statusCode;
-				const message =
-					err instanceof Error ? err.message : "push_send_failed";
-				if (status === 404 || status === 410) {
-					gone.push(sub.endpoint);
-				} else {
-					console.warn("web-push send failed", { status, message });
-					failures.push({ statusCode: status, message });
-				}
-			}
-		}
-
-		if (gone.length > 0) {
-			await ctx.runMutation(internal.notifications.removePushByEndpoints, {
-				endpoints: gone,
-			});
-		}
-
-		return { ok: true as const, skipped: false as const, sent, gone, failures };
 	},
 });
+
+export type SendTestPushResult =
+	| { status: "unauthenticated" }
+	| { status: "notifications_disabled" }
+	| { status: "push_disabled" }
+	| { status: "no_subscription" }
+	| { status: "vapid_missing"; subscriptionCount: number }
+	| { status: "all_gone"; subscriptionCount: number; gone: number }
+	| {
+			status: "send_failed";
+			subscriptionCount: number;
+			gone: number;
+			failures: number;
+			detail?: string;
+	  }
+	| {
+			status: "sent";
+			subscriptionCount: number;
+			sent: number;
+			gone: number;
+			failures: number;
+	  };
 
 /**
  * Diagnostic push for the signed-in user. Returns a clear status so Settings
@@ -230,10 +288,10 @@ export const sendPush = internalAction({
  */
 export const sendTestPush = action({
 	args: {},
-	handler: async (ctx) => {
+	handler: async (ctx): Promise<SendTestPushResult> => {
 		const userId = await getAuthUserId(ctx);
 		if (!userId) {
-			return { status: "unauthenticated" as const };
+			return { status: "unauthenticated" };
 		}
 
 		const delivery = await ctx.runQuery(
@@ -242,25 +300,30 @@ export const sendTestPush = action({
 		);
 
 		if (!delivery.notificationsEnabled) {
-			return { status: "notifications_disabled" as const };
+			return { status: "notifications_disabled" };
 		}
 		if (!delivery.pushEnabled) {
-			return { status: "push_disabled" as const };
+			return { status: "push_disabled" };
 		}
 		if (delivery.subscriptions.length === 0) {
-			return { status: "no_subscription" as const };
+			return { status: "no_subscription" };
 		}
 
-		const result = await ctx.runAction(internal.notificationActions.sendPush, {
+		const result = await deliverWebPush({
 			subscriptions: delivery.subscriptions,
 			title: "JP-WALLET",
 			body: "Push de prueba — si ves esto, el envío funciona.",
 			url: "/settings",
+			onGone: async (endpoints) => {
+				await ctx.runMutation(internal.notifications.removePushByEndpoints, {
+					endpoints,
+				});
+			},
 		});
 
 		if (result.skipped) {
 			return {
-				status: "vapid_missing" as const,
+				status: "vapid_missing",
 				subscriptionCount: delivery.subscriptions.length,
 			};
 		}
@@ -270,7 +333,7 @@ export const sendTestPush = action({
 
 		if (result.sent === 0 && goneCount > 0 && failureCount === 0) {
 			return {
-				status: "all_gone" as const,
+				status: "all_gone",
 				subscriptionCount: delivery.subscriptions.length,
 				gone: goneCount,
 			};
@@ -278,7 +341,7 @@ export const sendTestPush = action({
 
 		if (result.sent === 0 && failureCount > 0) {
 			return {
-				status: "send_failed" as const,
+				status: "send_failed",
 				subscriptionCount: delivery.subscriptions.length,
 				gone: goneCount,
 				failures: failureCount,
@@ -287,7 +350,7 @@ export const sendTestPush = action({
 		}
 
 		return {
-			status: "sent" as const,
+			status: "sent",
 			subscriptionCount: delivery.subscriptions.length,
 			sent: result.sent,
 			gone: goneCount,
