@@ -184,6 +184,7 @@ export async function listUnpaidFixedExpensesForCategory(
 	for (const item of items) {
 		if (item.categoryId !== categoryId) continue;
 		if (!appliesToPeriodKey(item, periodKey)) continue;
+		if (item.skippedPeriodKey === periodKey) continue;
 		if (await hasValidPaymentTransaction(ctx, item, periodKey)) continue;
 
 		let linkedSavingsGoalName: string | undefined;

@@ -12,6 +12,8 @@ type FixedExpenseListProps = {
 	onEdit: (item: FixedExpenseItem) => void;
 	onDelete: (id: string) => void;
 	onMarkPaid: (item: FixedExpenseItem) => void;
+	onSkipThisMonth?: (item: FixedExpenseItem) => void;
+	onClearSkipThisMonth?: (item: FixedExpenseItem) => void;
 };
 
 export function FixedExpenseList({
@@ -20,6 +22,8 @@ export function FixedExpenseList({
 	onEdit,
 	onDelete,
 	onMarkPaid,
+	onSkipThisMonth,
+	onClearSkipThisMonth,
 }: FixedExpenseListProps) {
 	if (items.length === 0) {
 		return <p className="budget-empty">No tienes gastos fijos registrados.</p>;
@@ -29,11 +33,12 @@ export function FixedExpenseList({
 		<ul className="fixed-expense-list card-stagger">
 			{items.map((item) => {
 				const isPaid = item.isPaidCurrentPeriod;
+				const isSkipped = item.isSkippedCurrentPeriod && !isPaid;
 
 				return (
 					<li
 						key={item._id}
-						className={`fixed-expense-card glass fixed-expense-card--selectable${isPaid ? " fixed-expense-card--paid" : " interactive-lift"}`}
+						className={`fixed-expense-card glass fixed-expense-card--selectable${isPaid ? " fixed-expense-card--paid" : ""}${isSkipped ? " fixed-expense-card--skipped" : ""}${!isPaid && !isSkipped ? " interactive-lift" : ""}`}
 						onClick={() => onEdit(item)}
 						onKeyDown={(event) => {
 							if (event.key === "Enter" || event.key === " ") {
@@ -46,7 +51,9 @@ export function FixedExpenseList({
 						aria-label={
 							isPaid
 								? `${item.name}, pagado${isViewingCurrentMonth ? " este mes" : ""}`
-								: item.name
+								: isSkipped
+									? `${item.name}, omitido este mes`
+									: item.name
 						}
 					>
 						<div className="fixed-expense-card__header">
@@ -56,6 +63,11 @@ export function FixedExpenseList({
 									{isPaid ? (
 										<span className="fixed-expense-card__paid-badge">
 											{isViewingCurrentMonth ? "Pagado este mes" : "Pagado"}
+										</span>
+									) : null}
+									{isSkipped ? (
+										<span className="fixed-expense-card__skip-badge">
+											Omitido este mes
 										</span>
 									) : null}
 								</div>
@@ -83,12 +95,17 @@ export function FixedExpenseList({
 									Día {item.dayOfMonth} · Vence:{" "}
 									{formatShortDate(item.nextDueDate)}
 								</p>
-								{!isPaid ? (
+								{!isPaid && !isSkipped ? (
 									<p className="fixed-expense-card__reminders">
 										Avisos:{" "}
 										{item.reminderOffsets
 											.map((o) => (o === 0 ? "mismo día" : `${o}d antes`))
 											.join(", ")}
+									</p>
+								) : null}
+								{isSkipped ? (
+									<p className="fixed-expense-card__reminders">
+										No cuenta en pendientes ni notificaciones este mes
 									</p>
 								) : null}
 							</div>
@@ -97,13 +114,33 @@ export function FixedExpenseList({
 								onMouseDown={(event) => event.stopPropagation()}
 								onClick={(event) => event.stopPropagation()}
 							>
-								{!isPaid ? (
+								{!isPaid && !isSkipped ? (
+									<>
+										<Button
+											type="button"
+											variant="secondary"
+											onClick={() => onMarkPaid(item)}
+										>
+											Marcar pagado
+										</Button>
+										{isViewingCurrentMonth && onSkipThisMonth ? (
+											<Button
+												type="button"
+												variant="secondary"
+												onClick={() => onSkipThisMonth(item)}
+											>
+												Omitir este mes
+											</Button>
+										) : null}
+									</>
+								) : null}
+								{isSkipped && onClearSkipThisMonth ? (
 									<Button
 										type="button"
 										variant="secondary"
-										onClick={() => onMarkPaid(item)}
+										onClick={() => onClearSkipThisMonth(item)}
 									>
-										Marcar pagado
+										Reactivar
 									</Button>
 								) : null}
 								<IconButton

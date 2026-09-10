@@ -189,6 +189,8 @@ export default defineSchema({
 		linkedSavingsGoalId: v.optional(v.id("savingsGoals")),
 		linkedCreditId: v.optional(v.id("credits")),
 		onlyPeriodKey: v.optional(v.string()),
+		/** When set to current YYYY-MM, exclude from pending + reminders for that month. */
+		skippedPeriodKey: v.optional(v.string()),
 		notes: v.optional(v.string()),
 		createdAt: v.number(),
 		updatedAt: v.number(),
@@ -214,6 +216,7 @@ export default defineSchema({
 		dedupeKey: v.string(),
 		type: v.union(
 			v.literal("fixed_expense_reminder"),
+			v.literal("fixed_expense_overdue"),
 			v.literal("budget_threshold"),
 			v.literal("period_report"),
 			v.literal("credit_due"),

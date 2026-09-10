@@ -56,7 +56,9 @@ export type FixedExpenseListItem = {
 	nextDueDate: number;
 	lastPaidPeriodKey?: string;
 	isPaidCurrentPeriod: boolean;
+	isSkippedCurrentPeriod: boolean;
 	onlyPeriodKey?: string;
+	skippedPeriodKey?: string;
 	notes?: string;
 };
 
@@ -73,6 +75,7 @@ async function enrichFixedExpense(
 		item,
 		viewPeriodKey,
 	);
+	const isSkippedCurrentPeriod = item.skippedPeriodKey === viewPeriodKey;
 	return {
 		_id: item._id,
 		name: item.name,
@@ -91,7 +94,9 @@ async function enrichFixedExpense(
 			: nextDueTimestamp(item.dayOfMonth),
 		lastPaidPeriodKey: item.lastPaidPeriodKey,
 		isPaidCurrentPeriod,
+		isSkippedCurrentPeriod,
 		onlyPeriodKey: item.onlyPeriodKey,
+		skippedPeriodKey: item.skippedPeriodKey,
 		notes: item.notes,
 	};
 }
@@ -293,6 +298,44 @@ export const remove = mutation({
 	},
 });
 
+export const skipThisMonth = mutation({
+	args: {
+		id: v.id("fixedExpenses"),
+		periodKey: v.optional(v.string()),
+	},
+	handler: async (ctx, { id, periodKey }) => {
+		const userId = await requireUserId(ctx);
+		const item = await ctx.db.get(id);
+		if (!item || item.userId !== userId) {
+			throw new Error("Fixed expense not found");
+		}
+		const key = periodKey
+			? validateOnlyPeriodKey(periodKey)
+			: periodKeyFromTimestamp(Date.now());
+		await ctx.db.patch(id, {
+			skippedPeriodKey: key,
+			updatedAt: Date.now(),
+		});
+		return null;
+	},
+});
+
+export const clearSkipThisMonth = mutation({
+	args: { id: v.id("fixedExpenses") },
+	handler: async (ctx, { id }) => {
+		const userId = await requireUserId(ctx);
+		const item = await ctx.db.get(id);
+		if (!item || item.userId !== userId) {
+			throw new Error("Fixed expense not found");
+		}
+		await ctx.db.patch(id, {
+			skippedPeriodKey: undefined,
+			updatedAt: Date.now(),
+		});
+		return null;
+	},
+});
+
 export const markPaid = mutation({
 	args: {
 		id: v.id("fixedExpenses"),
@@ -466,17 +509,25 @@ export const processReminders = internalMutation({
 	args: {},
 	handler: async (ctx) => {
 		const now = new Date();
-		const todayKey = dateKeyFromTimestamp(now.getTime());
+		const nowTs = now.getTime();
+		const todayKey = dateKeyFromTimestamp(nowTs);
 		const year = now.getFullYear();
 		const monthIndex = now.getMonth();
+		const currentPeriodKey = periodKeyFromTimestamp(nowTs);
+		const dayMs = 24 * 60 * 60 * 1000;
 
 		const items = await ctx.db.query("fixedExpenses").collect();
 
 		for (const item of items) {
 			if (!item.active) continue;
 
-			const currentPeriodKey = periodKeyFromTimestamp(now.getTime());
 			if (item.onlyPeriodKey && item.onlyPeriodKey !== currentPeriodKey) {
+				continue;
+			}
+
+			if (item.skippedPeriodKey === currentPeriodKey) continue;
+
+			if (await hasValidPaymentTransaction(ctx, item, currentPeriodKey)) {
 				continue;
 			}
 
@@ -486,6 +537,11 @@ export const processReminders = internalMutation({
 				.unique();
 			const prefs = resolveUserPreferences(prefsDoc);
 			if (!prefs.notificationsEnabled) continue;
+
+			const amountLabel = `$${item.amount.toLocaleString("es-CO")}`;
+			const channels: Array<"email" | "push" | "in_app"> = ["in_app"];
+			if (item.emailReminders) channels.push("email");
+			if (item.pushReminders && prefs.pushEnabled) channels.push("push");
 
 			const reminderDates = reminderDatesForMonth(
 				year,
@@ -507,9 +563,12 @@ export const processReminders = internalMutation({
 					return dateKeyFromTimestamp(d) === todayKey;
 				});
 
-				const channels: Array<"email" | "push" | "in_app"> = ["in_app"];
-				if (item.emailReminders) channels.push("email");
-				if (item.pushReminders && prefs.pushEnabled) channels.push("push");
+				const when =
+					offset === 0
+						? "vence hoy"
+						: offset === 1
+							? "vence mañana"
+							: `vence en ${offset ?? 0} días`;
 
 				await ctx.scheduler.runAfter(0, internal.notifications.dispatch, {
 					userId: item.userId,
@@ -517,14 +576,47 @@ export const processReminders = internalMutation({
 					referenceId: `${item._id}:${offset ?? 0}`,
 					channels,
 					payload: {
-						title: `Recordatorio: ${item.name}`,
-						body: `Pago de $${item.amount.toLocaleString("es-CO")} — vence el día ${item.dayOfMonth}`,
+						title: `${item.name} · ${amountLabel}`,
+						body: `Gasto fijo ${when} (día ${item.dayOfMonth}). Ábrelo en Presupuestos.`,
 						url: "/budgets",
 						emailSubject: `Recordatorio — ${item.name}`,
-						emailHtml: `<p>Recuerda pagar <strong>${item.name}</strong>: <strong>$${item.amount.toLocaleString("es-CO")}</strong> (día ${item.dayOfMonth}).</p>`,
+						emailHtml: `<p>Recuerda pagar <strong>${item.name}</strong>: <strong>${amountLabel}</strong> (${when}).</p>`,
 					},
 					dateKey: todayKey,
 					dedupeSuffix: String(offset ?? 0),
+				});
+			}
+
+			const dueTs = dueTimestampForPeriodKey(
+				item.dayOfMonth,
+				currentPeriodKey,
+			);
+			const dueStart = new Date(dueTs);
+			dueStart.setHours(0, 0, 0, 0);
+			const todayStart = new Date(now);
+			todayStart.setHours(0, 0, 0, 0);
+			const daysOverdue = Math.round(
+				(todayStart.getTime() - dueStart.getTime()) / dayMs,
+			);
+
+			if (daysOverdue === 3 || daysOverdue === 6) {
+				const overdueChannels: Array<"email" | "push" | "in_app"> = ["in_app"];
+				if (item.pushReminders && prefs.pushEnabled) {
+					overdueChannels.push("push");
+				}
+
+				await ctx.scheduler.runAfter(0, internal.notifications.dispatch, {
+					userId: item.userId,
+					type: "fixed_expense_overdue",
+					referenceId: `${item._id}:overdue-${daysOverdue}`,
+					channels: overdueChannels,
+					payload: {
+						title: `${item.name} sin pagar`,
+						body: `Llevas ${daysOverdue} días de mora · ${amountLabel}. Márcalo pagado u omítelo este mes.`,
+						url: "/budgets",
+					},
+					dateKey: todayKey,
+					dedupeSuffix: `overdue-${daysOverdue}`,
 				});
 			}
 		}

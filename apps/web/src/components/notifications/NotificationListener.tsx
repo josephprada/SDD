@@ -2,11 +2,30 @@ import { useToastStore } from "@app/stores/toast";
 import { api } from "@convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 
 const TYPE_LABELS: Record<string, string> = {
 	budget_threshold: "Presupuesto",
 	fixed_expense_reminder: "Gasto fijo",
+	fixed_expense_overdue: "Gasto fijo en mora",
+	credit_due: "Crédito",
 	period_report: "Reporte",
+};
+
+const TYPE_BODIES: Record<string, string> = {
+	budget_threshold: "Has cruzado un umbral de presupuesto",
+	fixed_expense_reminder: "Tienes un pago próximo",
+	fixed_expense_overdue: "Un gasto fijo sigue sin pagar",
+	credit_due: "Tienes una cuota por vencer",
+	period_report: "Nuevo reporte disponible",
+};
+
+const TYPE_URLS: Record<string, string> = {
+	budget_threshold: "/budgets",
+	fixed_expense_reminder: "/budgets",
+	fixed_expense_overdue: "/budgets",
+	credit_due: "/credits",
+	period_report: "/reports",
 };
 
 const CURSOR_KEY = "jpw:notif-toast-cursor";
@@ -40,6 +59,7 @@ function persistKeys(keys: Set<string>): void {
 
 export function NotificationListener() {
 	const { isAuthenticated } = useConvexAuth();
+	const navigate = useNavigate();
 	const recent = useQuery(
 		api.notifications.listRecentInApp,
 		isAuthenticated ? { limit: 5 } : "skip",
@@ -47,6 +67,19 @@ export function NotificationListener() {
 	const show = useToastStore((s) => s.show);
 	const seenRef = useRef<Set<string>>(loadPersistedKeys());
 	const seededRef = useRef(false);
+
+	useEffect(() => {
+		const onMessage = (event: MessageEvent) => {
+			const data = event.data as { type?: string; url?: string } | undefined;
+			if (data?.type === "NOTIFICATION_NAV" && typeof data.url === "string") {
+				navigate(data.url);
+			}
+		};
+		navigator.serviceWorker?.addEventListener("message", onMessage);
+		return () => {
+			navigator.serviceWorker?.removeEventListener("message", onMessage);
+		};
+	}, [navigate]);
 
 	useEffect(() => {
 		if (!recent) return;
@@ -66,13 +99,8 @@ export function NotificationListener() {
 			seenRef.current.add(key);
 			show({
 				title: TYPE_LABELS[item.type] ?? "JP-WALLET",
-				body:
-					item.type === "budget_threshold"
-						? "Has cruzado un umbral de presupuesto"
-						: item.type === "fixed_expense_reminder"
-							? "Tienes un pago próximo"
-							: "Nuevo reporte disponible",
-				url: item.type === "period_report" ? "/reports" : "/budgets",
+				body: TYPE_BODIES[item.type] ?? "Tienes una notificación nueva",
+				url: TYPE_URLS[item.type] ?? "/budgets",
 			});
 		}
 		persistKeys(seenRef.current);

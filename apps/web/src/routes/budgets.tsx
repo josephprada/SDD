@@ -46,6 +46,8 @@ export function BudgetsRoute() {
 	const removeFixed = useMutation(api.fixedExpenses.remove);
 	const acknowledgePaid = useMutation(api.fixedExpenses.acknowledgePaidForPeriod);
 	const unmarkPaid = useMutation(api.fixedExpenses.unmarkPaid);
+	const skipThisMonth = useMutation(api.fixedExpenses.skipThisMonth);
+	const clearSkipThisMonth = useMutation(api.fixedExpenses.clearSkipThisMonth);
 	const payment = useFixedExpensePayment();
 
 	const [budgetModal, setBudgetModal] = useState(false);
@@ -329,6 +331,17 @@ export function BudgetsRoute() {
 							if (item) requestDeleteFixed(item);
 						}}
 						onMarkPaid={openFixedExpensePayment}
+						onSkipThisMonth={async (item) => {
+							await skipThisMonth({
+								id: item._id as Id<"fixedExpenses">,
+								periodKey,
+							});
+						}}
+						onClearSkipThisMonth={async (item) => {
+							await clearSkipThisMonth({
+								id: item._id as Id<"fixedExpenses">,
+							});
+						}}
 					/>
 				</>
 			)}

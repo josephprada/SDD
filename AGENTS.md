@@ -62,6 +62,26 @@ La app en `apps/web/` consume JP-DS vía alias `@jp-ds/*` y Convex vía `@convex
 
 ---
 
+## Change activo: notifications-polish 🚧 (Change 9 — 2026-09-10)
+
+Rama: `feat/notifications-polish` → `testing` → `main` (cuando se pida).
+
+| Artefacto | Ruta |
+|-----------|------|
+| Propuesta | `changes/notifications-polish/proposal.md` |
+| Spec | `changes/notifications-polish/spec.md` |
+| Diseño | `changes/notifications-polish/design.md` |
+| Tasks | `changes/notifications-polish/tasks.md` |
+| Quickstart | `changes/notifications-polish/quickstart.md` |
+
+**Alcance v1:** Push solo fuera de foreground; copy + deep links; mora fijo +3/+6; omitir este mes (dashboard + notificaciones).
+
+**Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
+
+**Roadmap:** Changes 1–8 en prod. Change 9 en curso.
+
+---
+
 ## Change cerrado: app-polish-fixes ✅ (Change 8 — 2026-08-01)
 
 Rama histórica: `feat/app-polish-fixes` — merge `testing` + `main` (prod).
@@ -75,11 +95,7 @@ Rama histórica: `feat/app-polish-fixes` — merge `testing` + `main` (prod).
 
 **Alcance v1:** Proyección disponible − fijos (jerarquía visual); modal/scroll movimientos; autofocus; toasts/push; adjuntos en create; MCP `list_fixed_expenses`; Playwright E2E scaffold.
 
-**Flujo de ramas:** desarrollar y documentar en **`feat/*` → `testing`**; desplegar a producción (`main`) solo cuando se pida explícitamente.
-
-**Roadmap:** Changes 1–8 cerrados. Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
-
-Nuevo change: crear `changes/<id>/` y actualizar este contexto.
+Prod: `https://wallet.lavalex.co` · MCP: `https://mcp.wallet.lavalex.co`
 
 ---
 
