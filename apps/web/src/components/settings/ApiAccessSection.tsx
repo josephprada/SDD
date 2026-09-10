@@ -43,12 +43,14 @@ export function ApiAccessSection() {
 	const audit = useQuery(api.apiAudit.listRecent, { limit: 15 });
 	const createToken = useMutation(api.apiTokens.create);
 	const revokeToken = useMutation(api.apiTokens.revoke);
+	const removeToken = useMutation(api.apiTokens.remove);
 
 	const [createOpen, setCreateOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [error, setError] = useState("");
 	const [plaintext, setPlaintext] = useState<string | null>(null);
 	const [revokeId, setRevokeId] = useState<Id<"apiTokens"> | null>(null);
+	const [removeId, setRemoveId] = useState<Id<"apiTokens"> | null>(null);
 	const [helpOpen, setHelpOpen] = useState(false);
 	const [copiedHelp, setCopiedHelp] = useState<"remote" | "stdio" | null>(null);
 
@@ -80,6 +82,20 @@ export function ApiAccessSection() {
 			setRevokeId(null);
 		} catch (e) {
 			setError(formatConvexError(e, "No se pudo revocar el token"));
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const handleRemove = async () => {
+		if (!removeId) return;
+		setBusy(true);
+		setError("");
+		try {
+			await removeToken({ tokenId: removeId });
+			setRemoveId(null);
+		} catch (e) {
+			setError(formatConvexError(e, "No se pudo eliminar el token"));
 		} finally {
 			setBusy(false);
 		}
@@ -200,7 +216,15 @@ export function ApiAccessSection() {
 									>
 										Revocar
 									</Button>
-								) : null}
+								) : (
+									<Button
+										variant="secondary"
+										onClick={() => setRemoveId(token._id)}
+										disabled={busy}
+									>
+										Eliminar
+									</Button>
+								)}
 							</li>
 						))}
 					</ul>
@@ -261,6 +285,17 @@ export function ApiAccessSection() {
 				variant="danger"
 				onConfirm={() => void handleRevoke()}
 				onCancel={() => setRevokeId(null)}
+			/>
+
+			<ConfirmDialog
+				open={removeId !== null}
+				title="Eliminar token"
+				description="Se borrará de la lista y su historial de auditoría. Esta acción no se puede deshacer."
+				confirmLabel="Eliminar"
+				cancelLabel="Cancelar"
+				variant="danger"
+				onConfirm={() => void handleRemove()}
+				onCancel={() => setRemoveId(null)}
 			/>
 		</section>
 	);

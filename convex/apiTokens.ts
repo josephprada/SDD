@@ -162,3 +162,32 @@ export const revoke = mutation({
 		return { ok: true };
 	},
 });
+
+/** Permanent delete for inactive tokens (revoked or expired). Active must revoke first. */
+export const remove = mutation({
+	args: { tokenId: v.id("apiTokens") },
+	handler: async (ctx, { tokenId }) => {
+		const userId = await requireUserId(ctx);
+		const token = await ctx.db.get(tokenId);
+		if (!token || token.userId !== userId) {
+			throw new Error("Token not found");
+		}
+
+		const now = Date.now();
+		const status = tokenStatus(token, now);
+		if (status === "active") {
+			throw new Error("Revoke the token before deleting it");
+		}
+
+		const auditRows = await ctx.db
+			.query("apiAuditLog")
+			.withIndex("by_token_created", (q) => q.eq("tokenId", tokenId))
+			.collect();
+		for (const row of auditRows) {
+			await ctx.db.delete(row._id);
+		}
+
+		await ctx.db.delete(tokenId);
+		return { ok: true };
+	},
+});

@@ -33,7 +33,7 @@ export function TokenSecretOnceDialog({
 
 	return (
 		<Modal open={open} title="Guarda tu token" onClose={onClose}>
-			<div className="api-token-secret">
+			<div className="api-token-secret brand-scroll">
 				<p className="api-token-secret__warn">
 					Este secreto solo se muestra <strong>una vez</strong>. Cópialo ahora;
 					si lo pierdes tendrás que revocar y crear otro.
@@ -73,9 +73,11 @@ export function TokenSecretOnceDialog({
 					</Button>
 				</details>
 
-				<Button variant="secondary" fullWidth onClick={onClose}>
-					Ya lo guardé
-				</Button>
+				<div className="api-token-secret__footer">
+					<Button variant="secondary" fullWidth onClick={onClose}>
+						Ya lo guardé
+					</Button>
+				</div>
 			</div>
 		</Modal>
 	);
