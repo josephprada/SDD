@@ -83,6 +83,16 @@ type ApiTokenPublic = {
 
 ---
 
+### `apiTokens.remove`
+
+**Args**: `{ tokenId: Id<"apiTokens"> }`  
+**Returns**: `{ ok: true }`  
+**Behavior**: borra el documento y sus filas en `apiAuditLog` (`by_token_created`).  
+**Allowed**: solo `revoked` o `expired`.  
+**Errors**: not found / not owner / `Revoke the token before deleting it` si aún está activo.
+
+---
+
 ## Queries
 
 ### `apiTokens.list`
