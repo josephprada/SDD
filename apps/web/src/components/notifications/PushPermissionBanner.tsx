@@ -6,8 +6,42 @@ import {
 import { usePreferencesStore } from "@app/stores/preferences";
 import { api } from "@convex/_generated/api";
 import { Button } from "@jp-ds";
-import { useConvexAuth, useConvex, useMutation } from "convex/react";
+import { useAction, useConvexAuth, useConvex, useMutation } from "convex/react";
 import { useState } from "react";
+
+type TestPushResult = {
+	status: string;
+	subscriptionCount?: number;
+	sent?: number;
+	gone?: number;
+	failures?: number;
+	detail?: string;
+};
+
+function messageForTestResult(result: TestPushResult): string {
+	switch (result.status) {
+		case "sent":
+			return `Push de prueba enviada (${result.sent ?? 0} de ${result.subscriptionCount ?? 0}). Revisa la bandeja del sistema.`;
+		case "vapid_missing":
+			return "El servidor no tiene claves VAPID configuradas. Revisa VAPID_* en Convex.";
+		case "no_subscription":
+			return "No hay suscripción guardada. Desactiva y vuelve a Activar push.";
+		case "push_disabled":
+			return "pushEnabled está en false en el servidor. Vuelve a Activar push.";
+		case "notifications_disabled":
+			return "Las notificaciones generales están desactivadas en Ajustes.";
+		case "all_gone":
+			return "La suscripción ya no es válida (410). Desactiva y vuelve a Activar push.";
+		case "send_failed": {
+			const detail = result.detail ? `: ${result.detail}` : "";
+			return `El envío falló${detail}. Suele ser VAPID despareado o endpoint inválido.`;
+		}
+		case "unauthenticated":
+			return "Sesión no válida. Vuelve a iniciar sesión.";
+		default:
+			return `Resultado inesperado: ${result.status}`;
+	}
+}
 
 export function PushPermissionBanner() {
 	const convex = useConvex();
@@ -15,6 +49,7 @@ export function PushPermissionBanner() {
 	const pushEnabled = usePreferencesStore((s) => s.pushEnabled);
 	const setPushEnabled = usePreferencesStore((s) => s.setPushEnabled);
 	const updatePrefs = useMutation(api.userPreferences.update);
+	const sendTestPush = useAction(api.notificationActions.sendTestPush);
 	const [busy, setBusy] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
 
@@ -41,6 +76,7 @@ export function PushPermissionBanner() {
 
 	const handleDisable = async () => {
 		setBusy(true);
+		setMessage(null);
 		try {
 			await unregisterPushSubscription(convex);
 			setPushEnabled(false);
@@ -50,9 +86,27 @@ export function PushPermissionBanner() {
 		}
 	};
 
+	const handleTest = async () => {
+		setBusy(true);
+		setMessage(null);
+		try {
+			const result = (await sendTestPush({})) as TestPushResult;
+			setMessage(messageForTestResult(result));
+			if (result.status === "all_gone" || result.status === "no_subscription") {
+				setPushEnabled(false);
+				await updatePrefs({ pushEnabled: false });
+			}
+		} catch (err: unknown) {
+			const detail = err instanceof Error ? err.message : "error desconocido";
+			setMessage(`No se pudo enviar la prueba: ${detail}`);
+		} finally {
+			setBusy(false);
+		}
+	};
+
 	return (
 		<div className="push-banner glass">
-			<div>
+			<div className="push-banner__copy">
 				<div className="settings-row__title">Notificaciones push</div>
 				<div className="settings-row__sub">
 					{pushEnabled
@@ -61,15 +115,27 @@ export function PushPermissionBanner() {
 				</div>
 				{message ? <p className="push-banner__msg">{message}</p> : null}
 			</div>
-			{pushEnabled ? (
-				<Button type="button" variant="secondary" disabled={busy} onClick={handleDisable}>
-					Desactivar
-				</Button>
-			) : (
-				<Button type="button" disabled={busy} onClick={handleEnable}>
-					Activar push
-				</Button>
-			)}
+			<div className="push-banner__actions">
+				{pushEnabled ? (
+					<>
+						<Button type="button" disabled={busy} onClick={handleTest}>
+							Enviar prueba
+						</Button>
+						<Button
+							type="button"
+							variant="secondary"
+							disabled={busy}
+							onClick={handleDisable}
+						>
+							Desactivar
+						</Button>
+					</>
+				) : (
+					<Button type="button" disabled={busy} onClick={handleEnable}>
+						Activar push
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 }

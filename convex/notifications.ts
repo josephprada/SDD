@@ -1,5 +1,10 @@
 import { v } from "convex/values";
-import { internalMutation, mutation, query } from "./_generated/server";
+import {
+	internalMutation,
+	internalQuery,
+	mutation,
+	query,
+} from "./_generated/server";
 import { requireUserId } from "./lib/auth";
 import {
 	buildDedupeKey,
@@ -94,6 +99,32 @@ export const removePushByEndpoints = internalMutation({
 				await ctx.db.delete(existing._id);
 			}
 		}
+	},
+});
+
+/** Context for diagnostic / test push delivery (auth via caller action). */
+export const getPushDeliveryContext = internalQuery({
+	args: { userId: v.id("users") },
+	handler: async (ctx, { userId }) => {
+		const prefsDoc = await ctx.db
+			.query("userPreferences")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.unique();
+		const prefs = resolveUserPreferences(prefsDoc);
+		const subs = await ctx.db
+			.query("pushSubscriptions")
+			.withIndex("by_user", (q) => q.eq("userId", userId))
+			.collect();
+
+		return {
+			notificationsEnabled: prefs.notificationsEnabled,
+			pushEnabled: prefs.pushEnabled,
+			subscriptions: subs.map((s) => ({
+				endpoint: s.endpoint,
+				p256dh: s.p256dh,
+				auth: s.auth,
+			})),
+		};
 	},
 });
 

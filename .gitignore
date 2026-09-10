@@ -38,3 +38,5 @@ deploy-keys/
 **/playwright-report/
 **/blob-report/
 **/e2e/.auth/
+
+apps/web/dev-dist/

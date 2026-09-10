@@ -1,10 +1,11 @@
 "use node";
 
+import { getAuthUserId } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { PDFDocument, StandardFonts } from "pdf-lib";
 import webpush from "web-push";
 import { internal } from "./_generated/api";
-import { internalAction } from "./_generated/server";
+import { action, internalAction } from "./_generated/server";
 
 export const sendEmailWithReport = internalAction({
 	args: {
@@ -169,7 +170,13 @@ export const sendPush = internalAction({
 
 		if (!publicKey || !privateKey) {
 			console.warn("VAPID keys not set; skipping push");
-			return { skipped: true, gone: [] as string[] };
+			return {
+				skipped: true as const,
+				skipReason: "vapid_missing" as const,
+				sent: 0,
+				gone: [] as string[],
+				failures: [] as { statusCode?: number; message: string }[],
+			};
 		}
 
 		webpush.setVapidDetails(subject, publicKey, privateKey);
@@ -181,6 +188,8 @@ export const sendPush = internalAction({
 		});
 
 		const gone: string[] = [];
+		const failures: { statusCode?: number; message: string }[] = [];
+		let sent = 0;
 
 		for (const sub of args.subscriptions) {
 			try {
@@ -191,10 +200,16 @@ export const sendPush = internalAction({
 					},
 					payload,
 				);
+				sent += 1;
 			} catch (err: unknown) {
 				const status = (err as { statusCode?: number }).statusCode;
+				const message =
+					err instanceof Error ? err.message : "push_send_failed";
 				if (status === 404 || status === 410) {
 					gone.push(sub.endpoint);
+				} else {
+					console.warn("web-push send failed", { status, message });
+					failures.push({ statusCode: status, message });
 				}
 			}
 		}
@@ -205,6 +220,78 @@ export const sendPush = internalAction({
 			});
 		}
 
-		return { ok: true, gone };
+		return { ok: true as const, skipped: false as const, sent, gone, failures };
+	},
+});
+
+/**
+ * Diagnostic push for the signed-in user. Returns a clear status so Settings
+ * can explain missing VAPID, empty subs, or dead endpoints.
+ */
+export const sendTestPush = action({
+	args: {},
+	handler: async (ctx) => {
+		const userId = await getAuthUserId(ctx);
+		if (!userId) {
+			return { status: "unauthenticated" as const };
+		}
+
+		const delivery = await ctx.runQuery(
+			internal.notifications.getPushDeliveryContext,
+			{ userId },
+		);
+
+		if (!delivery.notificationsEnabled) {
+			return { status: "notifications_disabled" as const };
+		}
+		if (!delivery.pushEnabled) {
+			return { status: "push_disabled" as const };
+		}
+		if (delivery.subscriptions.length === 0) {
+			return { status: "no_subscription" as const };
+		}
+
+		const result = await ctx.runAction(internal.notificationActions.sendPush, {
+			subscriptions: delivery.subscriptions,
+			title: "JP-WALLET",
+			body: "Push de prueba — si ves esto, el envío funciona.",
+			url: "/settings",
+		});
+
+		if (result.skipped) {
+			return {
+				status: "vapid_missing" as const,
+				subscriptionCount: delivery.subscriptions.length,
+			};
+		}
+
+		const goneCount = result.gone.length;
+		const failureCount = result.failures.length;
+
+		if (result.sent === 0 && goneCount > 0 && failureCount === 0) {
+			return {
+				status: "all_gone" as const,
+				subscriptionCount: delivery.subscriptions.length,
+				gone: goneCount,
+			};
+		}
+
+		if (result.sent === 0 && failureCount > 0) {
+			return {
+				status: "send_failed" as const,
+				subscriptionCount: delivery.subscriptions.length,
+				gone: goneCount,
+				failures: failureCount,
+				detail: result.failures[0]?.message,
+			};
+		}
+
+		return {
+			status: "sent" as const,
+			subscriptionCount: delivery.subscriptions.length,
+			sent: result.sent,
+			gone: goneCount,
+			failures: failureCount,
+		};
 	},
 });
