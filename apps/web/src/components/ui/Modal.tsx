@@ -1,5 +1,5 @@
-import { CoreIcon } from "@app/lib/core/icons";
 import { lockBodyScroll, unlockBodyScroll } from "@app/lib/core/bodyScrollLock";
+import { CoreIcon } from "@app/lib/core/icons";
 import type { GenieOriginRect } from "@app/lib/motion/genieModal";
 import { useGenieOverlay } from "@app/lib/motion/useGenieOverlay";
 import { IconButton } from "@jp-ds";
@@ -116,9 +116,11 @@ export function Modal({
 	return (
 		<OverlayPortal>
 			<div
-				className={`modal-backdrop${
+				className={`modal-backdrop${useGenie ? " modal-backdrop--genie" : ""}${
 					closing
-						? ` modal-backdrop--out${useGenie ? " modal-backdrop--genie-out" : ""}`
+						? useGenie
+							? " modal-backdrop--genie-out"
+							: " modal-backdrop--out"
 						: " modal-backdrop--in"
 				}`}
 			>
@@ -135,8 +137,7 @@ export function Modal({
 					aria-label={displayTitle}
 					className={`modal glass ${surfaceAnimClass} ${surfaceExtraClass}`.trim()}
 					onAnimationEnd={(event) => {
-						if (event.target !== event.currentTarget) return;
-						handleAnimationEnd();
+						handleAnimationEnd(event);
 					}}
 				>
 					<header className="modal__header">

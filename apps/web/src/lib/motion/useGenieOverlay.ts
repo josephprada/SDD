@@ -1,12 +1,18 @@
 import { takeGenieOrigin } from "@app/lib/core/genieOrigin";
+import { useOverlayAnimation } from "@app/lib/core/useOverlayAnimation";
 import {
-	applyGenieModalVars,
 	type GenieOriginRect,
+	applyGenieModalVars,
 	getGenieOriginFromActiveElement,
 	prefersReducedMotion,
 } from "@app/lib/motion/genieModal";
-import { useOverlayAnimation } from "@app/lib/core/useOverlayAnimation";
-import { type RefObject, useEffect, useLayoutEffect, useState } from "react";
+import {
+	type RefObject,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 
 const GENIE_DISPLACEMENT_ID = "genie-displacement-map";
 
@@ -17,7 +23,9 @@ function setSvgWarpScale(scale: number): void {
 }
 
 function readGenieWarpScale(surface: HTMLElement): number {
-	const warp = getComputedStyle(surface).getPropertyValue("--genie-warp").trim();
+	const warp = getComputedStyle(surface)
+		.getPropertyValue("--genie-warp")
+		.trim();
 	const scale = Number.parseFloat(warp);
 	return Number.isFinite(scale) ? scale : 0;
 }
@@ -43,47 +51,49 @@ export function useGenieOverlay({
 	const [resolvedOrigin, setResolvedOrigin] = useState<GenieOriginRect | null>(
 		null,
 	);
+	/** After genie-in ends, drop the enter class so fill-mode cannot keep a crop clip. */
+	const [enterSettled, setEnterSettled] = useState(false);
 	const reducedMotion = prefersReducedMotion();
+	const varsAppliedForOpenRef = useRef(false);
 
 	useEffect(() => {
 		if (open) {
+			setEnterSettled(false);
 			setResolvedOrigin(
 				genieOrigin ??
 					takeGenieOrigin() ??
-					(autoCaptureActiveElement
-						? getGenieOriginFromActiveElement()
-						: null),
+					(autoCaptureActiveElement ? getGenieOriginFromActiveElement() : null),
 			);
 			return;
 		}
 
 		if (!mounted) {
 			setResolvedOrigin(null);
+			setEnterSettled(false);
+			varsAppliedForOpenRef.current = false;
 		}
 	}, [open, mounted, genieOrigin, autoCaptureActiveElement]);
 
 	const useGenie = Boolean(resolvedOrigin) && !reducedMotion;
 
 	useLayoutEffect(() => {
-		if (!mounted || !useGenie || !resolvedOrigin) return;
+		if (!mounted || !useGenie || !resolvedOrigin) {
+			return;
+		}
 
-		const sync = () => {
-			if (!surfaceRef.current || !resolvedOrigin) return;
-			applyGenieModalVars(surfaceRef.current, resolvedOrigin, {
-				intensity: genieIntensity,
-				duration: genieDuration,
-			});
-			if (closing) {
-				surfaceRef.current.style.removeProperty("--genie-warp");
-				setSvgWarpScale(readGenieWarpScale(surfaceRef.current));
-			} else {
-				setSvgWarpScale(0);
-			}
-		};
+		const surface = surfaceRef.current;
+		if (!surface) return;
 
-		sync();
-		const frame = requestAnimationFrame(sync);
-		return () => cancelAnimationFrame(frame);
+		if (varsAppliedForOpenRef.current && closing) {
+			return;
+		}
+
+		applyGenieModalVars(surface, resolvedOrigin, {
+			intensity: genieIntensity,
+			duration: genieDuration,
+		});
+		varsAppliedForOpenRef.current = true;
+		setSvgWarpScale(0);
 	}, [
 		mounted,
 		closing,
@@ -115,20 +125,53 @@ export function useGenieOverlay({
 		};
 	}, [mounted, useGenie, closing, surfaceRef]);
 
+	const onSurfaceAnimationEnd = (
+		event: Pick<AnimationEvent, "target" | "currentTarget" | "animationName">,
+	) => {
+		if (event.target !== event.currentTarget) return;
+		const name = event.animationName || "";
+
+		if (closing) {
+			// Ignore cancelled enter animationend when switching to --genie-out.
+			if (name && !/out/i.test(name)) return;
+			handleAnimationEnd();
+			setSvgWarpScale(0);
+			varsAppliedForOpenRef.current = false;
+			setEnterSettled(false);
+			return;
+		}
+
+		if (name && !/in/i.test(name)) return;
+
+		// Settle enter: remove modal--genie-in so clip-path/filter from keyframes
+		// do not stick (especially circle() aimed at an off-panel desktop trigger).
+		const surface = surfaceRef.current;
+		if (surface) {
+			surface.style.removeProperty("clip-path");
+			surface.style.removeProperty("filter");
+		}
+		setEnterSettled(true);
+		setSvgWarpScale(0);
+	};
+
 	const surfaceAnimClass = useGenie
 		? closing
 			? "modal--genie-out"
-			: "modal--genie-in"
+			: enterSettled
+				? ""
+				: "modal--genie-in"
 		: closing
 			? "modal--sheet-out"
-			: "modal--sheet-in";
+			: enterSettled
+				? ""
+				: "modal--sheet-in";
 
 	const surfaceExtraClass = useGenie ? "modal--genie-warp" : "";
 
 	return {
 		mounted,
 		closing,
-		handleAnimationEnd,
+		handleAnimationEnd: onSurfaceAnimationEnd,
 		useGenie,
 		reducedMotion,
 		surfaceAnimClass,

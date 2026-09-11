@@ -24,6 +24,12 @@
 	filter: url("#genie-warp");
 }
 
+/* During exit the panel leaves its box; don't clip the warped silhouette. */
+.modal.modal--genie-out,
+.dialog.modal--genie-out {
+	overflow: visible;
+}
+
 .modal-backdrop--genie-out,
 .dialog-backdrop.modal-backdrop--genie-out {
 	animation: modal-backdrop-genie-out var(--genie-duration, 420ms)
@@ -31,12 +37,14 @@
 }
 
 .modal--genie-in {
-	animation: modal-genie-in var(--genie-duration, 420ms) var(--genie-ease-in) both;
+	animation: modal-genie-in var(--genie-duration, 420ms) var(--genie-ease-in)
+		both;
 	will-change: transform, clip-path, opacity, filter;
 }
 
 .modal--genie-out {
-	animation: modal-genie-out var(--genie-duration, 420ms) var(--genie-ease-out) both;
+	animation: modal-genie-out var(--genie-duration, 420ms) var(--genie-ease-out)
+		both;
 	will-change: transform, clip-path, opacity, filter;
 }
 
@@ -85,11 +93,14 @@
 		transform: scale(calc(1 - 0.008 * var(--genie-intensity, 1)));
 	}
 
+	/* Resting frame MUST fully reveal the panel. A circle centered on a
+	   desktop trigger (often outside the modal box) with fill-mode:both was
+	   leaving the open modal permanently cropped. */
 	100% {
 		opacity: 1;
 		transform: none;
-		clip-path: circle(150% at var(--genie-x) var(--genie-y));
-		filter: blur(0);
+		clip-path: none;
+		filter: none;
 	}
 }
 

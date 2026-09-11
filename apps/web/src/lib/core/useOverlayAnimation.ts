@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-/** Fallback if animationend never fires (genie / reduced-motion edge cases). */
-const CLOSE_FALLBACK_MS = 700;
+/** Fallback if animationend never fires (genie ~420ms + compositor slack). */
+const CLOSE_FALLBACK_MS = 750;
 
 export function useOverlayAnimation(open: boolean) {
 	const [mounted, setMounted] = useState(open);
