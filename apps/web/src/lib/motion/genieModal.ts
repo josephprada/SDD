@@ -74,17 +74,17 @@ export function readLayoutClientRect(el: HTMLElement): DOMRect {
 	const rect = el.getBoundingClientRect();
 	const snapshot = new DOMRect(rect.x, rect.y, rect.width, rect.height);
 
-	const restore = (prop: keyof typeof prev, cssName: string, value: string) => {
+	const restore = (cssName: string, value: string) => {
 		if (value) el.style.setProperty(cssName, value);
 		else el.style.removeProperty(cssName);
 	};
 
-	restore("animation", "animation", prev.animation);
-	restore("transition", "transition", prev.transition);
-	restore("transform", "transform", prev.transform);
-	restore("filter", "filter", prev.filter);
-	restore("clipPath", "clip-path", prev.clipPath);
-	restore("willChange", "will-change", prev.willChange);
+	restore("animation", prev.animation);
+	restore("transition", prev.transition);
+	restore("transform", prev.transform);
+	restore("filter", prev.filter);
+	restore("clip-path", prev.clipPath);
+	restore("will-change", prev.willChange);
 
 	return snapshot;
 }
