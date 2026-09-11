@@ -11,10 +11,11 @@ export function GenieModalSvgDefs() {
 			<defs>
 				<filter
 					id="genie-warp"
-					x="-20%"
-					y="-20%"
-					width="140%"
-					height="140%"
+					x="-60%"
+					y="-60%"
+					width="220%"
+					height="220%"
+					filterUnits="objectBoundingBox"
 					colorInterpolationFilters="sRGB"
 				>
 					<feTurbulence

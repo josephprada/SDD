@@ -80,9 +80,11 @@ export function ConfirmDialog({
 	return (
 		<OverlayPortal>
 			<div
-				className={`dialog-backdrop${
+				className={`dialog-backdrop${useGenie ? " modal-backdrop--genie" : ""}${
 					closing
-						? ` modal-backdrop--out${useGenie ? " modal-backdrop--genie-out" : ""}`
+						? useGenie
+							? " modal-backdrop--genie-out"
+							: " modal-backdrop--out"
 						: " modal-backdrop--in"
 				}`}
 			>
@@ -100,8 +102,7 @@ export function ConfirmDialog({
 					aria-labelledby={titleId}
 					aria-describedby={descId}
 					onAnimationEnd={(event) => {
-						if (event.target !== event.currentTarget) return;
-						handleAnimationEnd();
+						handleAnimationEnd(event);
 					}}
 				>
 					<h2 id={titleId} className="dialog__title">

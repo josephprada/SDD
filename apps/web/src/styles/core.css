@@ -13,14 +13,14 @@
 
 [data-theme="light"] .shell .glass {
 	border-color: #8b95a1;
-	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+	box-shadow: 0 1px 2px
+		color-mix(in srgb, var(--color-text-primary) 6%, transparent);
 }
 
 .shell .interactive-lift {
-	transition:
-		transform var(--duration-fast) var(--ease-out),
-		box-shadow var(--duration-fast) var(--ease-out),
-		border-color var(--duration-fast) var(--ease-out);
+	transition: transform var(--duration-fast) var(--ease-out), box-shadow
+		var(--duration-fast) var(--ease-out), border-color var(--duration-fast)
+		var(--ease-out);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -334,15 +334,13 @@
 
 [data-theme="light"] .brand-logo-mark {
 	background: color-mix(in srgb, #047857 10%, var(--color-surface-1));
-	box-shadow:
-		0 0 0 1px color-mix(in srgb, #047857 24%, transparent),
-		0 0 12px color-mix(in srgb, #047857 12%, transparent);
+	box-shadow: 0 0 0 1px color-mix(in srgb, #047857 24%, transparent), 0 0 12px
+		color-mix(in srgb, #047857 12%, transparent);
 }
 
 [data-theme="light"] .brand-logo-mark--greeting {
-	box-shadow:
-		0 0 0 1px color-mix(in srgb, #047857 24%, transparent),
-		0 0 10px color-mix(in srgb, #047857 14%, transparent);
+	box-shadow: 0 0 0 1px color-mix(in srgb, #047857 24%, transparent), 0 0 10px
+		color-mix(in srgb, #047857 14%, transparent);
 }
 
 @media (min-width: 1024px) {
@@ -355,7 +353,6 @@
 		font-weight: 850;
 	}
 }
-
 
 .dash-mobile-summary {
 	display: flex;
@@ -1322,11 +1319,7 @@
 }
 
 .account-card--selectable:hover {
-	border-color: color-mix(
-		in srgb,
-		var(--color-accent) 45%,
-		var(--color-border)
-	);
+	border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
 }
 
 .account-card--selectable:focus-visible {
@@ -1687,9 +1680,7 @@
 	color: var(--color-text-primary);
 	font-family: inherit;
 	cursor: pointer;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .category-choice__item--active {
@@ -1767,9 +1758,7 @@
 	background: var(--color-surface-1);
 	display: grid;
 	place-items: center;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .emoji-picker__item,
@@ -1874,8 +1863,7 @@
 	pointer-events: none;
 	opacity: 0;
 	transform: translateY(-4px);
-	transition:
-		opacity var(--motion-duration-fast) var(--motion-ease-out),
+	transition: opacity var(--motion-duration-fast) var(--motion-ease-out),
 		transform var(--motion-duration-fast) var(--motion-ease-out);
 }
 
@@ -2047,7 +2035,8 @@
 	align-items: center;
 	justify-content: center;
 	padding: var(--space-4);
-	overflow: hidden;
+	/* visible: genie exit translates/scales toward trigger; hidden clipped the panel mid-flight on desktop */
+	overflow: visible;
 	overscroll-behavior: none;
 }
 
@@ -2360,9 +2349,9 @@
 	cursor: pointer;
 	display: grid;
 	place-items: center;
-	box-shadow:
-		0 4px 14px color-mix(in srgb, var(--color-accent) 35%, transparent),
-		0 0 0 4px var(--color-bg);
+	box-shadow: 0 4px 14px
+		color-mix(in srgb, var(--color-accent) 35%, transparent), 0 0 0 4px
+		var(--color-bg);
 	transition: transform 0.15s ease;
 }
 

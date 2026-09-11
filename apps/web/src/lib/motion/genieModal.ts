@@ -48,8 +48,50 @@ export function getGenieOriginCenter(origin: GenieOriginRect) {
 }
 
 /**
+ * Layout box ignoring active CSS animations/transforms.
+ * Required because genie keyframes use `animation-fill-mode: both`, so a normal
+ * getBoundingClientRect() already includes the 0% transform and corrupts --genie-*.
+ * Safe to call in useLayoutEffect before paint.
+ */
+export function readLayoutClientRect(el: HTMLElement): DOMRect {
+	const prev = {
+		animation: el.style.animation,
+		transition: el.style.transition,
+		transform: el.style.transform,
+		filter: el.style.filter,
+		clipPath: el.style.clipPath,
+		willChange: el.style.willChange,
+	};
+
+	el.style.setProperty("animation", "none", "important");
+	el.style.setProperty("transition", "none", "important");
+	el.style.setProperty("transform", "none", "important");
+	el.style.setProperty("filter", "none", "important");
+	el.style.setProperty("clip-path", "none", "important");
+	el.style.setProperty("will-change", "auto", "important");
+
+	void el.offsetWidth;
+	const rect = el.getBoundingClientRect();
+	const snapshot = new DOMRect(rect.x, rect.y, rect.width, rect.height);
+
+	const restore = (prop: keyof typeof prev, cssName: string, value: string) => {
+		if (value) el.style.setProperty(cssName, value);
+		else el.style.removeProperty(cssName);
+	};
+
+	restore("animation", "animation", prev.animation);
+	restore("transition", "transition", prev.transition);
+	restore("transform", "transform", prev.transform);
+	restore("filter", "filter", prev.filter);
+	restore("clipPath", "clip-path", prev.clipPath);
+	restore("willChange", "will-change", prev.willChange);
+
+	return snapshot;
+}
+
+/**
  * Calcula variables CSS y transform-origin para animar la modal desde/hacia `origin`.
- * Llamar tras el layout (useLayoutEffect + rAF) cuando el nodo modal ya tiene dimensiones.
+ * Llamar en useLayoutEffect con geometría congelada (no re-medir a mitad de animación).
  */
 export function applyGenieModalVars(
 	modalEl: HTMLElement,
@@ -58,18 +100,29 @@ export function applyGenieModalVars(
 ): void {
 	const intensity = Math.min(1, Math.max(0, options?.intensity ?? 1));
 	const duration = options?.duration ?? GENIE_DURATION_MS;
-	const modalRect = modalEl.getBoundingClientRect();
+	const modalRect = readLayoutClientRect(modalEl);
 	const center = getGenieOriginCenter(origin);
 
-	const originX = center.x - modalRect.left;
-	const originY = center.y - modalRect.top;
-	const modalCenterX = modalRect.left + modalRect.width / 2;
-	const modalCenterY = modalRect.top + modalRect.height / 2;
+	const width = Math.max(modalRect.width, 1);
+	const height = Math.max(modalRect.height, 1);
+
+	// Raw origin relative to the untransformed modal box (may sit outside on desktop).
+	const rawX = center.x - modalRect.left;
+	const rawY = center.y - modalRect.top;
+
+	// Clamp clip-path anchors so funnel tips stay within an expanded modal box.
+	// Keeps the genie aim toward the trigger without degenerate polygons off-screen.
+	const padX = width * 0.2;
+	const padY = height * 0.2;
+	const originX = Math.min(width + padX, Math.max(-padX, rawX));
+	const originY = Math.min(height + padY, Math.max(-padY, rawY));
+
+	const modalCenterX = modalRect.left + width / 2;
+	const modalCenterY = modalRect.top + height / 2;
 	const deltaX = center.x - modalCenterX;
 	const deltaY = center.y - modalCenterY;
 
-	const anchor: "top" | "bottom" =
-		center.y > modalCenterY ? "bottom" : "top";
+	const anchor: "top" | "bottom" = center.y > modalCenterY ? "bottom" : "top";
 
 	modalEl.style.setProperty("--genie-x", `${originX}px`);
 	modalEl.style.setProperty("--genie-y", `${originY}px`);
@@ -81,7 +134,8 @@ export function applyGenieModalVars(
 	modalEl.style.setProperty("--genie-duration", `${duration}ms`);
 	modalEl.style.setProperty("--genie-anchor", anchor === "top" ? "0" : "1");
 	modalEl.dataset.genieAnchor = anchor;
-	modalEl.style.transformOrigin = `${originX}px ${originY}px`;
+	// transform-origin uses raw aim so scale collapses toward the real trigger.
+	modalEl.style.transformOrigin = `${rawX}px ${rawY}px`;
 }
 
 export function clearGenieModalVars(modalEl: HTMLElement): void {
